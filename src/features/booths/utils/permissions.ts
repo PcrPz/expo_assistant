@@ -1,0 +1,215 @@
+// src/features/booths/utils/permissions.ts
+
+import type { EventRole } from '@/src/features/events/types/event.types';
+
+/**
+ * ✅ Permission System สำหรับ Booth Management
+ * รองรับ undefined สำหรับทุก EventRole parameters
+ */
+
+// ============================================
+// BOOTH CRUD PERMISSIONS
+// ============================================
+
+/**
+ * สามารถสร้างบูธได้
+ */
+export function canCreateBooth(userRole: EventRole | undefined): boolean {
+  if (!userRole) return false;
+  return ['system_admin', 'owner', 'admin'].includes(userRole);
+}
+
+/**
+ * สามารถแก้ไขบูธได้
+ */
+export function canEditBooth(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  if (!userRole) return false;
+  
+  if (['system_admin', 'owner', 'admin', 'staff'].includes(userRole)) {
+    return true;
+  }
+
+  if (userRole === 'booth_staff') {
+    return isAssignedStaff;
+  }
+
+  return false;
+}
+
+/**
+ * สามารถลบบูธได้
+ */
+export function canDeleteBooth(userRole: EventRole | undefined): boolean {
+  if (!userRole) return false;
+  return ['system_admin', 'owner', 'admin'].includes(userRole);
+}
+
+/**
+ * สามารถดูบูธได้
+ */
+export function canViewBooth(userRole: EventRole | undefined): boolean {
+  return true;
+}
+
+// ============================================
+// BOOTH STAFF MANAGEMENT PERMISSIONS
+// ============================================
+
+/**
+ * สามารถจัดการ Booth Staff ได้ (เชิญ/ลบ)
+ */
+export function canManageBoothStaff(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  if (!userRole) return false;
+  
+  if (['system_admin', 'owner', 'admin', 'staff'].includes(userRole)) {
+    return true;
+  }
+
+  if (userRole === 'booth_staff') {
+    return isAssignedStaff;
+  }
+
+  return false;
+}
+
+/**
+ * สามารถเชิญ Staff เข้าบูธได้
+ */
+export function canAddStaffToBooth(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageBoothStaff(userRole, isAssignedStaff);
+}
+
+/**
+ * สามารถลบ Staff ออกจากบูธได้
+ * ✅ ใช้ Email แทน UserID
+ */
+export function canRemoveStaffFromBooth(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean,
+  targetStaffEmail: string | undefined,
+  currentUserEmail: string | undefined
+): boolean {
+  if (!userRole) return false;
+  if (!targetStaffEmail) return false;
+  
+  // System Admin, Owner, Admin, Staff → ลบใครก็ได้
+  if (['system_admin', 'owner', 'admin', 'staff'].includes(userRole)) {
+    return true;
+  }
+
+  // Booth Staff → ลบคนอื่นได้ แต่ลบตัวเองไม่ได้
+  if (userRole === 'booth_staff' && isAssignedStaff && currentUserEmail) {
+    return targetStaffEmail !== currentUserEmail;
+  }
+
+  return false;
+}
+
+// ============================================
+// TAB VISIBILITY PERMISSIONS
+// ============================================
+
+/**
+ * สามารถเห็น Staff Tab ได้
+ */
+export function canViewStaffTab(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageBoothStaff(userRole, isAssignedStaff);
+}
+
+/**
+ * สามารถเห็น Documents/Products/Announcements Tabs ได้
+ */
+export function canViewContentTabs(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  if (!userRole) return true; // ให้ดูได้
+  
+  if (['system_admin', 'owner', 'admin', 'staff'].includes(userRole)) {
+    return true;
+  }
+
+  return true;
+}
+
+/**
+ * สามารถแก้ไขเนื้อหา (Documents/Products/Announcements) ได้
+ */
+export function canEditContent(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  if (!userRole) return false;
+  
+  if (['system_admin', 'owner', 'admin', 'staff'].includes(userRole)) {
+    return true;
+  }
+
+  if (userRole === 'booth_staff') {
+    return isAssignedStaff;
+  }
+
+  return false;
+}
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+/**
+ * รวม permissions ทั้งหมดในออบเจ็กต์เดียว
+ */
+export function getBoothPermissions(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean,
+  currentUserEmail?: string | undefined
+) {
+  return {
+    canView: canViewBooth(userRole),
+    canCreate: canCreateBooth(userRole),
+    canEdit: canEditBooth(userRole, isAssignedStaff),
+    canDelete: canDeleteBooth(userRole),
+    canManageStaff: canManageBoothStaff(userRole, isAssignedStaff),
+    canAddStaff: canAddStaffToBooth(userRole, isAssignedStaff),
+    canRemoveStaff: (targetStaffEmail: string) =>
+      canRemoveStaffFromBooth(userRole, isAssignedStaff, targetStaffEmail, currentUserEmail),
+    canViewStaffTab: canViewStaffTab(userRole, isAssignedStaff),
+    canViewContentTabs: canViewContentTabs(userRole, isAssignedStaff),
+    canEditContent: canEditContent(userRole, isAssignedStaff),
+  };
+}
+
+/**
+ * Check ว่า user เป็น organizer หรือไม่
+ */
+export function isOrganizer(userRole: EventRole | undefined): boolean {
+  if (!userRole) return false;
+  return ['system_admin', 'owner', 'admin', 'staff'].includes(userRole);
+}
+
+/**
+ * Check ว่า user เป็น booth staff ของบูธนี้หรือไม่
+ * ✅ ใช้ Email แทน UserID
+ */
+export function isUserAssignedToBooth(
+  userEmail: string | undefined,
+  boothStaffList: Array<{ email: string; is_staff: boolean }>
+): boolean {
+  if (!userEmail) return false;
+  
+  return boothStaffList.some(
+    (staff) => staff.email === userEmail && staff.is_staff
+  );
+}

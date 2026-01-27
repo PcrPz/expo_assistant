@@ -5,10 +5,9 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAuthStore } from '../store/authStore';
 import { LoginRequest } from '../types/auth.types';
 import { login } from '../api/authApi';
-
+import { useAuthStore } from '../store/authStore';
 
 export function LoginForm() {
   const [emailOrUsername, setEmailOrUsername] = useState('');
@@ -18,7 +17,7 @@ export function LoginForm() {
   const [error, setError] = useState('');
 
   const router = useRouter();
-  const setUser = useAuthStore((state) => state.setUser);
+  const { refreshUser } = useAuthStore();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -30,23 +29,24 @@ export function LoginForm() {
         email: emailOrUsername, 
         password 
       };
+      
+      console.log('🔐 Login - Attempting login...');
       const response = await login(loginData);
+      console.log('✅ Login successful:', response);
 
-      console.log('Login successful:', response);
+      // ✅ login() จะเรียก tokenManager.setTokens() ให้แล้ว
 
-      localStorage.setItem('accessToken', response.accessToken);
-      if (response.refreshToken) {
-        localStorage.setItem('refreshToken', response.refreshToken);
-      }
+      // ✅ โหลด User data ทันทีหลัง Login
+      console.log('📡 Login - Loading user data...');
+      await refreshUser();
+      console.log('✅ Login - User data loaded');
 
-      setUser(response.user);
-
-      // Redirect ไปหน้าแรก (Landing Page)
-      router.push('/');
+      // Redirect ไปหน้า Home
+      router.push('/home');
       router.refresh();
     } catch (err: any) {
-      console.error('Login error:', err);
-      setError(err.message || 'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูล');
+      console.error('❌ Login error:', err);
+      setError(err.error || 'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูล');
     } finally {
       setLoading(false);
     }
@@ -55,11 +55,11 @@ export function LoginForm() {
   return (
     <div className="min-h-[calc(100vh-72px)] flex">
       {/* Left Side - Form (60%) */}
-      <div className="w-full lg:w-[60%] flex items-center justify-center px-8 lg:px-16 xl:px-24 py-12 bg-white">
-        <div className="w-full max-w-2xl">
+      <div className="w-full lg:w-[60%] flex items-center justify-center px-6 lg:px-12 xl:px-20 py-12 bg-white">
+        <div className="w-full max-w-3xl">
           {/* Header */}
-          <div className="mb-12">
-            <h1 className="text-6xl font-bold text-gray-900 mb-4">
+          <div className="mb-10">
+            <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-3">
               เข้าสู่ระบบ
             </h1>
             <p className="text-gray-600 text-lg">
@@ -69,8 +69,8 @@ export function LoginForm() {
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-              {error}
+            <div className="mb-8 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg">
+              <p className="font-medium">{error}</p>
             </div>
           )}
 
@@ -82,13 +82,13 @@ export function LoginForm() {
                 type="text"
                 value={emailOrUsername}
                 onChange={(e) => setEmailOrUsername(e.target.value)}
-                className="w-full px-5 py-4 pl-14 pr-5 rounded-xl border-0 bg-gray-100 text-gray-800 text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                className="w-full px-6 py-4 pl-14 pr-5 rounded-xl border-0 bg-gray-100 text-gray-800 text-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
                 placeholder="อีเมล / ชื่อผู้ใช้"
                 required
                 disabled={loading}
               />
               <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
                   <circle cx="12" cy="7" r="4"></circle>
                 </svg>
@@ -101,13 +101,13 @@ export function LoginForm() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-5 py-4 pl-14 pr-14 rounded-xl border-0 bg-gray-100 text-gray-800 text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                className="w-full px-6 py-4 pl-14 pr-14 rounded-xl border-0 bg-gray-100 text-gray-800 text-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
                 placeholder="รหัสผ่าน"
                 required
                 disabled={loading}
               />
               <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
@@ -118,7 +118,7 @@ export function LoginForm() {
                 className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
                 disabled={loading}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   {showPassword ? (
                     <>
                       <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
@@ -139,10 +139,10 @@ export function LoginForm() {
             {/* Sign In Button */}
             <button
               type="submit"
-              className={`w-full bg-blue-600 text-white font-semibold py-4 px-5 rounded-xl text-base shadow-sm transition-all ${
+              className={`w-full bg-blue-600 text-white font-bold py-5 px-6 rounded-xl text-lg shadow-md transition-all ${
                 loading 
                   ? 'opacity-70 cursor-not-allowed' 
-                  : 'hover:bg-blue-700 hover:shadow-md active:scale-[0.98]'
+                  : 'hover:bg-blue-700 hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]'
               }`}
               disabled={loading}
             >
@@ -151,23 +151,23 @@ export function LoginForm() {
           </form>
 
           {/* Forgot Password */}
-          <div className="text-center mt-5">
+          <div className="text-center mt-6">
             <Link 
               href="/forgot-password" 
-              className="text-base text-blue-600 hover:text-blue-700 font-medium transition"
+              className="text-lg text-blue-600 hover:text-blue-700 font-semibold hover:underline transition"
             >
               ลืมรหัสผ่าน?
             </Link>
           </div>
 
           {/* Divider */}
-          <div className="mt-10 mb-8">
+          <div className="mt-10 mb-10">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
+                <div className="w-full border-t-2 border-gray-200"></div>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">
+              <div className="relative flex justify-center">
+                <span className="px-6 bg-white text-gray-500 text-base font-medium">
                   หรือเข้าสู่ระบบด้วย
                 </span>
               </div>
@@ -177,10 +177,10 @@ export function LoginForm() {
           {/* Google Login Button */}
           <button
             type="button"
-            className="w-full flex items-center justify-center gap-3 py-4 px-5 rounded-xl bg-blue-50 text-blue-600 font-medium text-base hover:bg-blue-100 transition-all active:scale-[0.98] mb-8"
+            className="w-full flex items-center justify-center gap-4 py-4 px-6 rounded-xl bg-white border-2 border-gray-200 text-blue-600 font-semibold text-lg hover:bg-blue-50 hover:border-blue-300 transition-all active:scale-[0.99] mb-10 shadow-sm hover:shadow-md"
             disabled={loading}
           >
-            <svg width="22" height="22" viewBox="0 0 20 20">
+            <svg width="24" height="24" viewBox="0 0 20 20">
               <path
                 fill="#4285F4"
                 d="M19.6 10.23c0-.82-.1-1.42-.25-2.05H10v3.72h5.5c-.15.96-.74 2.31-2.04 3.22v2.45h3.16c1.89-1.73 2.98-4.3 2.98-7.34z"
@@ -202,11 +202,11 @@ export function LoginForm() {
           </button>
 
           {/* Sign Up Link */}
-          <div className="text-center text-base">
-            <span className="text-gray-600">ยังไม่มีบัญชีใช่ไหม? </span>
+          <div className="text-center">
+            <span className="text-gray-600 text-lg">ยังไม่มีบัญชีใช่ไหม? </span>
             <Link 
               href="/register" 
-              className="text-blue-600 hover:text-blue-700 font-medium transition"
+              className="text-blue-600 hover:text-blue-700 font-semibold text-lg hover:underline transition"
             >
               สมัครสมาชิก
             </Link>
@@ -215,7 +215,7 @@ export function LoginForm() {
       </div>
 
       {/* Right Side - Illustration (40%) */}
-      <div className="hidden lg:flex lg:w-[40%] bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 items-center justify-center p-8 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-[40%] bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 items-center justify-center p-12 relative overflow-hidden">
         {/* Background Decoration */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 right-10 w-64 h-64 bg-blue-500 rounded-full blur-3xl"></div>
@@ -223,12 +223,12 @@ export function LoginForm() {
         </div>
         
         {/* Image Container */}
-        <div className="relative z-10 w-full max-w-md">
+        <div className="relative z-10 w-full max-w-lg">
           <Image
             src="/images/Login_Image.png"
             alt="Login Illustration"
-            width={400}
-            height={400}
+            width={450}
+            height={450}
             className="object-contain drop-shadow-2xl"
             priority
           />

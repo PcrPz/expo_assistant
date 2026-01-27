@@ -1,55 +1,65 @@
 // src/features/auth/store/authStore.ts
-
 import { create } from 'zustand';
-import type { User } from '../types/auth.types';
+import { User } from '../types/auth.types';
+import { getUserDetail } from '../api/authApi';
+import { tokenManager } from '@/src/lib/auth/tokenManager';
 
-/**
- * State ของ Auth
- */
 interface AuthState {
-  user: User | null;              // ข้อมูล user ปัจจุบัน
-  isAuthenticated: boolean;       // สถานะการ login
-  isLoading: boolean;             // กำลังโหลดข้อมูล
-  
-  // Actions
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 }
 
-/**
- * Zustand Store สำหรับ Authentication
- * ใช้สำหรับเก็บข้อมูล user และสถานะการ login
- */
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
   isLoading: true,
-  
-  /**
-   * เซ็ต user และสถานะการ login
-   */
-  setUser: (user) => set({ 
-    user, 
-    isAuthenticated: !!user,
-    isLoading: false
-  }),
-  
-  /**
-   * เซ็ตสถานะกำลังโหลด
-   */
-  setLoading: (loading) => set({ isLoading: loading }),
-  
-  /**
-   * ออกจากระบบ - ลบข้อมูล user และ token
-   */
+
+  setUser: (user) => {
+    console.log('📝 authStore.setUser:', user);
+    set({ 
+      user, 
+      isAuthenticated: !!user,
+      isLoading: false 
+    });
+  },
+
+  setLoading: (loading) => {
+    console.log('⏳ authStore.setLoading:', loading);
+    set({ isLoading: loading });
+  },
+
   logout: () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    console.log('🚪 authStore.logout - Clearing user data');
+    tokenManager.clearTokens();
     set({ 
       user: null, 
       isAuthenticated: false,
-      isLoading: false
+      isLoading: false 
     });
+  },
+
+  refreshUser: async () => {
+    console.log('🔄 authStore.refreshUser - Reloading user data');
+    try {
+      const userData = await getUserDetail();
+      console.log('✅ authStore.refreshUser - Success:', userData);
+      set({ 
+        user: userData, 
+        isAuthenticated: true,
+        isLoading: false 
+      });
+    } catch (error) {
+      console.error('❌ authStore.refreshUser - Failed:', error);
+      set({ 
+        user: null, 
+        isAuthenticated: false,
+        isLoading: false 
+      });
+    }
   },
 }));

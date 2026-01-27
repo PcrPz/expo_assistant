@@ -1,101 +1,146 @@
 // src/features/auth/api/authApi.ts
-
-import type { LoginRequest, LoginResponse } from '../types/auth.types';
-
-// Base URL ของ Backend
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-
-// ⚠️ MOCK MODE - เปลี่ยนเป็น false เมื่อพร้อมใช้ API จริง
-const USE_MOCK = true;
-
-
-const MOCK_USER = {
-  id: '1',
-  username: 'testuser',
-  email: 'test@example.com',
-  phoneNumber: '0812345678',
-  companyName: 'Test Company',
-  role: 'user' as const,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-};
-
 /**
- * Mock Login Function
+ * 🔐 Auth API - Cookie-based Version
+ * - accessToken: localStorage
+ * - refreshToken: HTTPOnly Cookie
  */
-async function mockLogin(data: LoginRequest): Promise<LoginResponse> {
-  // จำลองการรอ API (1 วินาที)
-  await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  // ตรวจสอบ email/password (ทดสอบ)
-  if (
-    (data.email === 'test@example.com' || data.email === 'testuser') &&
-    data.password === '123456'
-  ) {
-    return {
-      user: MOCK_USER,
-      accessToken: 'mock-access-token-12345',
-      refreshToken: 'mock-refresh-token-67890',
-      message: 'เข้าสู่ระบบสำเร็จ',
-    };
+import type { 
+  User, 
+  RegisterRequest, 
+  LoginRequest, 
+  AuthResponse,
+  UpdateUserRequest 
+} from '../types/auth.types';
+
+import { tokenManager } from '@/src/lib/auth/tokenManager';
+import { fetchWithAuth } from '@/src/lib/api/fetchWithAuth';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+
+// ============================================
+// 1. Register (POST /users/register)
+// ============================================
+
+export async function register(data: RegisterRequest): Promise<AuthResponse> {
+  const response = await fetch(`${API_URL}/users/register`, {
+    method: 'POST',
+    credentials: 'include',  // ← สำคัญ! รับ Cookie
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Registration failed');
   }
 
-  // Login ล้มเหลว
-  throw new Error('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+  const result = await response.json();
+  
+  // ✅ บันทึกแค่ accessToken (refreshToken อยู่ใน Cookie แล้ว)
+  tokenManager.setTokens(result.accessToken);
+  
+  return result;
 }
 
-/**
- * เข้าสู่ระบบ
- * @param data - email และ password
- * @returns ข้อมูล user และ token
- */
-export async function login(data: LoginRequest): Promise<LoginResponse> {
-  // ถ้าใช้ Mock Mode
-  if (USE_MOCK) {
-    return mockLogin(data);
+// ============================================
+// 2. Login (POST /users/login)
+// ============================================
+
+export async function login(data: LoginRequest): Promise<AuthResponse> {
+  const response = await fetch(`${API_URL}/users/login`, {
+    method: 'POST',
+    credentials: 'include',  // ← สำคัญ! รับ Cookie
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Login failed');
   }
 
-  // API จริง
-  try {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'เข้าสู่ระบบไม่สำเร็จ');
-    }
-
-    return response.json();
-  } catch (error: any) {
-    throw new Error(error.message || 'เข้าสู่ระบบไม่สำเร็จ');
-  }
+  const result = await response.json();
+  
+  // ✅ บันทึกแค่ accessToken
+  tokenManager.setTokens(result.accessToken);
+  
+  return result;
 }
 
-/**
- * ออกจากระบบ
- */
+// ============================================
+// 3. Get User Detail (GET /users/detail)
+// ============================================
+
+export async function getUserDetail(): Promise<User> {
+  const response = await fetchWithAuth(`${API_URL}/users/detail`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to get user detail');
+  }
+
+  return response.json();
+}
+
+// ============================================
+// 4. Logout (GET /users/logout)
+// ============================================
+
 export async function logout(): Promise<void> {
-  if (USE_MOCK) {
-    // Mock logout
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    return;
+  try {
+    await fetchWithAuth(`${API_URL}/users/logout`, {
+      method: 'GET',
+    });
+  } catch (error) {
+    console.warn('Logout API call failed:', error);
+  } finally {
+    tokenManager.clearTokens();
+  }
+}
+
+// ============================================
+// 5. Update User (PUT /users/update)
+// ============================================
+
+export async function updateUser(data: UpdateUserRequest): Promise<void> {
+  const formData = new FormData();
+  
+  if (data.firstname) formData.append('firstname', data.firstname);
+  if (data.lastname) formData.append('lastname', data.lastname);
+  if (data.email) formData.append('email', data.email);
+  if (data.tel) formData.append('tel', data.tel);
+  if (data.gender) formData.append('gender', data.gender);
+  
+  if (data.dob) formData.append('dob', data.dob);
+  if (data.career) formData.append('career', data.career);
+  if (data.company) formData.append('company', data.company);
+  if (data.detail) formData.append('detail', data.detail);
+  
+  if (data.profile_pic) {
+    formData.append('profile_pic', data.profile_pic);
   }
 
-  // API จริง
-  try {
-    await fetch(`${API_URL}/auth/logout`, {
-      method: 'POST',
-    });
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-  } catch (error: any) {
-    throw new Error(error.message || 'ออกจากระบบไม่สำเร็จ');
+  console.log('📤 Sending data to backend:');
+  for (let [key, value] of formData.entries()) {
+    if (value instanceof File) {
+      console.log(`  ${key}: [File] ${value.name}`);
+    } else {
+      console.log(`  ${key}: ${value}`);
+    }
+  }
+
+  const response = await fetchWithAuth(`${API_URL}/users/update`, {
+    method: 'PUT',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Update failed');
   }
 }

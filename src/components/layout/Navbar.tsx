@@ -3,34 +3,12 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { useEffect } from 'react';
-import { useAuthStore } from '@/src/features/auth/store/authStore';
 
 export function Navbar() {
-  const router = useRouter();
-  const { user, isAuthenticated, logout } = useAuthStore();
-
-  // โหลด user จาก localStorage เมื่อ mount
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (token && !user) {
-      // TODO: เรียก API เพื่อ verify token และดึง user data
-      // ตอนนี้ใช้แค่เช็ค token ก่อน
-    }
-  }, [user]);
-
-  const handleLogout = () => {
-    logout();
-    router.push('/');
-    router.refresh();
-  };
-
   return (
-    <nav className="bg-[#498AC3] px-6 py-4 shadow-md">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Logo */}
+    <nav className="bg-[#4A8BC2] text-white shadow-md sticky top-0 z-40">
+      <div className="h-14 px-6 flex items-center justify-between max-w-7xl mx-auto">
+        {/* Left: Logo */}
         <Link href="/" className="flex items-center gap-3 group">
           <Image 
             src="/images/logo_expo.png"
@@ -44,108 +22,26 @@ export function Navbar() {
           </span>
         </Link>
 
-        {/* Right Side - เปลี่ยนตามสถานะ Login */}
+        {/* Right: Login + Register Buttons */}
         <div className="flex items-center gap-3">
-          {isAuthenticated && user ? (
-            <>
-              {/* แสดงเมื่อ Login แล้ว */}
-              
-              {/* User Info */}
-              <div className="flex items-center gap-3 text-white">
-                <div className="text-right hidden sm:block">
-                  <p className="text-sm font-medium">{user.username}</p>
-                  <p className="text-xs opacity-90">{user.email}</p>
-                </div>
-                
-                {/* Avatar */}
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-semibold">
-                  {user.username.charAt(0).toUpperCase()}
-                </div>
-              </div>
+          {/* Register Button */}
+          <Link
+            href="/register"
+            className="px-5 py-2 text-white font-medium hover:bg-white/10 rounded-full transition-all"
+          >
+            ลงทะเบียน
+          </Link>
 
-              {/* Dashboard Button */}
-              <Link href={user.role === 'admin' ? '/admin/dashboard' : '/dashboard'}>
-                <Button 
-                  variant="outline" 
-                  className="bg-transparent text-white border-2 border-white hover:bg-white hover:text-[#498AC3] transition-colors"
-                >
-                  <svg 
-                    className="w-5 h-5 mr-2" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" 
-                    />
-                  </svg>
-                  แดชบอร์ด
-                </Button>
-              </Link>
-
-              {/* Logout Button */}
-              <Button 
-                onClick={handleLogout}
-                variant="outline" 
-                className="bg-white/10 text-white border-2 border-white/50 hover:bg-red-500 hover:border-red-500 transition-colors"
-              >
-                <svg 
-                  className="w-5 h-5 mr-2" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" 
-                  />
-                </svg>
-                ออกจากระบบ
-              </Button>
-            </>
-          ) : (
-            <>
-              {/* แสดงเมื่อยัง Login */}
-              
-              {/* Register Link */}
-              <Link href="/register">
-                <Button 
-                  variant="ghost"
-                  className="text-white hover:bg-white/10 transition-colors"
-                >
-                  สมัครสมาชิก
-                </Button>
-              </Link>
-
-              {/* Login Button */}
-              <Link href="/login">
-                <Button 
-                  variant="outline" 
-                  className="bg-transparent text-white border-2 border-white hover:bg-white hover:text-[#498AC3] transition-colors"
-                >
-                  <svg 
-                    className="w-5 h-5 mr-2" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" 
-                    />
-                  </svg>
-                  เข้าสู่ระบบ
-                </Button>
-              </Link>
-            </>
-          )}
+          {/* Login Button */}
+          <Link
+            href="/login"
+            className="flex items-center gap-2 px-5 py-2 bg-white text-[#4A8BC2] hover:bg-white/90 rounded-full transition-all font-medium shadow-sm"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+            </svg>
+            <span>เข้าสู่ระบบ</span>
+          </Link>
         </div>
       </div>
     </nav>

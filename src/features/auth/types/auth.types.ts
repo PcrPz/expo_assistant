@@ -1,21 +1,39 @@
 // src/features/auth/types/auth.types.ts
 
 /**
- * ประเภทของผู้ใช้
+ * User Interface - ตรงกับ Backend Response (Uppercase)
  */
 export interface User {
-  id: string;
-  username: string;
-  email: string;
-  phoneNumber?: string;
-  companyName?: string;
-  role: 'user' | 'admin' | 'organizer' | 'exhibitor';
-  createdAt?: string;
-  updatedAt?: string;
+  Firstname: string;
+  Lastname: string;
+  Email: string;
+  Tel: string;
+  Gender: string;
+  Role: string;
+  Career: string;
+  Company: string;
+  Detail: string;
+  ProfilePic: string;
 }
 
 /**
- * ข้อมูลสำหรับ Login
+ * Register Request - ส่งไปเป็น lowercase
+ */
+export interface RegisterRequest {
+  firstname: string;           // lowercase
+  lastname: string;
+  username: string;
+  email: string;
+  password: string;
+  confirm_password: string;
+  tel: string;
+  dob: string;
+  gender: string;
+  pdpa_accepted: boolean;
+}
+
+/**
+ * Login Request
  */
 export interface LoginRequest {
   email: string;
@@ -23,19 +41,24 @@ export interface LoginRequest {
 }
 
 /**
- * ข้อมูลที่ได้จาก Login สำเร็จ
+ * Auth Response
  */
-export interface LoginResponse {
-  user: User;
+export interface AuthResponse {
   accessToken: string;
-  refreshToken?: string;
-  message?: string;
 }
 
-/**
- * Error จาก API
- */
-export interface AuthError {
-  message: string;
-  statusCode?: number;
+export interface UpdateUserRequest {
+  // Required fields (ต้องส่งเสมอ)
+  firstname: string;
+  lastname: string;
+  email: string;
+  tel: string;
+  gender: string;
+  // Optional fields
+  password?: string;
+  dob?: string;
+  career?: string;
+  company?: string;
+  detail?: string;
+  profile_pic?: File;
 }
