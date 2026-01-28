@@ -17,6 +17,7 @@ import {
   canViewStaffTab,
   isUserAssignedToBooth 
 } from '@/src/features/booths/utils/permissions';
+import { DocumentsTab } from './documents/DocumentTab';
 
 interface BoothDetailClientProps {
   eventId: string;
@@ -260,7 +261,14 @@ export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailCli
               />
             )}
 
-            {activeTab === 'documents' && <ComingSoonTab feature="เอกสาร" />}
+            {activeTab === 'documents' && (
+            <DocumentsTab
+                boothId={boothId}
+                expoId={eventId}
+                userRole={userRole}
+                isAssignedStaff={isAssignedStaff}
+            />
+            )}
             {activeTab === 'products' && <ComingSoonTab feature="สินค้า" />}
             {activeTab === 'announcements' && <ComingSoonTab feature="ประกาศ" />}
           </div>

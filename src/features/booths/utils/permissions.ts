@@ -213,3 +213,95 @@ export function isUserAssignedToBooth(
     (staff) => staff.email === userEmail && staff.is_staff
   );
 }
+
+// src/features/booths/utils/permissions.ts
+// ✅ เพิ่มส่วนนี้เข้าไปใน permissions.ts ที่มีอยู่แล้ว
+
+// ============================================
+// DOCUMENT PERMISSIONS
+// ============================================
+
+/**
+ * สามารถดูเอกสารได้
+ * ทุกคนดูได้หมด
+ */
+export function canViewDocuments(userRole: EventRole | undefined): boolean {
+  return true;
+}
+
+/**
+ * สามารถจัดการเอกสารได้ (เพิ่ม/แก้ไข/ลบ)
+ * 
+ * Permission Matrix:
+ * - System Admin/Owner/Admin/Staff → จัดการได้ทุกบูธ
+ * - Booth Staff → จัดการได้เฉพาะบูธตัวเอง
+ * 
+ * @param userRole - บทบาทของ user
+ * @param isAssignedStaff - true ถ้า user เป็น staff ของบูธนี้
+ */
+export function canManageDocuments(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  if (!userRole) return false;
+  
+  // System Admin, Owner, Admin, Staff → จัดการได้ทุกบูธ
+  if (['system_admin', 'owner', 'admin', 'staff'].includes(userRole)) {
+    return true;
+  }
+
+  // Booth Staff → จัดการได้เฉพาะบูธตัวเอง
+  if (userRole === 'booth_staff') {
+    return isAssignedStaff;
+  }
+
+  return false;
+}
+
+/**
+ * สามารถเพิ่มเอกสารได้
+ */
+export function canCreateDocument(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageDocuments(userRole, isAssignedStaff);
+}
+
+/**
+ * สามารถแก้ไขเอกสารได้
+ */
+export function canEditDocument(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageDocuments(userRole, isAssignedStaff);
+}
+
+/**
+ * สามารถลบเอกสารได้
+ */
+export function canDeleteDocument(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageDocuments(userRole, isAssignedStaff);
+}
+
+/**
+ * สามารถ Publish/Unpublish เอกสารได้
+ */
+export function canPublishDocument(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageDocuments(userRole, isAssignedStaff);
+}
+
+/**
+ * สามารถ Download เอกสารได้
+ * ทุกคนดาวน์โหลดได้
+ */
+export function canDownloadDocument(userRole: EventRole | undefined): boolean {
+  return true;
+}
