@@ -305,3 +305,75 @@ export function canPublishDocument(
 export function canDownloadDocument(userRole: EventRole | undefined): boolean {
   return true;
 }
+
+
+/**
+ * Product Permissions
+ * Permission Matrix เหมือนกับ Documents
+ */
+
+/**
+ * Check if user can view products
+ * ทุกคนดูได้
+ */
+export function canViewProducts(role?: EventRole): boolean {
+  return true;
+}
+
+/**
+ * Check if user can manage products (create/edit/delete)
+ * System Admin, Owner, Admin, Staff: ทุกบูธ
+ * Booth Staff: เฉพาะบูธตัวเอง
+ */
+export function canManageProducts(
+  role?: EventRole,
+  isAssignedStaff?: boolean
+): boolean {
+  // ตรวจสอบ role ก่อน
+  if (!role) return false;
+  
+  // Default isAssignedStaff = false ถ้าไม่ได้ส่งมา
+  const assigned = isAssignedStaff ?? false;
+  
+  // System Admin, Owner, Admin, Staff: จัดการได้ทุกบูธ
+  if (['system_admin', 'owner', 'admin', 'staff'].includes(role)) {
+    return true;
+  }
+  
+  // Booth Staff: จัดการได้เฉพาะบูธตัวเอง
+  if (role === 'booth_staff' && assigned) {
+    return true;
+  }
+  
+  return false;
+}
+
+/**
+ * Check if user can create product
+ */
+export function canCreateProduct(
+  role?: EventRole,
+  isAssignedStaff?: boolean
+): boolean {
+  return canManageProducts(role, isAssignedStaff);
+}
+
+/**
+ * Check if user can edit product
+ */
+export function canEditProduct(
+  role?: EventRole,
+  isAssignedStaff?: boolean
+): boolean {
+  return canManageProducts(role, isAssignedStaff);
+}
+
+/**
+ * Check if user can delete product
+ */
+export function canDeleteProduct(
+  role?: EventRole,
+  isAssignedStaff?: boolean
+): boolean {
+  return canManageProducts(role, isAssignedStaff);
+}
