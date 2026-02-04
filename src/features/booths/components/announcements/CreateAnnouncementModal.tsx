@@ -1,0 +1,263 @@
+// src/features/booths/components/announcements/CreateAnnouncementModal.tsx
+'use client';
+
+import { useState } from 'react';
+import { X, Upload, ImageIcon, Plus, Info } from 'lucide-react';
+import { createBoothAnnouncement } from '../../api/announcementApi';
+
+interface CreateAnnouncementModalProps {
+  expoID: string;
+  boothID: string;
+  open: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+}
+
+export function CreateAnnouncementModal({
+  expoID,
+  boothID,
+  open,
+  onClose,
+  onSuccess,
+}: CreateAnnouncementModalProps) {
+  const [title, setTitle] = useState('');
+  const [detail, setDetail] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      const invalidFiles = newFiles.filter((file) => !file.type.startsWith('image/'));
+      
+      if (invalidFiles.length > 0) {
+        setError('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
+        return;
+      }
+      
+      setFiles((prev) => [...prev, ...newFiles]);
+      setError(null);
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError(null);
+
+  if (!title.trim()) {
+    setError('กรุณากรอกชื่อประกาศ');
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    await createBoothAnnouncement(expoID, boothID, { // ✅ เพิ่ม boothID เป็น parameter ตัวที่ 2
+      booth_id: boothID,
+      title: title.trim(),
+      detail: detail.trim() || undefined,
+      status: 'unpublish',
+      files: files.length > 0 ? files : undefined,
+    });
+
+    alert('สร้างประกาศสำเร็จ');
+    handleReset();
+    onSuccess?.();
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');
+    alert('สร้างประกาศไม่สำเร็จ');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+  const handleReset = () => {
+    setTitle('');
+    setDetail('');
+    setFiles([]);
+    setError(null);
+  };
+
+  const handleClose = () => {
+    if (!isLoading) {
+      handleReset();
+      onClose();
+    }
+  };
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
+        <form onSubmit={handleSubmit}>
+          {/* Blue Header */}
+          <div className="relative h-28 bg-gradient-to-br from-[#3674B5] via-[#498AC3] to-[#749BC2] p-6">
+            <div className="absolute inset-0 bg-white/5"></div>
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg border border-white/30">
+                  <Plus className="w-7 h-7 text-white" strokeWidth={2.5} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white drop-shadow-lg">สร้างประกาศใหม่</h2>
+                  <p className="text-white/80 text-sm mt-0.5">สร้างประกาศหรือโปรโมชั่นสำหรับบูธของคุณ</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleClose}
+                disabled={isLoading}
+                className="w-10 h-10 bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-colors flex items-center justify-center"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-6 space-y-5 max-h-[calc(90vh-12rem)] overflow-y-auto">
+            {error && (
+              <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4">
+                <p className="text-sm text-red-600 font-medium">⚠️ {error}</p>
+              </div>
+            )}
+
+            <div className="bg-gradient-to-br from-blue-50 to-sky-50 border-2 border-blue-200 rounded-2xl p-4">
+              <div className="flex gap-3">
+                <Info className="w-5 h-5 text-[#3674B5] flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-[#3674B5]">สร้างเป็นฉบับร่าง</p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    ประกาศจะถูกสร้างในสถานะ "ฉบับร่าง" คุณสามารถเผยแพร่ได้ภายหลัง
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-gray-900">
+                ชื่อประกาศ <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="เช่น โปรโมชั่นพิเศษ ลด 50%"
+                disabled={isLoading}
+                maxLength={200}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#3674B5] focus:ring-4 focus:ring-[#3674B5]/20 disabled:opacity-50 disabled:bg-gray-50 transition-all"
+              />
+              <p className="text-xs text-gray-500">{title.length}/200 ตัวอักษร</p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-gray-900">รายละเอียดประกาศ</label>
+              <textarea
+                value={detail}
+                onChange={(e) => setDetail(e.target.value)}
+                placeholder="เพิ่มรายละเอียดเกี่ยวกับประกาศของคุณ..."
+                rows={4}
+                disabled={isLoading}
+                maxLength={1000}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#3674B5] focus:ring-4 focus:ring-[#3674B5]/20 resize-none disabled:opacity-50 disabled:bg-gray-50 transition-all"
+              />
+              <p className="text-xs text-gray-500">{detail.length}/1,000 ตัวอักษร</p>
+            </div>
+
+            <div className="space-y-3">
+              <label className="block text-sm font-bold text-gray-900">รูปภาพประกาศ</label>
+              
+              <button
+                type="button"
+                onClick={() => document.getElementById('file-upload')?.click()}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-[#498AC3] text-[#3674B5] rounded-xl hover:bg-blue-50 hover:border-[#3674B5] transition-colors font-medium disabled:opacity-50"
+              >
+                <Upload className="w-5 h-5" />
+                <span>เลือกรูปภาพ</span>
+                {files.length > 0 && <span className="text-sm">({files.length} ไฟล์)</span>}
+              </button>
+              <input
+                id="file-upload"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileChange}
+                className="hidden"
+                disabled={isLoading}
+              />
+
+              {files.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {files.map((file, index) => (
+                    <div
+                      key={index}
+                      className="relative group rounded-2xl overflow-hidden border-2 border-blue-200 bg-gray-50"
+                    >
+                      <div className="aspect-square">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFile(index)}
+                        className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-lg"
+                        disabled={isLoading}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                        <p className="text-xs text-white truncate">{file.name}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-gray-200 rounded-2xl p-12 text-center bg-gray-50">
+                  <ImageIcon className="w-16 h-16 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm text-gray-500 mb-1">ยังไม่มีรูปภาพ</p>
+                  <p className="text-xs text-gray-400">คลิกปุ่มด้านบนเพื่ออัปโหลด</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
+            <button
+              type="button"
+              onClick={handleClose}
+              disabled={isLoading}
+              className="flex-1 px-5 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-white font-medium transition-colors disabled:opacity-50"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex-1 px-5 py-3 bg-[#3674B5] text-white rounded-xl hover:bg-[#2d5d96] font-medium transition-all shadow-md hover:shadow-lg disabled:opacity-50"
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  กำลังสร้าง...
+                </span>
+              ) : (
+                'สร้างประกาศ'
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

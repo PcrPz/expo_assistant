@@ -1,16 +1,16 @@
-// src/features/products/components/products/ProductsTab.tsx
+// src/features/booths/components/products/ProductsTab.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Package, Plus, RefreshCw } from 'lucide-react';
-import { getBoothProducts } from '../../api/productApi';
 import { canManageProducts } from '../../utils/permissions';
-import type { Product, ProductDetail } from '../../types/product.types';
 import type { EventRole } from '@/src/features/events/types/event.types';
 import { ProductCard } from './ProductCard';
-import { ProductDetailModal } from './ProductDetailModal';
 import { CreateProductModal } from './CreateProductModal';
+import { ProductDetailModal } from './ProductDetailModal';
+import { Product, ProductDetail } from '../../types/product.types';
 import { EditProductModal } from './EditProductModal';
+import { getBoothProducts } from '../../api/productApi';
 
 interface ProductsTabProps {
   boothId: string;
@@ -28,8 +28,8 @@ export function ProductsTab({
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [viewingProductId, setViewingProductId] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<ProductDetail | null>(null);
+  const [viewingProductId, setViewingProductId] = useState<string | null>(null);
 
   const canManage = canManageProducts(userRole, isAssignedStaff);
 
@@ -62,9 +62,9 @@ export function ProductsTab({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">สินค้าบูธ</h3>
+          <h3 className="text-lg font-semibold text-gray-900">สินค้าและบริการ</h3>
           <p className="text-sm text-gray-500 mt-1">
-            จัดการสินค้าและแสดงรายละเอียดสินค้าของบูธนี้
+            จัดการสินค้าและบริการของบูธนี้
           </p>
         </div>
         
@@ -107,7 +107,7 @@ export function ProductsTab({
 
       {/* Product Grid */}
       {products.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
             <ProductCard
               key={product.ProductID}
@@ -136,6 +136,7 @@ export function ProductsTab({
         <ProductDetailModal
           productId={viewingProductId}
           expoId={expoId}
+          boothId={boothId}
           canManage={canManage}
           onClose={() => setViewingProductId(null)}
           onEdit={(product) => {
@@ -154,6 +155,7 @@ export function ProductsTab({
         <EditProductModal
           product={editingProduct}
           expoId={expoId}
+          boothId={boothId}
           onClose={() => setEditingProduct(null)}
           onSuccess={() => {
             setEditingProduct(null);

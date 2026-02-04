@@ -5,10 +5,13 @@
  * ✅ ใช้ PascalCase ตรงกับ Backend Response
  */
 export interface BoothDocument {
-  DocID: string;      // Backend ส่งมาเป็น PascalCase
+  DocID: string;               // Backend ส่งมาเป็น PascalCase
+  BoothID: string;             // ✅ เพิ่ม BoothID
   Title: string;
   Status: 'published' | 'unpublished';
-  PublishAt: string | null;  // ISO timestamp
+  PublishAt: string | null;    // ISO timestamp
+  CreatedAt: string;           // ✅ เพิ่ม timestamp
+  UpdatedAt: string;           // ✅ เพิ่ม timestamp
 }
 
 /**
@@ -16,26 +19,28 @@ export interface BoothDocument {
  */
 export interface CreateDocumentRequest {
   booth_id: string;
-  title?: string;  // optional - ถ้าไม่ส่งจะใช้ชื่อไฟล์
+  title?: string;              // optional - ถ้าไม่ส่งจะใช้ชื่อไฟล์
   status: 'published' | 'unpublished';
   file: File;
 }
 
 /**
  * UpdateDocumentRequest - แก้ไขเอกสาร
+ * ⚠️ Note: booth_id ไม่อยู่ใน request body แต่อยู่ใน API path
  */
 export interface UpdateDocumentRequest {
   doc_id: string;
   title: string;
   status: 'published' | 'unpublished';
-  file?: File;  // optional - ถ้าไม่ส่งจะไม่เปลี่ยนไฟล์
+  file?: File;                 // optional - ถ้าไม่ส่งจะไม่เปลี่ยนไฟล์
 }
 
 /**
  * DeleteDocumentsRequest - ลบเอกสาร
+ * ⚠️ Note: booth_id ไม่อยู่ใน request body แต่อยู่ใน API path
  */
 export interface DeleteDocumentsRequest {
-  doc_list: string[];  // array of doc_id
+  doc_list: string[];          // array of doc_id
 }
 
 /**

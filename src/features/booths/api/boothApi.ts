@@ -229,6 +229,7 @@ export async function createBooth(
 /**
  * Update an existing booth
  * Backend expects multipart/form-data (not JSON)
+ * ✅ FIXED: Added /${boothId} to path
  */
 export async function updateBooth(
   expoId: string,
@@ -236,7 +237,7 @@ export async function updateBooth(
   data: UpdateBoothRequest
 ): Promise<Booth | null> {
   try {
-    console.log(`🌐 [BoothAPI] PUT /booth/${expoId}/update`);
+    console.log(`🌐 [BoothAPI] PUT /booth/${expoId}/update/${boothId}`);
     console.log('📦 [BoothAPI] Request data:', data);
     
     // ✅ Backend expects multipart/form-data (form fields, not JSON)
@@ -263,7 +264,8 @@ export async function updateBooth(
       console.log(`  ${key}: ${value}`);
     }
     
-    const response = await fetchWithAuth(`${API_URL}/booth/${expoId}/update`, {
+    // ✅ FIXED: Added /${boothId} to path
+    const response = await fetchWithAuth(`${API_URL}/booth/${expoId}/update/${boothId}`, {
       method: 'PUT',
       body: formData,
       // ⚠️ Don't set Content-Type - browser will set it with boundary
@@ -292,6 +294,7 @@ export async function updateBooth(
 /**
  * Update booth with new thumbnail
  * Sends everything in one multipart/form-data request
+ * ✅ FIXED: Added /${boothId} to path
  */
 export async function updateBoothWithThumbnail(
   expoId: string,
@@ -300,7 +303,7 @@ export async function updateBoothWithThumbnail(
   updateData: UpdateBoothRequest
 ): Promise<Booth | null> {
   try {
-    console.log('🌐 [BoothAPI] PUT /booth/${expoId}/update (with thumbnail)');
+    console.log('🌐 [BoothAPI] PUT /booth/${expoId}/update/${boothId} (with thumbnail)');
     console.log('📸 [BoothAPI] Thumbnail file:', file.name, file.type, file.size);
     
     // ✅ Send everything in one FormData
@@ -327,7 +330,8 @@ export async function updateBoothWithThumbnail(
     
     console.log('📦 [BoothAPI] FormData with thumbnail');
     
-    const response = await fetchWithAuth(`${API_URL}/booth/${expoId}/update`, {
+    // ✅ FIXED: Added /${boothId} to path
+    const response = await fetchWithAuth(`${API_URL}/booth/${expoId}/update/${boothId}`, {
       method: 'PUT',
       body: formData,
       // ⚠️ Don't set Content-Type - browser will set it with boundary
@@ -417,6 +421,7 @@ export async function getBoothStaff(expoId: string, boothId: string): Promise<an
 
 /**
  * Update booth staff
+ * ✅ FIXED: Added /${data.booth_id} to path
  */
 export async function updateBoothStaff(
   expoId: string,
@@ -427,13 +432,14 @@ export async function updateBoothStaff(
   }
 ): Promise<boolean> {
   try {
-    console.log(`🌐 [BoothAPI] POST /booth/${expoId}/update-staff`);
+    console.log(`🌐 [BoothAPI] POST /booth/${expoId}/update-staff/${data.booth_id}`);
     console.log('📦 [BoothAPI] Request data:', data);
     
-    const response = await fetchWithAuth(`${API_URL}/booth/${expoId}/update-staff`, {
+    // ✅ FIXED: Added /${data.booth_id} to path
+    const response = await fetchWithAuth(`${API_URL}/booth/${expoId}/update-staff/${data.booth_id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),  // ✅ ส่ง data ที่มี add_staff_list และ delete_staff_list
+      body: JSON.stringify(data),
     });
 
     console.log(`📡 [BoothAPI] Status: ${response.status}`);

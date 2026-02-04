@@ -13,20 +13,6 @@ interface BoothTabProps {
   role: EventRole;
 }
 
-// Type Labels
-const TYPE_LABELS: Record<string, string> = {
-  small_booth: 'บูธเล็ก',
-  big_booth: 'บูธใหญ่',
-  stage: 'เวที',
-};
-
-// Type Icons
-const TYPE_ICONS: Record<string, string> = {
-  small_booth: '🏪',
-  big_booth: '🏬',
-  stage: '🎭',
-};
-
 export function BoothTab({ expoId, role }: BoothTabProps) {
   const router = useRouter();
   const [booths, setBooths] = useState<Booth[]>([]);
@@ -49,11 +35,9 @@ export function BoothTab({ expoId, role }: BoothTabProps) {
     try {
       setIsLoading(true);
       
-      // โหลดบูธทั้งหมดในงาน
       const allBooths = await getBoothsByExpoId(expoId);
       setBooths(allBooths);
 
-      // โหลดบูธของตัวเอง (ถ้าเป็น booth_staff)
       if (role === 'booth_staff') {
         const myBooths = await getMyBooths();
         const myIds = new Set(
@@ -72,28 +56,26 @@ export function BoothTab({ expoId, role }: BoothTabProps) {
 
   // Filter Booths
   const filteredBooths = booths.filter(booth => {
-    // Search Filter - ป้องกัน null/undefined
     const matchesSearch = 
       (booth.booth_no || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (booth.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       false;
 
-    // Type Filter
     const matchesType = selectedType === 'all' || booth.type === selectedType;
 
     return matchesSearch && matchesType;
   });
 
-  // Group by "My Booths" and "Other Booths"
-  const myBooths = filteredBooths.filter(b => myBoothIds.has(b.booth_id));
-  const otherBooths = filteredBooths.filter(b => !myBoothIds.has(b.booth_id));
+  // Group by "My Booths" and "Other Booths" (เฉพาะ booth_staff)
+  const myBooths = role === 'booth_staff' ? filteredBooths.filter(b => myBoothIds.has(b.booth_id)) : [];
+  const otherBooths = role === 'booth_staff' ? filteredBooths.filter(b => !myBoothIds.has(b.booth_id)) : [];
 
   // Loading State
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-[#3674B5] rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">กำลังโหลดบูธ...</p>
         </div>
       </div>
@@ -124,7 +106,7 @@ export function BoothTab({ expoId, role }: BoothTabProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นหาเลขที่บูธ หรือชื่อบูธ..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition"
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:border-[#3674B5] focus:ring-2 focus:ring-[#3674B5]/20 focus:outline-none transition"
             />
           </div>
         </div>
@@ -134,7 +116,7 @@ export function BoothTab({ expoId, role }: BoothTabProps) {
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition"
+            className="px-4 py-2.5 rounded-lg border border-gray-300 focus:border-[#3674B5] focus:ring-2 focus:ring-[#3674B5]/20 focus:outline-none transition"
           >
             <option value="all">ทุกประเภท</option>
             <option value="small_booth">บูธเล็ก</option>
@@ -145,7 +127,7 @@ export function BoothTab({ expoId, role }: BoothTabProps) {
           {canCreate && (
             <button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-md"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#3674B5] text-white font-semibold rounded-lg hover:bg-[#2d5a8f] transition shadow-md"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -160,9 +142,15 @@ export function BoothTab({ expoId, role }: BoothTabProps) {
       {/* Empty State */}
       {filteredBooths.length === 0 && (
         <div className="text-center py-12">
-          <div className="text-6xl mb-4">🏪</div>
+          <div className="flex justify-center mb-6">
+            <img 
+              src="/images/No_data.png" 
+              alt="ไม่พบบูธ"
+              className="w-48 h-48 object-contain opacity-60"
+            />
+          </div>
           <p className="text-xl font-semibold text-gray-900 mb-2">ไม่พบบูธ</p>
-          <p className="text-gray-600">
+          <p className="text-gray-600 mb-6">
             {searchQuery || selectedType !== 'all'
               ? 'ลองเปลี่ยนเงื่อนไขการค้นหา'
               : canCreate
@@ -173,7 +161,7 @@ export function BoothTab({ expoId, role }: BoothTabProps) {
           {canCreate && !searchQuery && selectedType === 'all' && (
             <button
               onClick={() => setShowCreateModal(true)}
-              className="mt-4 px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition"
+              className="px-6 py-3 bg-[#3674B5] text-white font-semibold rounded-lg hover:bg-[#2d5a8f] transition shadow-md"
             >
               สร้างบูธ
             </button>
@@ -181,53 +169,56 @@ export function BoothTab({ expoId, role }: BoothTabProps) {
         </div>
       )}
 
-      {/* Booth Staff: My Booths Section */}
-      {role === 'booth_staff' && myBooths.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg font-bold text-gray-900">บูธของฉัน</h3>
-            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-              {myBooths.length} บูธ
-            </span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {myBooths.map((booth) => (
-              <BoothCard
-                key={booth.booth_id}
-                booth={booth}
-                isMyBooth={true}
-                onClick={() => router.push(`/events/${expoId}/booths/${booth.booth_id}`)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Other Booths Section */}
-      {otherBooths.length > 0 && (
-        <div className="space-y-4">
-          {role === 'booth_staff' && (
-            <h3 className="text-lg font-bold text-gray-900">บูธอื่นๆ</h3>
+      {/* เฉพาะ booth_staff: แสดง "บูธของฉัน" และ "บูธอื่นๆ" */}
+      {role === 'booth_staff' && filteredBooths.length > 0 && (
+        <>
+          {/* My Booths Section */}
+          {myBooths.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-bold text-gray-900">บูธของฉัน</h3>
+                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                  {myBooths.length} บูธ
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {myBooths.map((booth) => (
+                  <BoothCard
+                    key={booth.booth_id}
+                    booth={booth}
+                    isMyBooth={true}
+                    onClick={() => router.push(`/events/${expoId}/booths/${booth.booth_id}`)}
+                  />
+                ))}
+              </div>
+            </div>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {otherBooths.map((booth) => (
-              <BoothCard
-                key={booth.booth_id}
-                booth={booth}
-                isMyBooth={false}
-                onClick={() => router.push(`/events/${expoId}/booths/${booth.booth_id}`)}
-              />
-            ))}
-          </div>
-        </div>
+
+          {/* Other Booths Section */}
+          {otherBooths.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-gray-900">บูธอื่นๆ</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {otherBooths.map((booth) => (
+                  <BoothCard
+                    key={booth.booth_id}
+                    booth={booth}
+                    isMyBooth={false}
+                    onClick={() => router.push(`/events/${expoId}/booths/${booth.booth_id}`)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
-      {/* All Booths (for Owner/Admin) */}
+      {/* สำหรับ owner/admin/system_admin: แสดง "บูธทั้งหมด" เพียงครั้งเดียว */}
       {role !== 'booth_staff' && filteredBooths.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-bold text-gray-900">บูธทั้งหมด</h3>
-            <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+            <span className="px-2 py-1 bg-[#E8F0FB] text-[#3674B5] text-xs font-semibold rounded-full">
               {filteredBooths.length} บูธ
             </span>
           </div>
@@ -267,10 +258,8 @@ interface BoothCardProps {
 }
 
 function BoothCard({ booth, isMyBooth, onClick }: BoothCardProps) {
-  // ✅ ดึงฟังก์ชันสำหรับ MinIO
   const { getMinioFileUrl } = require('@/src/features/minio/api/minioApi');
   
-  // ✨ Minimal Config - ใช้สีธีม #3674B5
   const TYPE_CONFIG: Record<string, { 
     icon: React.ReactElement; 
     color: string; 
@@ -279,7 +268,7 @@ function BoothCard({ booth, isMyBooth, onClick }: BoothCardProps) {
   }> = {
     small_booth: {
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
           <polyline points="9 22 9 12 15 12 15 22"></polyline>
         </svg>
@@ -290,7 +279,7 @@ function BoothCard({ booth, isMyBooth, onClick }: BoothCardProps) {
     },
     big_booth: {
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
           <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
         </svg>
@@ -301,21 +290,19 @@ function BoothCard({ booth, isMyBooth, onClick }: BoothCardProps) {
     },
     stage: {
       icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
           <polyline points="2 17 12 22 22 17"></polyline>
           <polyline points="2 12 12 17 22 12"></polyline>
         </svg>
       ),
-      color: '#5A7BA8',
-      lightColor: '#EEF2F7',
+      color: '#749BC2',
+      lightColor: '#EBF4FC',
       label: 'เวที'
     },
   };
 
   const config = TYPE_CONFIG[booth.type] || TYPE_CONFIG.small_booth;
-  
-  // ✅ สร้าง URL สำหรับ thumbnail
   const thumbnailUrl = booth.thumbnail ? getMinioFileUrl(booth.thumbnail) : null;
 
   return (
@@ -340,47 +327,158 @@ function BoothCard({ booth, isMyBooth, onClick }: BoothCardProps) {
             alt={booth.booth_no}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {
-              // ถ้ารูปโหลดไม่ได้ แสดง placeholder
               const target = e.currentTarget;
               target.style.display = 'none';
               if (target.parentElement) {
-                target.parentElement.style.backgroundColor = config.lightColor;
+                const parent = target.parentElement;
+                // ✅ สร้าง gradient สีอ่อนตาม type
+                const bgGradient = booth.type === 'stage' 
+                  ? 'linear-gradient(135deg, rgba(116, 155, 194, 0.15) 0%, rgba(116, 155, 194, 0.08) 100%)'
+                  : `linear-gradient(135deg, ${config.lightColor} 0%, #F0F5FA 100%)`;
+                
+                const patternColor = booth.type === 'stage' ? '#749BC2' : config.color;
+                
+                parent.innerHTML = `
+                  <div class="w-full h-32 flex items-center justify-center relative overflow-hidden" style="background: ${bgGradient};">
+                    <div class="text-center z-10">
+                      <div class="w-16 h-16 mx-auto mb-2 rounded-xl flex items-center justify-center" style="background-color: rgba(255, 255, 255, 0.6); color: ${patternColor};">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          ${booth.type === 'stage' 
+                            ? '<polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline>'
+                            : booth.type === 'big_booth'
+                            ? '<rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>'
+                            : '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>'
+                          }
+                        </svg>
+                      </div>
+                    </div>
+                    <svg class="absolute inset-0 w-full h-full opacity-5" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <pattern id="pattern-${booth.booth_id}" width="20" height="20" patternUnits="userSpaceOnUse">
+                          <circle cx="10" cy="10" r="1" fill="${patternColor}" />
+                        </pattern>
+                      </defs>
+                      <rect width="100%" height="100%" fill="url(#pattern-${booth.booth_id})" />
+                    </svg>
+                  </div>
+                `;
               }
             }}
           />
-          {/* Overlay Gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
         </div>
       ) : (
-        // Placeholder ถ้าไม่มีรูป
+        // ✅ Placeholder สำหรับบูธที่ไม่มีรูป - ปรับสีตาม type
         <div 
-          className="w-full h-32 flex items-center justify-center"
-          style={{ backgroundColor: config.lightColor }}
+          className="relative w-full h-32 flex items-center justify-center overflow-hidden"
+          style={{ 
+            background: booth.type === 'stage'
+              ? 'linear-gradient(135deg, rgba(116, 155, 194, 0.15) 0%, rgba(116, 155, 194, 0.08) 100%)'
+              : `linear-gradient(135deg, ${config.lightColor} 0%, #F0F5FA 100%)`
+          }}
         >
-          <div style={{ color: config.color, opacity: 0.3 }}>
-            {config.icon}
+          {/* Main Content */}
+          <div className="relative z-10 text-center">
+            <div 
+              className="w-16 h-16 mx-auto mb-2 rounded-xl flex items-center justify-center shadow-sm"
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                color: booth.type === 'stage' ? '#749BC2' : config.color
+              }}
+            >
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                {booth.type === 'small_booth' && (
+                  <>
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                  </>
+                )}
+                {booth.type === 'big_booth' && (
+                  <>
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </>
+                )}
+                {booth.type === 'stage' && (
+                  <>
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                  </>
+                )}
+              </svg>
+            </div>
+            {/* ✅ เอาข้อความออก - ไม่แสดงอะไรเลย */}
           </div>
+          
+          {/* Decorative Pattern Background */}
+          <svg 
+            className="absolute inset-0 w-full h-full opacity-5 pointer-events-none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <pattern 
+                id={`pattern-${booth.booth_id}`} 
+                width="20" 
+                height="20" 
+                patternUnits="userSpaceOnUse"
+              >
+                <circle cx="10" cy="10" r="1" fill={booth.type === 'stage' ? '#749BC2' : config.color} />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill={`url(#pattern-${booth.booth_id})`} />
+          </svg>
+
+          {/* Corner Decoration */}
+          <div 
+            className="absolute top-0 right-0 w-20 h-20 rounded-bl-full opacity-10"
+            style={{ backgroundColor: booth.type === 'stage' ? '#749BC2' : config.color }}
+          ></div>
+          <div 
+            className="absolute bottom-0 left-0 w-16 h-16 rounded-tr-full opacity-10"
+            style={{ backgroundColor: booth.type === 'stage' ? '#749BC2' : config.color }}
+          ></div>
         </div>
       )}
 
       {/* Card Content */}
       <div className="p-4">
-        {/* Header - Icon และ Type Badge แนวนอน */}
+        {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div 
             className="w-10 h-10 rounded-lg flex items-center justify-center"
             style={{ 
               backgroundColor: config.lightColor,
-              color: config.color
+              color: booth.type === 'stage' ? '#749BC2' : config.color
             }}
           >
-            {config.icon}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              {booth.type === 'small_booth' && (
+                <>
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </>
+              )}
+              {booth.type === 'big_booth' && (
+                <>
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </>
+              )}
+              {booth.type === 'stage' && (
+                <>
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                  <polyline points="2 17 12 22 22 17"></polyline>
+                  <polyline points="2 12 12 17 22 12"></polyline>
+                </>
+              )}
+            </svg>
           </div>
           
           <span 
             className="px-2.5 py-1 rounded-md text-[11px] font-semibold"
             style={{ 
-              color: config.color,
+              color: booth.type === 'stage' ? '#749BC2' : config.color,
               backgroundColor: config.lightColor
             }}
           >
@@ -388,12 +486,12 @@ function BoothCard({ booth, isMyBooth, onClick }: BoothCardProps) {
           </span>
         </div>
 
-        {/* Booth Number - กลาง */}
+        {/* Booth Number */}
         <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-[#3674B5] transition">
           {booth.booth_no}
         </h3>
 
-        {/* Info - แนวนอน */}
+        {/* Info */}
         <div className="flex items-center gap-4 text-xs text-gray-600">
           {booth.zone_name && (
             <div className="flex items-center gap-1.5">
@@ -421,7 +519,7 @@ function BoothCard({ booth, isMyBooth, onClick }: BoothCardProps) {
         </div>
       </div>
 
-      {/* Arrow - มุมล่างขวา */}
+      {/* Arrow */}
       <div className="absolute bottom-3 right-3 text-gray-300 group-hover:text-[#3674B5] group-hover:translate-x-0.5 transition-all">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <line x1="5" y1="12" x2="19" y2="12"></line>

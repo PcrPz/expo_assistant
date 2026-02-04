@@ -55,7 +55,7 @@ export interface UpdateBoothRequest {
 }
 
 // ============================================================================
-// 🆕 BOOTH STAFF TYPES
+// BOOTH STAFF TYPES
 // ============================================================================
 
 export interface BoothStaff {
@@ -75,7 +75,7 @@ export interface AssignStaffRequest {
 }
 
 // ============================================================================
-// CONSTANTS (เพิ่มเข้ามา - สำหรับ EditBoothModal)
+// CONSTANTS
 // ============================================================================
 
 export const BOOTH_TYPES = [

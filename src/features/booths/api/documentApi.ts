@@ -62,10 +62,12 @@ export async function getDocumentDetail(
 
 /**
  * สร้างเอกสาร 1 ไฟล์
- * POST /booth-doc/:expoID/create
+ * POST /booth-doc/:expoID/:boothID/create
+ * ✅ เพิ่ม boothID ใน path
  */
 export async function createDocument(
   expoId: string,
+  boothId: string, // ✅ เพิ่ม parameter
   request: CreateDocumentRequest
 ): Promise<string> {
   const formData = new FormData();
@@ -78,7 +80,7 @@ export async function createDocument(
   }
   
   const response = await fetchWithAuth(
-    `${API_URL}/booth-doc/${expoId}/create`,
+    `${API_URL}/booth-doc/${expoId}/${boothId}/create`, // ✅ เพิ่ม boothId
     {
       method: 'POST',
       body: formData,
@@ -96,15 +98,16 @@ export async function createDocument(
 
 /**
  * สร้างหลายเอกสารพร้อมกัน
- * POST /booth-doc/:expoID/multi-create
+ * POST /booth-doc/:expoID/:boothID/multi-create
+ * ✅ เพิ่ม boothID ใน path
  */
 export async function createMultipleDocuments(
   expoId: string,
+  boothId: string, // ✅ เพิ่ม parameter
   request: CreateMultipleDocumentsRequest
 ): Promise<string[]> {
   const formData = new FormData();
   
-  // เพิ่มไฟล์หลายไฟล์
   request.files.forEach(file => {
     formData.append('files', file);
   });
@@ -113,7 +116,7 @@ export async function createMultipleDocuments(
   formData.append('status', request.status);
   
   const response = await fetchWithAuth(
-    `${API_URL}/booth-doc/${expoId}/multi-create`,
+    `${API_URL}/booth-doc/${expoId}/${boothId}/multi-create`, // ✅ เพิ่ม boothId
     {
       method: 'POST',
       body: formData,
@@ -131,10 +134,12 @@ export async function createMultipleDocuments(
 
 /**
  * แก้ไขเอกสาร
- * PUT /booth-doc/:expoID/update
+ * PUT /booth-doc/:expoID/:boothID/update
+ * ✅ เพิ่ม boothID ใน path
  */
 export async function updateDocument(
   expoId: string,
+  boothId: string, // ✅ เพิ่ม parameter
   request: UpdateDocumentRequest
 ): Promise<void> {
   const formData = new FormData();
@@ -147,7 +152,7 @@ export async function updateDocument(
   }
   
   const response = await fetchWithAuth(
-    `${API_URL}/booth-doc/${expoId}/update`,
+    `${API_URL}/booth-doc/${expoId}/${boothId}/update`, // ✅ เพิ่ม boothId
     {
       method: 'PUT',
       body: formData,
@@ -162,14 +167,16 @@ export async function updateDocument(
 
 /**
  * ลบเอกสาร (รองรับลบหลายไฟล์)
- * POST /booth-doc/:expoID/remove
+ * POST /booth-doc/:expoID/:boothID/remove
+ * ✅ เพิ่ม boothID ใน path
  */
 export async function deleteDocuments(
   expoId: string,
+  boothId: string, // ✅ เพิ่ม parameter
   docIds: string[]
 ): Promise<void> {
   const response = await fetchWithAuth(
-    `${API_URL}/booth-doc/${expoId}/remove`,
+    `${API_URL}/booth-doc/${expoId}/${boothId}/remove`, // ✅ เพิ่ม boothId
     {
       method: 'POST',
       headers: {
@@ -190,6 +197,7 @@ export async function deleteDocuments(
 /**
  * ดาวน์โหลดเอกสาร
  * GET /booth-doc/:expoID/download/:docID
+ * ✅ Path นี้ไม่ต้องแก้ (ไม่มี boothID)
  */
 export async function downloadDocument(
   expoId: string,

@@ -112,6 +112,7 @@ export function DocumentsTab({
             <DocumentCard
               key={doc.DocID}
               document={doc}
+              boothId={boothId} // ✅ ส่ง boothId
               canManage={canManage}
               onView={() => setViewingDoc(doc)}
               onEdit={() => setEditingDoc(doc)}
@@ -140,6 +141,7 @@ export function DocumentsTab({
         <EditDocumentModal
           document={editingDoc}
           expoId={expoId}
+          boothId={boothId} // ✅ ส่ง boothId
           onClose={() => setEditingDoc(null)}
           onSuccess={() => {
             setEditingDoc(null);

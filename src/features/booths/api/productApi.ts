@@ -62,7 +62,8 @@ export async function getProductDetail(
 
 /**
  * Create product
- * POST /booth-product/:expoID/create
+ * POST /booth-product/:expoID/:boothID/create
+ * ✅ FIXED: Added /${data.booth_id} to path
  */
 export async function createProduct(
   expoId: string,
@@ -91,8 +92,9 @@ export async function createProduct(
     });
   }
 
+  // ✅ FIXED: Added /${data.booth_id} to path
   const response = await fetchWithAuth(
-    `${API_URL}/booth-product/${expoId}/create`,
+    `${API_URL}/booth-product/${expoId}/${data.booth_id}/create`,
     {
       method: 'POST',
       body: formData,
@@ -109,7 +111,8 @@ export async function createProduct(
 
 /**
  * Update product
- * PUT /booth-product/:expoID/update
+ * PUT /booth-product/:expoID/:boothID/update
+ * ✅ FIXED: Added /${data.booth_id} to path
  */
 export async function updateProduct(
   expoId: string,
@@ -118,6 +121,7 @@ export async function updateProduct(
   const formData = new FormData();
   
   formData.append('product_id', data.product_id);
+  formData.append('booth_id', data.booth_id); // ✅ เพิ่ม booth_id
   formData.append('title', data.title);
   
   if (data.detail) {
@@ -148,8 +152,9 @@ export async function updateProduct(
     });
   }
 
+  // ✅ FIXED: Added /${data.booth_id} to path
   const response = await fetchWithAuth(
-    `${API_URL}/booth-product/${expoId}/update`,
+    `${API_URL}/booth-product/${expoId}/${data.booth_id}/update`,
     {
       method: 'PUT',
       body: formData,
@@ -166,14 +171,17 @@ export async function updateProduct(
 
 /**
  * Delete product
- * DELETE /booth-product/:expoID/delete/:productID
+ * DELETE /booth-product/:expoID/:boothID/delete/:productID
+ * ✅ FIXED: Added boothId parameter and /${boothId} to path
  */
 export async function deleteProduct(
   expoId: string,
+  boothId: string, // ✅ เพิ่ม parameter
   productId: string
 ): Promise<{ message: string }> {
+  // ✅ FIXED: Added /${boothId} to path
   const response = await fetchWithAuth(
-    `${API_URL}/booth-product/${expoId}/delete/${productId}`,
+    `${API_URL}/booth-product/${expoId}/${boothId}/delete/${productId}`,
     {
       method: 'DELETE',
     }

@@ -1,8 +1,4 @@
 // src/lib/api/fetchWithAuth.ts
-/**
- * 🌐 Fetch พร้อม Auto Retry เมื่อได้ 401
- * - ใช้ Cookie-based refresh token
- */
 
 import { tokenManager } from '@/src/lib/auth/tokenManager';
 
@@ -21,7 +17,7 @@ export async function fetchWithAuth(
   // 2. เรียก API ด้วย access token
   const response = await fetch(url, {
     ...options,
-    credentials: 'include',  // ← สำคัญ! ส่ง Cookie ไป
+    credentials: 'include', 
     headers: {
       ...options.headers,
       'Authorization': `Bearer ${token}`,
@@ -42,14 +38,13 @@ export async function fetchWithAuth(
       
       return fetch(url, {
         ...options,
-        credentials: 'include',  // ← สำคัญ! ส่ง Cookie ไป
+        credentials: 'include',
         headers: {
           ...options.headers,
           'Authorization': `Bearer ${newToken}`,
         },
       });
     } else {
-      // Refresh ล้มเหลว → จะ redirect ไป /login ใน tokenManager แล้ว
       throw new Error('Token refresh failed');
     }
   }

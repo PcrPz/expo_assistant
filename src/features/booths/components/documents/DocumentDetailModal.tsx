@@ -121,7 +121,7 @@ export function DocumentDetailModal({
             <button
               onClick={handleDownload}
               disabled={isDownloading}
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#3674B5] text-white rounded-lg hover:bg-[#2d5a8f] transition disabled:opacity-50"
             >
               {isDownloading ? (
                 <>
@@ -139,7 +139,7 @@ export function DocumentDetailModal({
             {canManage && (
               <button
                 onClick={onEdit}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#3674B5] text-white rounded-lg hover:bg-[#2d5a8f] transition"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition"
               >
                 <Edit2 className="h-4 w-4" />
                 แก้ไข

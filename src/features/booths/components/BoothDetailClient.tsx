@@ -15,10 +15,15 @@ import {
   canEditBooth,
   canDeleteBooth,
   canViewStaffTab,
-  isUserAssignedToBooth 
+  isUserAssignedToBooth, 
+  canCreateAnnouncement,
+  canEditAnnouncement,
+  canDeleteAnnouncement,
+  canPublishAnnouncement
 } from '@/src/features/booths/utils/permissions';
 import { DocumentsTab } from './documents/DocumentTab';
 import { ProductsTab } from './products/ProductsTab';
+import { AnnouncementsTab } from './announcements/AnnouncementTab';
 
 interface BoothDetailClientProps {
   eventId: string;
@@ -279,7 +284,15 @@ export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailCli
                 isAssignedStaff={isAssignedStaff}
             />
             )}
-            {activeTab === 'announcements' && <ComingSoonTab feature="ประกาศ" />}
+            {activeTab === 'announcements' &&   
+            <AnnouncementsTab
+                expoID={eventId}
+                boothID={boothId}
+                canCreate={canCreateAnnouncement(userRole, isAssignedStaff)}
+                canEdit={canEditAnnouncement(userRole, isAssignedStaff)}
+                canDelete={canDeleteAnnouncement(userRole, isAssignedStaff)}
+                canPublish={canPublishAnnouncement(userRole, isAssignedStaff)}
+            />}
           </div>
         </div>
       </div>

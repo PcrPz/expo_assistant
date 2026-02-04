@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Upload, FileText } from 'lucide-react';
+import { X, Upload, FileText, AlertCircle } from 'lucide-react';
 import { createDocument } from '../../api/documentApi';
 
 interface CreateDocumentModalProps {
@@ -22,11 +22,19 @@ export function CreateDocumentModal({
   const [status, setStatus] = useState<'published' | 'unpublished'>('unpublished');
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fileError, setFileError] = useState('');
+
+  // ✅ ขนาดไฟล์สูงสุด 20MB
+  const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB in bytes
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
+    
+    // Clear previous errors
+    setFileError('');
+    
     if (selectedFile) {
-      // ✅ รองรับ PDF, JPEG, PNG
+      // ✅ ตรวจสอบประเภทไฟล์
       const allowedTypes = [
         'application/pdf',
         'image/jpeg',
@@ -34,14 +42,22 @@ export function CreateDocumentModal({
       ];
       
       if (!allowedTypes.includes(selectedFile.type)) {
-        alert('กรุณาเลือกไฟล์ PDF, JPEG หรือ PNG เท่านั้น');
+        setFileError('กรุณาเลือกไฟล์ PDF, JPEG หรือ PNG เท่านั้น');
+        e.target.value = '';
+        return;
+      }
+      
+      // ✅ ตรวจสอบขนาดไฟล์
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        const sizeMB = (selectedFile.size / 1024 / 1024).toFixed(2);
+        setFileError(`ไฟล์มีขนาด ${sizeMB} MB ซึ่งเกินขนาดที่อนุญาต (20 MB)`);
         e.target.value = '';
         return;
       }
       
       setFile(selectedFile);
       
-      // ถ้ายังไม่มี title ให้ใช้ชื่อไฟล์
+      // Auto-fill title
       if (!title) {
         const filename = selectedFile.name.replace(/\.(pdf|jpg|jpeg|png)$/i, '');
         setTitle(filename);
@@ -53,14 +69,21 @@ export function CreateDocumentModal({
     e.preventDefault();
 
     if (!file) {
-      alert('กรุณาเลือกไฟล์');
+      setFileError('กรุณาเลือกไฟล์');
+      return;
+    }
+
+    // ✅ Double check ขนาดไฟล์ก่อน submit
+    if (file.size > MAX_FILE_SIZE) {
+      const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+      setFileError(`ไฟล์มีขนาด ${sizeMB} MB ซึ่งเกินขนาดที่อนุญาต (20 MB)`);
       return;
     }
 
     try {
       setIsSubmitting(true);
 
-      await createDocument(expoId, {
+      await createDocument(expoId, boothId, {
         booth_id: boothId,
         title: title || undefined,
         status,
@@ -76,7 +99,6 @@ export function CreateDocumentModal({
     }
   };
 
-  // แสดงประเภทไฟล์
   const getFileTypeLabel = (file: File) => {
     if (file.type === 'application/pdf') return 'PDF';
     if (file.type === 'image/jpeg') return 'JPEG';
@@ -108,10 +130,15 @@ export function CreateDocumentModal({
             </label>
             
             {!file ? (
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#3674B5] hover:bg-blue-50 transition">
-                <Upload className="h-8 w-8 text-gray-400 mb-2" />
+              <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition
+                ${fileError 
+                  ? 'border-red-300 bg-red-50 hover:bg-red-100' 
+                  : 'border-gray-300 hover:border-[#3674B5] hover:bg-blue-50'
+                }`}>
+                <Upload className={`h-8 w-8 mb-2 ${fileError ? 'text-red-400' : 'text-gray-400'}`} />
                 <span className="text-sm text-gray-600">คลิกเพื่อเลือกไฟล์</span>
                 <span className="text-xs text-gray-400 mt-1">PDF, JPEG, PNG</span>
+                <span className="text-xs text-[#3674B5] font-medium mt-1">ขนาดไฟล์สูงสุด 20 MB</span>
                 <input
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
@@ -130,15 +157,45 @@ export function CreateDocumentModal({
                   <p className="text-xs text-gray-500">
                     {getFileTypeLabel(file)} • {(file.size / 1024 / 1024).toFixed(2)} MB
                   </p>
+                  {/* ✅ แสดง Progress Bar ถ้าไฟล์ใกล้ขีดจำกัด */}
+                  {file.size > MAX_FILE_SIZE * 0.8 && (
+                    <div className="mt-2">
+                      <div className="w-full bg-gray-200 rounded-full h-1.5">
+                        <div 
+                          className={`h-1.5 rounded-full ${
+                            file.size > MAX_FILE_SIZE ? 'bg-red-500' : 'bg-yellow-500'
+                          }`}
+                          style={{ width: `${Math.min((file.size / MAX_FILE_SIZE) * 100, 100)}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {((file.size / MAX_FILE_SIZE) * 100).toFixed(0)}% ของขนาดสูงสุด
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <button
                   type="button"
-                  onClick={() => setFile(null)}
+                  onClick={() => {
+                    setFile(null);
+                    setFileError('');
+                  }}
                   disabled={isSubmitting}
                   className="text-red-600 hover:text-red-700 transition disabled:opacity-50"
                 >
                   <X className="h-5 w-5" />
                 </button>
+              </div>
+            )}
+
+            {/* ✅ Error Message */}
+            {fileError && (
+              <div className="mt-2 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-red-800">ไม่สามารถอัปโหลดไฟล์ได้</p>
+                  <p className="text-sm text-red-600 mt-1">{fileError}</p>
+                </div>
               </div>
             )}
           </div>
@@ -211,7 +268,7 @@ export function CreateDocumentModal({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !file}
+              disabled={isSubmitting || !file || !!fileError}
               className="flex-1 px-4 py-2 bg-[#3674B5] text-white rounded-lg hover:bg-[#2d5a8f] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (

@@ -377,3 +377,79 @@ export function canDeleteProduct(
 ): boolean {
   return canManageProducts(role, isAssignedStaff);
 }
+
+// ============================================
+// ANNOUNCEMENT PERMISSIONS
+// ============================================
+
+/**
+ * สามารถดูประกาศได้
+ * ทุกคนดูได้หมด
+ */
+export function canViewAnnouncements(userRole: EventRole | undefined): boolean {
+  return true;
+}
+
+/**
+ * สามารถจัดการประกาศได้ (เพิ่ม/แก้ไข/ลบ)
+ * 
+ * Permission Matrix:
+ * - System Admin/Owner/Admin/Staff → จัดการได้ทุกบูธ
+ * - Booth Staff → จัดการได้เฉพาะบูธตัวเอง
+ */
+export function canManageAnnouncements(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  if (!userRole) return false;
+  
+  if (['system_admin', 'owner', 'admin', 'staff'].includes(userRole)) {
+    return true;
+  }
+
+  if (userRole === 'booth_staff') {
+    return isAssignedStaff;
+  }
+
+  return false;
+}
+
+/**
+ * สามารถสร้างประกาศได้
+ */
+export function canCreateAnnouncement(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageAnnouncements(userRole, isAssignedStaff);
+}
+
+/**
+ * สามารถแก้ไขประกาศได้
+ */
+export function canEditAnnouncement(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageAnnouncements(userRole, isAssignedStaff);
+}
+
+/**
+ * สามารถลบประกาศได้
+ */
+export function canDeleteAnnouncement(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageAnnouncements(userRole, isAssignedStaff);
+}
+
+/**
+ * สามารถ Publish/Unpublish ประกาศได้
+ */
+export function canPublishAnnouncement(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageAnnouncements(userRole, isAssignedStaff);
+}

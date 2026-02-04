@@ -89,13 +89,6 @@ export function DeleteBoothModal({
               </li>
             </ul>
           </div>
-
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
-              <span className="font-semibold">💡 คำแนะนำ:</span> ถ้าคุณต้องการปิดบูธชั่วคราว 
-              แนะนำให้ใช้ฟีเจอร์ "ปิดการใช้งาน" แทนการลบ
-            </p>
-          </div>
         </div>
 
         {/* Footer */}

@@ -35,7 +35,7 @@ export function ProductCard({ product, onView }: ProductCardProps) {
       <div className="relative w-full aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
         {thumbnailUrl ? (
           <img
-            src={thumbnailUrl}
+            src={thumbnailUrl || undefined}
             alt={product.Title}
             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {

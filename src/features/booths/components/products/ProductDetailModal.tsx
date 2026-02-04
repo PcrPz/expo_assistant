@@ -10,6 +10,7 @@ import { ImageSlider } from './ImageSlider';
 interface ProductDetailModalProps {
   productId: string;
   expoId: string;
+  boothId: string; // ✅ เพิ่ม boothId
   canManage: boolean;
   onClose: () => void;
   onEdit: (product: ProductDetail) => void;
@@ -19,6 +20,7 @@ interface ProductDetailModalProps {
 export function ProductDetailModal({
   productId,
   expoId,
+  boothId, // ✅ เพิ่ม boothId
   canManage,
   onClose,
   onEdit,
@@ -49,7 +51,8 @@ export function ProductDetailModal({
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      await deleteProduct(expoId, productId);
+      // ✅ ส่ง boothId ด้วย
+      await deleteProduct(expoId, boothId, productId);
       alert('ลบสินค้าสำเร็จ');
       onRefresh();
       onClose();
@@ -85,10 +88,12 @@ export function ProductDetailModal({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-        <div className="bg-white rounded-xl w-full max-w-5xl my-8">
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        {/* ✅ Modal Container - Flex Column + Max Height */}
+        <div className="bg-white rounded-xl w-full max-w-5xl max-h-[90vh] flex flex-col">
+          
+          {/* ✅ Header - Fixed */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
             <h2 className="text-2xl font-bold text-gray-900">รายละเอียดสินค้า</h2>
             <button
               onClick={onClose}
@@ -98,9 +103,10 @@ export function ProductDetailModal({
             </button>
           </div>
 
-          {/* Content */}
-          <div className="p-6">
+          {/* ✅ Content - Scrollable */}
+          <div className="flex-1 overflow-y-auto p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              
               {/* Left: Image Slider */}
               <div>
                 <ImageSlider
@@ -109,62 +115,65 @@ export function ProductDetailModal({
                 />
               </div>
 
-        <div className="flex flex-col h-full">
-        {/* Content */}
-        <div className="space-y-6">
-            {/* Title */}
-            <div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {product.Title}
-            </h3>
-            </div>
+              {/* Right: Product Info */}
+              <div className="flex flex-col">
+                {/* Product Details */}
+                <div className="space-y-6 flex-1">
+                  {/* Title */}
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                      {product.Title}
+                    </h3>
+                  </div>
 
-            {/* Price */}
-            <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold text-[#3674B5]">
-                ฿{formatPrice(product.Price)}
-            </span>
-            </div>
+                  {/* Price */}
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold text-[#3674B5]">
+                      ฿{formatPrice(product.Price)}
+                    </span>
+                  </div>
 
-            <div className="border-t border-gray-200"></div>
+                  <div className="border-t border-gray-200"></div>
 
-            {product.Detail && (
-            <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-3">
-                รายละเอียดสินค้า
-                </h4>
-                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                {product.Detail}
-                </p>
-            </div>
-            )}
-        </div>
+                  {/* Description */}
+                  {product.Detail && (
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                        รายละเอียดสินค้า
+                      </h4>
+                      <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                        {product.Detail}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Buttons - Stick to bottom */}
                 {canManage && (
-                <div className="pt-6 mt-auto">
+                  <div className="pt-6 mt-6 border-t border-gray-200">
                     <div className="flex gap-3">
-                    <button
+                      <button
                         onClick={() => onEdit(product)}
                         className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition font-medium"
-                    >
+                      >
                         <Edit2 className="h-4 w-4" />
                         แก้ไขสินค้า
-                    </button>
+                      </button>
 
-                    <button
+                      <button
                         onClick={() => setShowDeleteModal(true)}
                         disabled={isDeleting}
                         className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition font-medium disabled:opacity-50"
-                    >
+                      >
                         <Trash2 className="h-4 w-4" />
                         ลบสินค้า
-                    </button>
+                      </button>
                     </div>
-                </div>
+                  </div>
                 )}
               </div>
             </div>
           </div>
-
         </div>
       </div>
 

@@ -8,6 +8,7 @@ import type { BoothDocument } from '../../types/document.types';
 
 interface DocumentCardProps {
   document: BoothDocument;
+  boothId: string; // ✅ เพิ่ม
   canManage: boolean;
   onView: () => void;
   onEdit: () => void;
@@ -17,6 +18,7 @@ interface DocumentCardProps {
 
 export function DocumentCard({
   document,
+  boothId, // ✅ เพิ่ม
   canManage,
   onView,
   onEdit,
@@ -53,7 +55,8 @@ export function DocumentCard({
   const handleConfirmDelete = async () => {
     try {
       setIsDeleting(true);
-      await deleteDocuments(expoId, [document.DocID]);
+      // ✅ FIXED: Added boothId parameter
+      await deleteDocuments(expoId, boothId, [document.DocID]);
       alert('ลบเอกสารสำเร็จ');
       onRefresh();
     } catch (error: any) {

@@ -2,13 +2,14 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Upload, FileText } from 'lucide-react';
+import { X, Upload, FileText, AlertCircle } from 'lucide-react';
 import { updateDocument } from '../../api/documentApi';
 import type { BoothDocument } from '../../types/document.types';
 
 interface EditDocumentModalProps {
   document: BoothDocument;
   expoId: string;
+  boothId: string;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -16,6 +17,7 @@ interface EditDocumentModalProps {
 export function EditDocumentModal({
   document,
   expoId,
+  boothId,
   onClose,
   onSuccess,
 }: EditDocumentModalProps) {
@@ -23,11 +25,19 @@ export function EditDocumentModal({
   const [status, setStatus] = useState<'published' | 'unpublished'>(document.Status);
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fileError, setFileError] = useState('');
+
+  // ✅ ขนาดไฟล์สูงสุด 20MB
+  const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB in bytes
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
+    
+    // Clear previous errors
+    setFileError('');
+    
     if (selectedFile) {
-      // ✅ รองรับ PDF, JPEG, PNG
+      // ✅ ตรวจสอบประเภทไฟล์
       const allowedTypes = [
         'application/pdf',
         'image/jpeg',
@@ -35,7 +45,15 @@ export function EditDocumentModal({
       ];
       
       if (!allowedTypes.includes(selectedFile.type)) {
-        alert('กรุณาเลือกไฟล์ PDF, JPEG หรือ PNG เท่านั้น');
+        setFileError('กรุณาเลือกไฟล์ PDF, JPEG หรือ PNG เท่านั้น');
+        e.target.value = '';
+        return;
+      }
+      
+      // ✅ ตรวจสอบขนาดไฟล์
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        const sizeMB = (selectedFile.size / 1024 / 1024).toFixed(2);
+        setFileError(`ไฟล์มีขนาด ${sizeMB} MB ซึ่งเกินขนาดที่อนุญาต (20 MB)`);
         e.target.value = '';
         return;
       }
@@ -52,10 +70,17 @@ export function EditDocumentModal({
       return;
     }
 
+    // ✅ Double check ขนาดไฟล์ก่อน submit (ถ้ามีไฟล์ใหม่)
+    if (file && file.size > MAX_FILE_SIZE) {
+      const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+      setFileError(`ไฟล์มีขนาด ${sizeMB} MB ซึ่งเกินขนาดที่อนุญาต (20 MB)`);
+      return;
+    }
+
     try {
       setIsSubmitting(true);
 
-      await updateDocument(expoId, {
+      await updateDocument(expoId, boothId, {
         doc_id: document.DocID,
         title: title.trim(),
         status,
@@ -71,7 +96,6 @@ export function EditDocumentModal({
     }
   };
 
-  // แสดงประเภทไฟล์
   const getFileTypeLabel = (file: File) => {
     if (file.type === 'application/pdf') return 'PDF';
     if (file.type === 'image/jpeg') return 'JPEG';
@@ -156,10 +180,15 @@ export function EditDocumentModal({
             </label>
             
             {!file ? (
-              <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#3674B5] hover:bg-blue-50 transition">
-                <Upload className="h-6 w-6 text-gray-400 mb-1" />
+              <label className={`flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer transition
+                ${fileError 
+                  ? 'border-red-300 bg-red-50 hover:bg-red-100' 
+                  : 'border-gray-300 hover:border-[#3674B5] hover:bg-blue-50'
+                }`}>
+                <Upload className={`h-6 w-6 mb-1 ${fileError ? 'text-red-400' : 'text-gray-400'}`} />
                 <span className="text-xs text-gray-600">คลิกเพื่อเลือกไฟล์ใหม่</span>
                 <span className="text-xs text-gray-400">PDF, JPEG, PNG</span>
+                <span className="text-xs text-[#3674B5] font-medium mt-0.5">ขนาดสูงสุด 20 MB</span>
                 <input
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
@@ -181,7 +210,10 @@ export function EditDocumentModal({
                 </div>
                 <button
                   type="button"
-                  onClick={() => setFile(null)}
+                  onClick={() => {
+                    setFile(null);
+                    setFileError('');
+                  }}
                   disabled={isSubmitting}
                   className="text-red-600 hover:text-red-700 transition disabled:opacity-50"
                 >
@@ -189,7 +221,19 @@ export function EditDocumentModal({
                 </button>
               </div>
             )}
-            <p className="text-xs text-gray-500 mt-1">
+
+            {/* ✅ Error Message */}
+            {fileError && (
+              <div className="mt-2 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-red-800">ไม่สามารถอัปโหลดไฟล์ได้</p>
+                  <p className="text-sm text-red-600 mt-1">{fileError}</p>
+                </div>
+              </div>
+            )}
+
+            <p className="text-xs text-gray-500 mt-2">
               ถ้าไม่เลือกไฟล์ใหม่ ไฟล์เดิมจะไม่เปลี่ยนแปลง
             </p>
           </div>
@@ -206,7 +250,7 @@ export function EditDocumentModal({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !!fileError}
               className="flex-1 px-4 py-2 bg-[#3674B5] text-white rounded-lg hover:bg-[#2d5a8f] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (

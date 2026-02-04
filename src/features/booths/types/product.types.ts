@@ -1,15 +1,20 @@
-// src/features/products/types/product.types.ts
+// src/features/booths/types/product.types.ts
 
 /**
  * Product - สินค้าในบูธ
  * Backend Response ใช้ PascalCase
+ *
+ * Note: Backend ส่ง empty string ("") แทน null สำหรับ Detail และ Thumbnail
  */
 export interface Product {
   ProductID: string;
+  BoothID: string;
   Title: string;
-  Detail: string;
-  Price: string;        // decimal string จาก Backend
-  Thumbnail: string;    // รูปปก (URL encrypted)
+  Detail: string;        // Backend ส่ง "" ถ้าไม่มีค่า (ไม่ใช่ null)
+  Price: string;
+  Thumbnail: string;     // Backend ส่ง "" ถ้าไม่มีรูป (ไม่ใช่ null)
+  CreatedAt: string;
+  UpdatedAt: string;
 }
 
 /**
@@ -17,7 +22,7 @@ export interface Product {
  * รวมรูปรายละเอียดด้วย
  */
 export interface ProductDetail extends Product {
-  Pics: string[];       // รูปรายละเอียด (URLs encrypted)
+  Pics: string[];        // รูปรายละเอียด (URLs encrypted)
 }
 
 /**
@@ -27,9 +32,9 @@ export interface CreateProductRequest {
   booth_id: string;
   title: string;
   detail?: string;
-  price?: number;              // จะแปลงเป็น decimal ที่ Backend
-  thumbnail_file?: File;       // รูปปก
-  files?: File[];              // รูปรายละเอียด (max 10)
+  price?: number;
+  thumbnail_file?: File;
+  files?: File[];
 }
 
 /**
@@ -37,13 +42,14 @@ export interface CreateProductRequest {
  */
 export interface UpdateProductRequest {
   product_id: string;
+  booth_id: string;
   title: string;
   detail?: string;
   price?: number;
-  thumbnail?: string;          // URL เดิม (ถ้าไม่เปลี่ยน)
-  thumbnail_file?: File;       // รูปปกใหม่
-  files?: File[];              // รูปรายละเอียดใหม่
-  deleted_pics?: string[];     // รูปที่จะลบ (URLs)
+  thumbnail?: string;
+  thumbnail_file?: File;
+  files?: File[];
+  deleted_pics?: string[];
 }
 
 /**
@@ -51,4 +57,5 @@ export interface UpdateProductRequest {
  */
 export interface DeleteProductRequest {
   product_id: string;
+  booth_id: string;
 }
