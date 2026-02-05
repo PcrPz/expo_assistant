@@ -11,6 +11,10 @@ import type { EventRole } from '@/src/features/events/types/event.types';
 import { EditBoothModal } from '@/src/features/booths/components/EditBoothModal';
 import { DeleteBoothModal } from '@/src/features/booths/components/DeleteBoothModal';
 import { BoothStaffTab } from '@/src/features/booths/components/staff/BoothStaffTab';
+import { DocumentsTab } from './documents/DocumentTab';
+import { ProductsTab } from './products/ProductsTab';
+import { AnnouncementsTab } from './announcements/AnnouncementTab';
+import { QueueTab } from '@/src/features/booths/components/queue/QueueTab';
 import { 
   canEditBooth,
   canDeleteBooth,
@@ -21,9 +25,6 @@ import {
   canDeleteAnnouncement,
   canPublishAnnouncement
 } from '@/src/features/booths/utils/permissions';
-import { DocumentsTab } from './documents/DocumentTab';
-import { ProductsTab } from './products/ProductsTab';
-import { AnnouncementsTab } from './announcements/AnnouncementTab';
 
 interface BoothDetailClientProps {
   eventId: string;
@@ -31,7 +32,7 @@ interface BoothDetailClientProps {
   userRole: EventRole;
 }
 
-type TabType = 'detail' | 'staff' | 'documents' | 'products' | 'announcements';
+type TabType = 'detail' | 'staff' | 'documents' | 'products' | 'announcements' | 'queue';
 
 export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailClientProps) {
   const router = useRouter();
@@ -251,6 +252,21 @@ export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailCli
             >
               ประกาศ
             </TabButton>
+
+            <TabButton
+              active={activeTab === 'queue'}
+              onClick={() => setActiveTab('queue')}
+              icon={
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              }
+            >
+              คิว
+            </TabButton>
           </div>
 
           <div className="p-6">
@@ -268,31 +284,42 @@ export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailCli
             )}
 
             {activeTab === 'documents' && (
-            <DocumentsTab
+              <DocumentsTab
                 boothId={boothId}
                 expoId={eventId}
                 userRole={userRole}
                 isAssignedStaff={isAssignedStaff}
-            />
+              />
             )}
 
             {activeTab === 'products' && (
-            <ProductsTab
+              <ProductsTab
                 boothId={boothId}
                 expoId={eventId}
                 userRole={userRole}
                 isAssignedStaff={isAssignedStaff}
-            />
+              />
             )}
-            {activeTab === 'announcements' &&   
-            <AnnouncementsTab
+
+            {activeTab === 'announcements' && (
+              <AnnouncementsTab
                 expoID={eventId}
                 boothID={boothId}
                 canCreate={canCreateAnnouncement(userRole, isAssignedStaff)}
                 canEdit={canEditAnnouncement(userRole, isAssignedStaff)}
                 canDelete={canDeleteAnnouncement(userRole, isAssignedStaff)}
                 canPublish={canPublishAnnouncement(userRole, isAssignedStaff)}
-            />}
+              />
+            )}
+
+            {activeTab === 'queue' && (
+              <QueueTab
+                boothId={boothId}
+                expoId={eventId}
+                userRole={userRole}
+                isAssignedStaff={isAssignedStaff}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -344,6 +371,7 @@ function TabButton({ active, onClick, icon, children }: TabButtonProps) {
     </button>
   );
 }
+
 // ============================================
 // Detail Tab Component
 // ============================================
@@ -357,9 +385,7 @@ interface DetailTabProps {
 function DetailTab({ booth, thumbnailUrl, typeLabel }: DetailTabProps) {
   return (
     <div className="space-y-6">
-      {/* ============================================ */}
-      {/* Hero Image Section - ด้านบนสุด */}
-      {/* ============================================ */}
+      {/* Hero Image Section */}
       <div className="rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
         {thumbnailUrl ? (
           <img
@@ -398,9 +424,7 @@ function DetailTab({ booth, thumbnailUrl, typeLabel }: DetailTabProps) {
         )}
       </div>
 
-      {/* ============================================ */}
       {/* Main Content Grid */}
-      {/* ============================================ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Main Info */}
         <div className="lg:col-span-2 space-y-6">
@@ -635,10 +659,6 @@ function DetailTab({ booth, thumbnailUrl, typeLabel }: DetailTabProps) {
   );
 }
 
-// ============================================
-// Info Row Component
-// ============================================
-
 interface InfoRowProps {
   icon: React.ReactElement;
   label: string;
@@ -665,22 +685,6 @@ function InfoRow({ icon, label, value, link }: InfoRowProps) {
           <p className="text-sm font-medium text-gray-900 break-words">{value}</p>
         )}
       </div>
-    </div>
-  );
-}
-
-interface ComingSoonTabProps {
-  feature: string;
-}
-
-function ComingSoonTab({ feature }: ComingSoonTabProps) {
-  return (
-    <div className="text-center py-12">
-      <div className="text-6xl mb-4">🚧</div>
-      <h3 className="text-xl font-bold text-gray-900 mb-2">กำลังพัฒนา</h3>
-      <p className="text-gray-600">
-        ฟีเจอร์ <span className="font-semibold">{feature}</span> จะเปิดให้ใช้งานเร็วๆ นี้
-      </p>
     </div>
   );
 }

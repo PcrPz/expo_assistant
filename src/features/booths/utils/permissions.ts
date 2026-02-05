@@ -453,3 +453,94 @@ export function canPublishAnnouncement(
 ): boolean {
   return canManageAnnouncements(userRole, isAssignedStaff);
 }
+
+
+// ============================================
+// QUEUE PERMISSIONS (ใหม่!)
+// ============================================
+
+/**
+ * สามารถดูคิวได้
+ * ทุกคนดูได้หมด (แต่ฝั่ง User ไม่ได้ทำ UI)
+ */
+export function canViewQueue(
+  userRole: EventRole | undefined
+): boolean {
+  return true;
+}
+
+/**
+ * สามารถจัดการคิวได้ (เพิ่ม/แก้ไข/ลบ/จัดการ)
+ * 
+ * Permission Matrix:
+ * - System Admin/Owner/Admin/Staff → จัดการได้ทุกบูธ
+ * - Booth Staff → จัดการได้เฉพาะบูธตัวเอง
+ */
+export function canManageQueue(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  if (!userRole) return false;
+  
+  // System Admin, Owner, Admin, Staff → จัดการได้ทุกบูธ
+  if (['system_admin', 'owner', 'admin', 'staff'].includes(userRole)) {
+    return true;
+  }
+
+  // Booth Staff → จัดการได้เฉพาะบูธตัวเอง
+  if (userRole === 'booth_staff') {
+    return isAssignedStaff;
+  }
+
+  return false;
+}
+
+/**
+ * สามารถสร้างคิวได้
+ */
+export function canCreateQueue(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageQueue(userRole, isAssignedStaff);
+}
+
+/**
+ * สามารถแก้ไขคิวได้ (ชื่อ, สถานะ)
+ */
+export function canEditQueue(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageQueue(userRole, isAssignedStaff);
+}
+
+/**
+ * สามารถลบคิวได้
+ */
+export function canDeleteQueue(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageQueue(userRole, isAssignedStaff);
+}
+
+/**
+ * สามารถจัดการคิวปัจจุบันได้ (Skip/Complete)
+ */
+export function canCallNextQueue(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageQueue(userRole, isAssignedStaff);
+}
+
+/**
+ * สามารถเปลี่ยนสถานะคิวได้ (Publish/Unpublish)
+ */
+export function canToggleQueueStatus(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  return canManageQueue(userRole, isAssignedStaff);
+}
