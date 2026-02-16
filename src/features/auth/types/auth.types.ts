@@ -1,6 +1,11 @@
 // src/features/auth/types/auth.types.ts
 
 /**
+ * User Role Types - ประเภทผู้ใช้งาน
+ */
+export type UserRole = 'organizer' | 'booth_manager';
+
+/**
  * User Interface - ตรงกับ Backend Response (Uppercase)
  */
 export interface User {
@@ -9,7 +14,7 @@ export interface User {
   Email: string;
   Tel: string;
   Gender: string;
-  Role: string;
+  Role: UserRole;  // ✅ เปลี่ยนเป็น UserRole แทน string
   Career: string;
   Company: string;
   Detail: string;
@@ -30,6 +35,7 @@ export interface RegisterRequest {
   dob: string;
   gender: string;
   pdpa_accepted: boolean;
+  role: UserRole;              // ✅ เพิ่ม role field
 }
 
 /**

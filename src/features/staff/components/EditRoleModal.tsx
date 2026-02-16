@@ -27,30 +27,23 @@ export function EditRoleModal({ staff, userRole, currentUserId, onClose, onSave 
     onSave(staff.id, selectedRole);
   };
 
-  // ✅ กำหนด role hierarchy
+  // ✅ กำหนด role hierarchy (ลบ event_staff)
   const roleHierarchy: Record<string, number> = {
     'system_admin': 5,
     'owner': 4,
     'admin': 3,
     'staff': 2,
-    'event_staff': 1,
-    'booth_staff': 1,
   };
 
   // กำหนด role options ตาม userRole
   const getRoleOptions = () => {
-    // ✅ สีใหม่ - เข้าธีม #3674B5 มากขึ้น
+    // ✅ เหลือแค่ Admin และ Staff
     const allRoles = [
       { value: 'admin', label: 'Admin', icon: '👑', color: 'from-[#3674B5] to-[#498AC3]', level: 3 },
       { value: 'staff', label: 'Staff', icon: '👤', color: 'from-sky-400 to-blue-400', level: 2 },
-      { value: 'event_staff', label: 'Event Staff', icon: '🎪', color: 'from-indigo-400 to-purple-400', level: 1 },
-      { value: 'booth_staff', label: 'Booth Staff', icon: '🏪', color: 'from-emerald-400 to-teal-400', level: 1 },
     ];
 
     let availableRoles = [...allRoles];
-
-    // ✅ ไม่แสดง owner option เลย (เพราะเป็นเจ้าของคนเดียว)
-    // Owner จะไม่อยู่ในตัวเลือกเลย
 
     // ✅ กรองตาม userRole - ไม่สามารถเลือก role ที่สูงกว่าตัวเอง
     const currentUserLevel = roleHierarchy[userRole || ''] || 0;
@@ -61,11 +54,9 @@ export function EditRoleModal({ staff, userRole, currentUserId, onClose, onSave 
       availableRoles = availableRoles.filter(role => role.value !== 'owner');
     }
 
-    // staff เห็นเฉพาะ event_staff และ booth_staff
+    // ✅ staff ไม่เห็นอะไรเลย (ไม่สามารถเปลี่ยน role ใครได้)
     if (userRole === 'staff') {
-      availableRoles = availableRoles.filter(role => 
-        role.value === 'event_staff' || role.value === 'booth_staff'
-      );
+      return [];
     }
 
     return availableRoles;
@@ -205,8 +196,8 @@ export function EditRoleModal({ staff, userRole, currentUserId, onClose, onSave 
                       <p className="text-xs text-gray-500 mt-0.5">
                         {option.value === 'admin' && 'จัดการ Staff และงาน'}
                         {option.value === 'staff' && 'ดูแลงานทั่วไป'}
-                        {option.value === 'event_staff' && 'ดูแลกิจกรรมภายในงาน'}
-                        {option.value === 'booth_staff' && 'ดูแลบูธเฉพาะ'}
+                        
+                        
                       </p>
                     </div>
 

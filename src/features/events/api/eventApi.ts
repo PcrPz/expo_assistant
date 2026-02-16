@@ -3,7 +3,6 @@
 import type { Event, CreateEventRequest, CreateEventResponse } from '../types/event.types';
 import { fetchWithAuth } from '@/src/lib/api/fetchWithAuth';
 import { getZonesByExpoId } from '@/src/features/zones/api/zoneApi';
-import { getExpoIdsFromMyBooths } from '../../booths/api/boothApi';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
@@ -43,7 +42,6 @@ function transformEventData(data: any): Event {
     map: data.Map || data.map,
     role: data.Role || data.role,
     
-    // ✅✅✅ แก้ส่วนนี้ - Map PascalCase → lowercase ✅✅✅
     zones: (data.zones || data.Zones || []).map((zone: any) => ({
       zone_id: zone.ZoneID || zone.zone_id || zone.id || '',
       title: zone.Title || zone.title || zone.name || '',
@@ -79,7 +77,7 @@ function isValidEvent(event: any): boolean {
 }
 
 // ============================================
-// Get Organized Events
+// Get Organized Events (Role: system_admin, owner, admin, staff)
 // ============================================
 
 export async function getOrganizedEvents(): Promise<Event[]> {
@@ -87,25 +85,38 @@ export async function getOrganizedEvents(): Promise<Event[]> {
     const response = await fetchWithAuth(`${API_URL}/expo/get-my-expo-list`);
     
     if (!response.ok) {
-      console.error('Failed to fetch organized events:', response.status);
+      console.error('Failed to fetch my expo list:', response.status);
       return [];
     }
     
     const data = await response.json();
+    console.log('📦 Raw API response:', data);
     
     let rawEvents: any[] = [];
     
-    if (Array.isArray(data)) {
-      rawEvents = data;
-    } else if (data.manage_expo) {
+    // ดึงจาก manage_expo
+    if (data.manage_expo && Array.isArray(data.manage_expo)) {
       rawEvents = data.manage_expo;
-    } else if (data.expos) {
-      rawEvents = data.expos;
-    } else if (data.data) {
-      rawEvents = data.data;
+    } else if (Array.isArray(data)) {
+      rawEvents = data;
     }
     
-    const validEvents = rawEvents.filter(isValidEvent);
+    console.log('📋 All events:', rawEvents.length);
+    
+    // ✅ กรองเฉพาะ Role ที่เป็นผู้จัด
+    const organizerRoles = ['system_admin', 'owner', 'admin', 'staff'];
+    const organizedEvents = rawEvents.filter(event => {
+      const role = (event.Role || event.role || '').toLowerCase();
+      const isOrganizer = organizerRoles.includes(role);
+      if (isOrganizer) {
+        console.log(`  ✅ Organizer: ${event.Title} (Role: ${role})`);
+      }
+      return isOrganizer;
+    });
+    
+    console.log('👔 Organized events (Role: system_admin/owner/admin/staff):', organizedEvents.length);
+    
+    const validEvents = organizedEvents.filter(isValidEvent);
     const normalizedEvents = validEvents.map(transformEventData);
     
     return normalizedEvents;
@@ -116,34 +127,47 @@ export async function getOrganizedEvents(): Promise<Event[]> {
 }
 
 // ============================================
-// Get Participated Events (งานที่เป็น Booth Staff)
+// Get Participated Events (Role: booth_staff)
 // ============================================
 
 export async function getParticipatedEvents(): Promise<Event[]> {
   try {
-    // ✅ ใช้ Booth API หา Expo IDs ที่เป็น Booth Staff
-    const expoIds = await getExpoIdsFromMyBooths();
+    const response = await fetchWithAuth(`${API_URL}/expo/get-my-expo-list`);
     
-    if (expoIds.length === 0) {
-      console.log('📭 No booths found for this user');
+    if (!response.ok) {
+      console.error('Failed to fetch my expo list:', response.status);
       return [];
     }
     
-    console.log('🏪 Found booths in expos:', expoIds);
+    const data = await response.json();
     
-    // ดึงรายละเอียด Event จากแต่ละ Expo ID
-    const events = await Promise.all(
-      expoIds.map(expoId => getEventById(expoId))
-    );
+    let rawEvents: any[] = [];
     
-    // กรองเฉพาะที่ได้ข้อมูล
-    const validEvents = events.filter((event): event is Event => event !== null);
+    // ดึงจาก manage_expo
+    if (data.manage_expo && Array.isArray(data.manage_expo)) {
+      rawEvents = data.manage_expo;
+    } else if (Array.isArray(data)) {
+      rawEvents = data;
+    }
     
-    console.log('✅ Participated events loaded:', validEvents.length);
+    // ✅ กรองเฉพาะ Role: booth_staff
+    const boothStaffEvents = rawEvents.filter(event => {
+      const role = (event.Role || event.role || '').toLowerCase();
+      const isBoothStaff = role === 'booth_staff';
+      if (isBoothStaff) {
+        console.log(`  🏪 Booth Staff: ${event.Title} (Role: ${role})`);
+      }
+      return isBoothStaff;
+    });
     
-    return validEvents;
+    console.log('🏪 Booth staff events (Role: booth_staff):', boothStaffEvents.length);
+    
+    const validEvents = boothStaffEvents.filter(isValidEvent);
+    const normalizedEvents = validEvents.map(transformEventData);
+    
+    return normalizedEvents;
   } catch (error) {
-    console.warn('Participated events not available:', error);
+    console.error('Failed to fetch participated events:', error);
     return [];
   }
 }

@@ -1,20 +1,52 @@
 // src/features/events/components/create/ZoneDetailsForm.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { Zone } from '../../types/event.types';
 import type { ZoneWithFile } from '@/src/features/zones/api/zoneApi';
 
+// ✅ Separate component for image preview (follows Rules of Hooks)
+function ZoneImagePreview({ file, alt }: { file: File; alt: string }) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+
+    // Cleanup blob URL when component unmounts
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  if (!previewUrl) {
+    return (
+      <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200">
+      <img
+        src={previewUrl}
+        alt={alt}
+        className="w-full h-full object-contain"
+      />
+    </div>
+  );
+}
+
 interface ZoneDetailsFormProps {
   zones: Zone[];
+  zonesWithFiles?: ZoneWithFile[];  // ✅ เพิ่ม prop สำหรับรับข้อมูลเดิม
   onChange: (zones: Zone[], zonesWithFiles: ZoneWithFile[]) => void;
   onNext: () => void;
   onBack: () => void;
 }
 
-export default function ZoneDetailsForm({ zones, onChange, onNext, onBack }: ZoneDetailsFormProps) {
+export default function ZoneDetailsForm({ zones, zonesWithFiles: initialZonesWithFiles, onChange, onNext, onBack }: ZoneDetailsFormProps) {
   const [localZones, setLocalZones] = useState<Zone[]>(zones || []);
-  const [zonesWithFiles, setZonesWithFiles] = useState<ZoneWithFile[]>([]);
+  const [zonesWithFiles, setZonesWithFiles] = useState<ZoneWithFile[]>(initialZonesWithFiles || []);
   const [isAdding, setIsAdding] = useState(false);
   const [newZone, setNewZone] = useState<{
     title: string;        // ← แก้จาก name
@@ -94,48 +126,70 @@ export default function ZoneDetailsForm({ zones, onChange, onNext, onBack }: Zon
   };
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-8">กรอกข้อมูลรายละเอียดโซน</h2>
-
+    <div className="space-y-8">
+          <div className="pb-6 border-b border-gray-200">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">กรอกข้อมูลรายละเอียดโซน</h2>
+        <p className="text-sm text-gray-500 text-center"></p>
+      </div>
       {/* Zone Cards */}
       {localZones.length > 0 && (
         <div className="space-y-4 mb-6">
-          {localZones.map((zone, index) => (
-            <div key={zone.zone_id || index} className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">รายละเอียดบูธ {index + 1}</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">ชื่อของโซน:</p>
-                      <p className="font-medium">{zone.title}</p>
-                    </div>
-                    {zone.description && (
+          {localZones.map((zone, index) => {
+            const zoneFile = zonesWithFiles[index]?.mapFile;
+            const isImage = zoneFile?.type.startsWith('image/');
+            
+            return (
+              <div key={zone.zone_id || index} className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">รายละเอียดโซน {index + 1}</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Zone Info */}
                       <div>
-                        <p className="text-sm text-gray-600 mb-1">รายละเอียดของโซน:</p>
-                        <p className="font-medium">{zone.description}</p>
+                        <p className="text-sm text-gray-600 mb-1">ชื่อของโซน:</p>
+                        <p className="font-medium">{zone.title}</p>
                       </div>
-                    )}
-                    {zonesWithFiles[index]?.mapFile && (
-                      <div className="col-span-2">
-                        <p className="text-sm text-gray-600 mb-1">ไฟล์แผนที่:</p>
-                        <p className="text-sm text-[#5B9BD5]">📎 {zonesWithFiles[index].mapFile!.name}</p>
-                      </div>
-                    )}
+                      {zone.description && (
+                        <div>
+                          <p className="text-sm text-gray-600 mb-1">รายละเอียดของโซน:</p>
+                          <p className="font-medium">{zone.description}</p>
+                        </div>
+                      )}
+                      
+                      {/* Image Preview */}
+                      {zoneFile && (
+                        <div className="col-span-2">
+                          <p className="text-sm text-gray-600 mb-2">ไฟล์แผนที่:</p>
+                          {isImage ? (
+                            <ZoneImagePreview file={zoneFile} alt={zone.title} />
+                          ) : (
+                            <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                              <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              <p className="text-sm text-blue-700 font-medium">📎 {zoneFile.name}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
+                  
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => handleRemoveZone(index)}
+                    className="ml-4 text-red-500 hover:text-red-700 transition"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleRemoveZone(index)}
-                  className="ml-4 text-red-500 hover:text-red-700 transition"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -143,7 +197,7 @@ export default function ZoneDetailsForm({ zones, onChange, onNext, onBack }: Zon
       {!isAdding ? (
         <button
           onClick={() => setIsAdding(true)}
-          className="w-full md:w-auto px-8 py-3 border-2 border-[#5B9BD5] text-[#5B9BD5] font-semibold rounded-xl hover:bg-blue-50 transition flex items-center justify-center gap-2"
+          className="w-full md:w-auto px-8 py-3 border-2 border-[#3674B5] text-[#3674B5] font-semibold rounded-xl hover:bg-blue-50 transition flex items-center justify-center gap-2"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -152,8 +206,8 @@ export default function ZoneDetailsForm({ zones, onChange, onNext, onBack }: Zon
           เพิ่มโซน
         </button>
       ) : (
-        <div className="bg-gray-50 border-2 border-[#5B9BD5] rounded-xl p-6 mb-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-6">รายละเอียดบูธ</h3>
+        <div className="bg-gray-50 border-2 border-[#3674B5] rounded-xl p-6 mb-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-6">รายละเอียดโซน</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left Column */}
@@ -186,7 +240,7 @@ export default function ZoneDetailsForm({ zones, onChange, onNext, onBack }: Zon
               <label className="block text-gray-700 font-medium mb-2">แผนผังของโซน (Optional)</label>
               
               {zoneImagePreview ? (
-                <div className="border-2 border-[#5B9BD5] rounded-xl p-4 bg-white">
+                <div className="border-2 border-[#3674B5] rounded-xl p-4 bg-white">
                   <img 
                     src={zoneImagePreview} 
                     alt="Zone Map Preview" 
@@ -206,7 +260,7 @@ export default function ZoneDetailsForm({ zones, onChange, onNext, onBack }: Zon
                   </div>
                 </div>
               ) : (
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-[#5B9BD5] transition cursor-pointer bg-white">
+                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-[#3674B5] transition cursor-pointer bg-white">
                   <input
                     type="file"
                     accept="image/*"
@@ -236,7 +290,7 @@ export default function ZoneDetailsForm({ zones, onChange, onNext, onBack }: Zon
               type="button"
               onClick={handleAddZone}
               disabled={!newZone.title.trim()}
-              className="flex-1 px-6 py-3 bg-[#5B9BD5] text-white font-semibold rounded-xl hover:bg-[#4A8BC2] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-[#3674B5] to-[#498AC3] text-white font-semibold rounded-xl hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               บันทึก
             </button>
@@ -256,20 +310,23 @@ export default function ZoneDetailsForm({ zones, onChange, onNext, onBack }: Zon
       )}
 
       {/* Navigation Buttons */}
-      <div className="mt-10 flex justify-between">
+      <div className="pt-6 flex justify-between border-t border-gray-200">
         <button
           type="button"
           onClick={onBack}
-          className="px-12 py-4 border-2 border-[#5B9BD5] text-[#5B9BD5] text-lg font-semibold rounded-xl hover:bg-blue-50 transition"
+          className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition"
         >
-          ย้อนกลับ
+          ← ย้อนกลับ
         </button>
         <button
           type="button"
           onClick={onNext}
-          className="px-12 py-4 bg-[#5B9BD5] text-white text-lg font-semibold rounded-xl hover:bg-[#4A8BC2] transition shadow-lg"
+          className="px-8 py-2.5 bg-gradient-to-r from-[#3674B5] to-[#498AC3] text-white font-semibold rounded-lg hover:shadow-lg transition flex items-center gap-2"
         >
-          ดำเนินการต่อ
+          <span>ดำเนินการต่อ</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <polyline points="5 12 10 17 20 7"></polyline>
+          </svg>
         </button>
       </div>
     </div>

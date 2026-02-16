@@ -15,6 +15,8 @@ import { DocumentsTab } from './documents/DocumentTab';
 import { ProductsTab } from './products/ProductsTab';
 import { AnnouncementsTab } from './announcements/AnnouncementTab';
 import { QueueTab } from '@/src/features/booths/components/queue/QueueTab';
+import { FormsTab } from './forms/FormsTab';
+import { FileText } from 'lucide-react';
 import { 
   canEditBooth,
   canDeleteBooth,
@@ -32,7 +34,7 @@ interface BoothDetailClientProps {
   userRole: EventRole;
 }
 
-type TabType = 'detail' | 'staff' | 'documents' | 'products' | 'announcements' | 'queue';
+type TabType = 'detail' | 'staff' | 'documents' | 'products' | 'announcements' | 'queue' | 'forms';
 
 export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailClientProps) {
   const router = useRouter();
@@ -267,7 +269,15 @@ export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailCli
             >
               คิว
             </TabButton>
-          </div>
+            <TabButton
+              active={activeTab === 'forms'}
+              onClick={() => setActiveTab('forms')}
+              icon={<FileText className="h-5 w-5" />}
+            >
+              แบบสอบถาม
+            </TabButton>
+            </div>
+
 
           <div className="p-6">
             {activeTab === 'detail' && (
@@ -314,6 +324,14 @@ export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailCli
 
             {activeTab === 'queue' && (
               <QueueTab
+                boothId={boothId}
+                expoId={eventId}
+                userRole={userRole}
+                isAssignedStaff={isAssignedStaff}
+              />
+            )}
+            {activeTab === 'forms' && (
+              <FormsTab
                 boothId={boothId}
                 expoId={eventId}
                 userRole={userRole}

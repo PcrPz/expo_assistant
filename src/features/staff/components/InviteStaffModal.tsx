@@ -187,8 +187,8 @@ export function InviteStaffModal({
                 >
                   <option value="staff">Staff</option>
                   <option value="admin">Admin</option>
-                  <option value="booth_staff">Booth Staff</option>
-                  <option value="event_staff">Event Staff</option>
+                  
+                  
                 </select>
               </div>
 
@@ -237,8 +237,8 @@ export function InviteStaffModal({
                 >
                   <option value="staff">Staff</option>
                   <option value="admin">Admin</option>
-                  <option value="booth_staff">Booth Staff</option>
-                  <option value="event_staff">Event Staff</option>
+                  
+                  
                 </select>
               </div>
 

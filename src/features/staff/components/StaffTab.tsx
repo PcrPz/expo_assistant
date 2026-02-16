@@ -4,11 +4,12 @@
 import { useState } from 'react';
 import { useStaff } from '../hooks/useStaff';
 import { InviteStaffModal } from './InviteStaffModal';
-import { EditRoleModal } from './EditRoleModal';
+
 import { DeleteStaffModal } from './DeleteStaffModal';
 import type { Staff } from '../api/staffApi';
 import type { EventRole } from '@/src/features/events/types/event.types';
 import { canRemoveStaff } from '@/src/features/events/types/event.types';
+import { EditRoleModal } from './EditRoleModal';
 
 interface StaffTabProps {
   expoId: string;
@@ -108,14 +109,12 @@ export function StaffTab({ expoId, userRole, currentUserId }: StaffTabProps) {
       return { canEdit: true, reason: '' };
     }
     
+    // ✅ Staff ไม่สามารถแก้ไข role ใครได้เลย
     if (userRole === 'staff') {
-      if (!['event_staff', 'booth_staff'].includes(staffRole)) {
-        return { 
-          canEdit: false, 
-          reason: 'คุณสามารถแก้ไขได้เฉพาะ Event Staff และ Booth Staff' 
-        };
-      }
-      return { canEdit: true, reason: '' };
+      return { 
+        canEdit: false, 
+        reason: 'คุณไม่มีสิทธิ์แก้ไข Staff คนอื่น' 
+      };
     }
     
     return { canEdit: false, reason: 'คุณไม่มีสิทธิ์แก้ไข Staff คนนี้' };
@@ -135,10 +134,11 @@ export function StaffTab({ expoId, userRole, currentUserId }: StaffTabProps) {
       };
     }
     
+    // ✅ Staff ไม่สามารถลบใครได้เลย
     if (userRole === 'staff') {
       return { 
         canDelete: false, 
-        reason: 'คุณสามารถลบได้เฉพาะ Event Staff และ Booth Staff' 
+        reason: 'คุณไม่มีสิทธิ์ลบ Staff'
       };
     }
     
@@ -209,7 +209,10 @@ export function StaffTab({ expoId, userRole, currentUserId }: StaffTabProps) {
         <div>
           <h3 className="text-xl font-bold text-gray-900">สมาชิกทั้งหมด</h3>
           <p className="text-sm text-gray-600 mt-1">
-            {staffList && staffList.length > 0 ? `${staffList.length} คน` : 'ยังไม่มีสมาชิก'}
+            {/* ✅ นับเฉพาะที่ไม่ใช่ booth_staff */}
+            {staffList && staffList.length > 0 
+              ? `${staffList.filter(s => s.role !== 'booth_staff').length} คน` 
+              : 'ยังไม่มีสมาชิก'}
           </p>
         </div>
         
@@ -241,7 +244,9 @@ export function StaffTab({ expoId, userRole, currentUserId }: StaffTabProps) {
       {/* Staff List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {staffList && staffList.length > 0 ? (
-          staffList.map((staff) => {
+          staffList
+            .filter(staff => staff.role !== 'booth_staff')  // ✅ กรอง booth_staff ออก
+            .map((staff) => {
             const editPermission = getEditPermission(staff.role);
             const deletePermission = getDeletePermission(staff.role);
 
@@ -251,19 +256,18 @@ export function StaffTab({ expoId, userRole, currentUserId }: StaffTabProps) {
                 className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border-2 border-gray-100 hover:border-[#498AC3]/30"
               >
                 {/* Status Banner */}
-                {staff.status === 'pending' && (
-                  <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 px-4 py-2">
-                    <p className="text-yellow-900 text-sm font-semibold text-center flex items-center justify-center gap-2">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                      </svg>
-                      รอการยืนยัน
-                    </p>
-                  </div>
-                )}
-
+{staff.status === 'pending' && (
+  <div className="bg-yellow-100 border-b border-yellow-400 px-4 py-2">
+    <p className="text-yellow-800 text-sm font-semibold text-center flex items-center justify-center gap-2">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      รอการยืนยัน
+    </p>
+  </div>
+)}
                 {/* Card Content */}
                 <div className="p-6">
                   {/* Avatar & Name */}
@@ -314,9 +318,10 @@ export function StaffTab({ expoId, userRole, currentUserId }: StaffTabProps) {
                         <button
                           onClick={() => editPermission.canEdit && setEditingStaff(staff)}
                           disabled={!editPermission.canEdit}
-                          className={`w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold rounded-xl transition-all ${
+                          className={`w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold rounded-xl transition-all
+                          ${
                             editPermission.canEdit
-                              ? 'bg-[#3674B5] text-white hover:bg-[#498AC3] hover:shadow-xl hover:scale-[1.02]'
+                              ? 'border border-[#3674B5] bg-[#3674B5]/10 text-[#3674B5] hover:bg-[#3674B5]/20 hover:shadow-md'
                               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                           }`}
                         >
@@ -355,11 +360,13 @@ export function StaffTab({ expoId, userRole, currentUserId }: StaffTabProps) {
                             })
                           }
                           disabled={!deletePermission.canDelete}
-                          className={`p-3 rounded-xl transition-all ${
-                            deletePermission.canDelete
-                              ? 'bg-red-500 text-white hover:bg-red-600 hover:shadow-xl hover:scale-[1.02]'
-                              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          }`}
+className={`p-3 rounded-xl transition-all
+${
+  deletePermission.canDelete
+    ? 'border border-red-500 bg-red-50 text-red-600 hover:bg-red-100 hover:shadow-md'
+    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+}`}
+
                         >
                           <svg
                             width="18"

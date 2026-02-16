@@ -12,11 +12,18 @@ import {
 } from '@/src/features/events/types/event.types';
 import { EventDetailHeader } from '@/src/features/events/components/detail/EventDetailHeader';
 import { StaffTab } from '@/src/features/staff/components/StaffTab';
-import { DashboardTab } from '@/src/features/booths/components/DashboardTab';
+
 import { BoothTab } from '@/src/features/booths/components/BoothTab';
 import { DetailTab } from '@/src/features/events/components/detail/DetailTab';
 
-type TabType = 'detail' | 'staff' | 'booth' | 'dashboard';
+// ✅ เพิ่ม Components ใหม่
+import { PaymentDepositSection } from '@/src/features/events/components/PaymentDepositSection';
+import { PublishEventSection } from '@/src/features/events/components/PublishEventSection';
+import { BoothApplicationsTab } from '@/src/features/events/components/BoothApplicationsTab';
+import { DashboardTab } from '@/src/features/events/components/detail/DashboardTab';
+
+// ✅ Tab Type - ลบ invitations
+type TabType = 'detail' | 'staff' | 'booth' | 'dashboard' | 'applications';
 
 export default function EventDetailPage() {
   const params = useParams();
@@ -61,6 +68,12 @@ export default function EventDetailPage() {
     }
   };
 
+  // ✅ Refresh event after payment
+  const handlePaymentSuccess = () => {
+    console.log('💰 Payment successful, refreshing event...');
+    loadEvent();
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -100,7 +113,24 @@ export default function EventDetailPage() {
         onTabChange={setActiveTab}
       />
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+        {/* ✅ Payment Deposit Section - แสดงเฉพาะ Owner + Pending */}
+        {isEventOrganizer(event.role) && event.status === 'pending' && (
+          <PaymentDepositSection 
+            eventId={event.expoID}
+            onPaymentSuccess={handlePaymentSuccess}
+          />
+        )}
+
+        {/* ✅ Publish Event Section - แสดงเฉพาะ Owner/Admin + Unpublished */}
+        {(event.role === 'owner' || event.role === 'admin') && event.status === 'unpublished' && (
+          <PublishEventSection 
+            eventId={event.expoID}
+            onPublishSuccess={handlePaymentSuccess}
+          />
+        )}
+
+        {/* Tab Content */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           {activeTab === 'detail' && (
             <DetailTab event={event} role={event.role} />
@@ -108,24 +138,28 @@ export default function EventDetailPage() {
           
           {activeTab === 'staff' && isEventOrganizer(event.role) && (
             <StaffTab 
-              expoId={event.id}
+              expoId={event.expoID}
               userRole={event.role}
             />
           )}
           
-          {/* ✅ แก้ตรงนี้ - ใช้ expoId แทน eventId */}
           {activeTab === 'booth' && (
             <BoothTab 
-              expoId={event.id}
+              expoId={event.expoID}
               role={event.role}
             />
           )}
           
-          {/* ✅ แก้ตรงนี้ - ใช้ expoId แทน eventId */}
           {activeTab === 'dashboard' && (
             <DashboardTab 
-              expoId={event.id}
+              eventId={event.expoID}
+              role={event.role}
             />
+          )}
+
+          {/* ✅ TAB ใหม่: คำขอเข้าบูธ */}
+          {activeTab === 'applications' && isEventOrganizer(event.role) && (
+            <BoothApplicationsTab eventId={event.expoID} />
           )}
         </div>
       </div>

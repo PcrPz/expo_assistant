@@ -153,9 +153,10 @@ export function canRemoveStaff(userRole: EventRole, targetStaffRole: EventRole):
   return false;
 }
 
-export function getAvailableTabs(role: EventRole): Array<'detail' | 'staff' | 'booth' | 'dashboard'> {
+export function getAvailableTabs(role: EventRole): Array<'detail' | 'staff' | 'booth' | 'dashboard' | 'applications'> {
   if (isEventOrganizer(role)) {
-    return ['detail', 'staff', 'booth', 'dashboard'];
+    // ✅ Organizer เห็น: detail, staff, booth, dashboard, applications
+    return ['detail', 'staff', 'booth', 'dashboard', 'applications'];
   }
   if (isBoothStaff(role)) {
     return ['detail', 'dashboard', 'booth'];

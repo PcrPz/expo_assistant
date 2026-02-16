@@ -48,6 +48,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const userData = await getUserDetail();
       console.log('✅ authStore.refreshUser - Success:', userData);
+      
+      // Backend should return user with Role field
       set({ 
         user: userData, 
         isAuthenticated: true,

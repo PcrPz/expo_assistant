@@ -134,7 +134,7 @@ export function JoinExpoModal({ onClose }: JoinExpoModalProps) {
               autoFocus
             />
             <p className="text-xs text-gray-500 mt-2 text-center">
-              💡 โค้ดเชิญมีอายุ 24 ชั่วโมง
+              โค้ดเชิญมีอายุ 24 ชั่วโมง
             </p>
           </div>
 

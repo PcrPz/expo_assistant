@@ -5,7 +5,8 @@ import React from 'react';
 import { getMinioFileUrl } from '@/src/features/minio/api/minioApi';
 import type { Event, EventRole } from '../../types/event.types';
 
-type TabType = 'detail' | 'staff' | 'booth' | 'dashboard';
+// ✅ Tab Type - ลบ invitations
+type TabType = 'detail' | 'staff' | 'booth' | 'dashboard' | 'applications';
 
 interface EventDetailHeaderProps {
   event: Event;
@@ -44,6 +45,7 @@ export function EventDetailHeader({
         staff: 'Staff',
         booth: 'บูธทั้งหมด',
         dashboard: 'บูธของฉัน',
+        applications: 'คำขอเข้าบูธ',
       };
       return boothStaffLabels[tab];
     }
@@ -53,11 +55,12 @@ export function EventDetailHeader({
       staff: 'Staff',
       booth: 'Booth',
       dashboard: 'Dashboard',
+      applications: 'คำขอเข้าบูธ',
     };
     return defaultLabels[tab];
   };
 
-  // ✅ Icons สำหรับแต่ละ Tab
+  // ✅ Icons สำหรับแต่ละ Tab (เพิ่ม 2 icons ใหม่)
   const getTabIcon = (tab: TabType): React.ReactElement => {
     const icons: Record<TabType, React.ReactElement> = {
       detail: (
@@ -87,6 +90,14 @@ export function EventDetailHeader({
           <rect x="3" y="14" width="7" height="7"></rect>
         </svg>
       ),
+      // ✅ Icon ใหม่: คำขอเข้าบูธ
+      applications: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="8.5" cy="7" r="4"></circle>
+          <polyline points="17 11 19 13 23 9"></polyline>
+        </svg>
+      ),
     };
     return icons[tab];
   };
@@ -111,10 +122,40 @@ export function EventDetailHeader({
             </div>
 
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900 truncate">
-                {event.name}
-              </h1>
-              {/* ✅ แสดงแบบเดิม: "บทบาทของคุณคือ ..." */}
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900 truncate">
+                  {event.name}
+                </h1>
+                {/* ✅ Status Badge */}
+                {event.status === 'pending' && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-[#FFFBDE] to-[#FFF8E1] border-2 border-[#FFDC82] text-gray-900 text-xs font-bold rounded-full">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    รอชำระเงิน
+                  </span>
+                )}
+                {event.status === 'unpublished' && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 border-2 border-blue-300 text-blue-700 text-xs font-bold rounded-full">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    พร้อมเผยแพร่
+                  </span>
+                )}
+                {event.status === 'published' && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 text-green-700 text-xs font-bold rounded-full">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    เผยแพร่แล้ว
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-gray-600 mt-1">
                 บทบาทของคุณคือ <span className="font-medium text-gray-900">{roleName}</span>
               </p>
