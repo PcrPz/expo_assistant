@@ -50,13 +50,18 @@ export async function register(data: RegisterRequest): Promise<AuthResponse> {
 // ============================================
 
 export async function login(data: LoginRequest): Promise<AuthResponse> {
+
   const response = await fetch(`${API_URL}/users/login`, {
     method: 'POST',
-    credentials: 'include',  // ← สำคัญ! รับ Cookie
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      email: data.email,
+      password: data.password,
+      role: data.role  // ✅ ส่ง role ไปด้วย
+    }),
   });
 
   if (!response.ok) {
@@ -65,8 +70,6 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
   }
 
   const result = await response.json();
-  
-  // ✅ บันทึกแค่ accessToken
   tokenManager.setTokens(result.accessToken);
   
   return result;

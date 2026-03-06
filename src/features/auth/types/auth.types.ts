@@ -14,7 +14,7 @@ export interface User {
   Email: string;
   Tel: string;
   Gender: string;
-  Role: UserRole;  // ✅ เปลี่ยนเป็น UserRole แทน string
+  Role: UserRole;
   Career: string;
   Company: string;
   Detail: string;
@@ -25,7 +25,7 @@ export interface User {
  * Register Request - ส่งไปเป็น lowercase
  */
 export interface RegisterRequest {
-  firstname: string;           // lowercase
+  firstname: string;
   lastname: string;
   username: string;
   email: string;
@@ -35,15 +35,16 @@ export interface RegisterRequest {
   dob: string;
   gender: string;
   pdpa_accepted: boolean;
-  role: UserRole;              // ✅ เพิ่ม role field
+  role: UserRole;
 }
 
 /**
- * Login Request
+ * Login Request - เพิ่ม role ✅
  */
 export interface LoginRequest {
   email: string;
   password: string;
+  role: UserRole;  // ✅ เพิ่ม role field
 }
 
 /**
@@ -54,7 +55,7 @@ export interface AuthResponse {
 }
 
 export interface UpdateUserRequest {
-  // Required fields (ต้องส่งเสมอ)
+  // Required fields
   firstname: string;
   lastname: string;
   email: string;

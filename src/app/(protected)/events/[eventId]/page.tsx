@@ -8,6 +8,7 @@ import type { Event } from '@/src/features/events/types/event.types';
 import { 
   isEventOrganizer, 
   isBoothStaff,
+  isBoothStaffVisitor,
   getAvailableTabs 
 } from '@/src/features/events/types/event.types';
 import { EventDetailHeader } from '@/src/features/events/components/detail/EventDetailHeader';
@@ -58,6 +59,8 @@ export default function EventDetailPage() {
         setActiveTab('detail');
       } else if (isBoothStaff(foundEvent.role)) {
         setActiveTab('dashboard');
+      } else if (isBoothStaffVisitor(foundEvent.role)) {
+        setActiveTab('detail'); // ดูได้แค่ detail
       }
       
     } catch (error) {
@@ -122,8 +125,8 @@ export default function EventDetailPage() {
           />
         )}
 
-        {/* ✅ Publish Event Section - แสดงเฉพาะ Owner/Admin + Unpublished */}
-        {(event.role === 'owner' || event.role === 'admin') && event.status === 'unpublished' && (
+        {/* ✅ Publish Event Section - แสดงเฉพาะ Owner/Admin + Unpublish */}
+        {(event.role === 'owner' || event.role === 'admin') && event.status === 'unpublish' && (
           <PublishEventSection 
             eventId={event.expoID}
             onPublishSuccess={handlePaymentSuccess}

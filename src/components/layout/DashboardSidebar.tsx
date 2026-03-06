@@ -4,257 +4,231 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuthStore } from '@/src/features/auth/store/authStore';
 import { useEventStore } from '@/src/features/events/store/eventStore';
 import { useLoadEvents } from '@/src/features/events/hooks/useLoadEvent';
 import { JoinExpoModal } from '@/src/features/events/components/JoinExpoModal';
+import { useAuthStore } from '@/src/features/auth/store/authStore';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+// ─── Icons ────────────────────────────────────────────────────
+const IcHome     = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+const IcCalendar = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+const IcBooth    = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>;
+const IcSearch   = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>;
+const IcDoc      = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>;
+const IcMail     = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>;
+const IcLogout   = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>;
+const IcChevron  = ({ open }: { open: boolean }) => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`ml-auto opacity-60 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}><polyline points="6 9 12 15 18 9"/></svg>;
+const IcPlus     = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
+const IcKey      = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
+
+// ─── Reusable pieces ──────────────────────────────────────────
+
+// เส้นคั่น
+const Divider = () => <div className="my-2 border-t border-white/[0.12]" />;
+
+// เมนูหลัก (nav-level)
+function NavItem({ icon, label, href, active, onClick, children, open, onToggle }: {
+  icon: React.ReactNode; label: string;
+  href?: string; active?: boolean; onClick?: () => void;
+  children?: React.ReactNode; open?: boolean; onToggle?: () => void;
+}) {
+  const cls = `flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+    ${active ? 'bg-white/[0.18] text-white' : 'text-white/75 hover:bg-white/[0.1] hover:text-white'}`;
+
+  if (children !== undefined) {
+    return (
+      <div>
+        <button className={cls} onClick={onToggle}>
+          {icon}<span>{label}</span><IcChevron open={!!open} />
+        </button>
+        {open && <div className="mt-0.5">{children}</div>}
+      </div>
+    );
+  }
+  if (href) return <Link href={href} onClick={onClick} className={cls}>{icon}<span>{label}</span></Link>;
+  return <button className={cls} onClick={onClick}>{icon}<span>{label}</span></button>;
+}
+
+// sub-link ใต้ dropdown
+function SubLink({ label, href, active, onClick }: { label: string; href: string; active?: boolean; onClick?: () => void }) {
+  return (
+    <Link href={href} onClick={onClick}
+      className={`flex items-center gap-2 w-full pl-[2.2rem] pr-3 py-2 rounded-lg text-sm transition-colors
+        ${active ? 'bg-white/[0.14] text-white font-medium' : 'text-white/55 hover:bg-white/[0.08] hover:text-white/90'}`}
+    >
+      <span className="w-1 h-1 rounded-full bg-current opacity-50 flex-shrink-0" />
+      <span className="truncate">{label}</span>
+    </Link>
+  );
+}
+
+// ปุ่ม action — มี background ชัด เห็นว่าเป็น "ปุ่ม"
+function ActionBtn({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+  return (
+    <button onClick={onClick}
+      className="flex items-center gap-2 w-full px-3 py-2 rounded-lg
+        bg-white/[0.12] border border-white/[0.15]
+        hover:bg-white/[0.2] hover:border-white/[0.25]
+        text-white/80 hover:text-white
+        text-xs font-medium transition-all"
+    >
+      {icon}<span>{label}</span>
+    </button>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
 export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  
-  // Get user role
-  const { user } = useAuthStore();
-  const userRole = user?.Role; // 'organizer' | 'booth_manager'
-  
-  // States
-  const [expandedSections, setExpandedSections] = useState<string[]>(['events']);
-  const [showJoinModal, setShowJoinModal] = useState(false);
+  const router   = useRouter();
 
-  // Load Events
+  const [eventsOpen,    setEventsOpen]    = useState(true);
+  const [boothOpen,     setBoothOpen]     = useState(true);
+  const [joinExpoModal, setJoinExpoModal] = useState(false);
+
+  const { user }  = useAuthStore();
+  const userRole  = user?.Role;
+
   useLoadEvents();
-  const { organizedEvents, participatedEvents } = useEventStore();
+  const { organizedEvents } = useEventStore();
 
-  const toggleSection = (section: string) => {
-    setExpandedSections(prev => 
-      prev.includes(section) 
-        ? prev.filter(s => s !== section)
-        : [...prev, section]
-    );
-  };
+  // TODO: เปลี่ยนเมื่อ API พร้อม
+  const hasBoothGlobal = false;
+  const boothName      = 'ABC Tech Booth';
+  const eventsJoined: { id: string; name: string }[] = [];
 
+  const go = (path: string) => { router.push(path); onClose(); };
   const handleLogout = () => {
-    if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
-      window.location.href = '/login';
-    }
+    if (confirm('ออกจากระบบหรือไม่?')) window.location.href = '/login';
   };
-
-  // Determine which events to show based on role
-  const isOrganizer = userRole === 'organizer';
-  const events = isOrganizer ? organizedEvents : participatedEvents;
-  const eventLabel = isOrganizer ? 'งานของฉัน' : 'บูธของฉัน';
-  const browseLabel = isOrganizer ? 'สำรวจบูธ' : 'สำรวจงาน';
-  const browsePath = isOrganizer ? '/browse/booths' : '/browse/expos';
-  const createLabel = isOrganizer ? 'สร้างงาน Expo' : 'เข้าร่วมงาน';
 
   return (
     <>
-      {/* Backdrop */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-20"
-          onClick={onClose}
-        ></div>
-      )}
+      {isOpen && <div className="fixed inset-0 bg-black/40 z-20" onClick={onClose} />}
 
-      {/* Sidebar */}
-      <aside
-        className={`
-          fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-64 bg-[#4A8BC2] text-white
-          transition-transform duration-300 ease-in-out z-30
-          overflow-y-auto
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
-      >
-        <div className="flex flex-col h-full">
-          {/* Main Menu */}
-          <div className="flex-1 pt-2">
-            {/* หน้าแรก */}
-            <Link
-              href="/home"
-              onClick={onClose}
-              className={`
-                flex items-center gap-3 px-5 py-3.5 hover:bg-white/10 transition
-                ${pathname === '/home' ? 'bg-white/20' : ''}
-              `}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-              </svg>
-              <span className="font-medium">หน้าแรก</span>
-            </Link>
+      <aside className={`
+        fixed top-14 left-0 h-[calc(100vh-3.5rem)] w-56
+        bg-[#3674B5] z-30 flex flex-col
+        transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
 
-            {/* สำรวจบูธ / สำรวจงาน */}
-            <Link
-              href={browsePath}
-              onClick={onClose}
-              className={`
-                flex items-center gap-3 px-5 py-3.5 hover:bg-white/10 transition
-                ${pathname === browsePath ? 'bg-white/20' : ''}
-              `}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-              </svg>
-              <span className="font-medium">{browseLabel}</span>
-            </Link>
+        {/* ── scroll area ── */}
+        <nav className="flex-1 overflow-y-auto px-3 pt-4 pb-3 space-y-0.5">
 
-            {/* งานของฉัน / บูธของฉัน Section */}
-            <div>
-              <button
-                onClick={() => toggleSection('events')}
-                className={`
-                  w-full flex items-center justify-between px-5 py-3.5 transition
-                  hover:bg-white/10
-                  ${expandedSections.includes('events') ? 'bg-white/5' : ''}
-                `}
+          {/* ═══════ ORGANIZER ═══════ */}
+          {userRole === 'organizer' && (
+            <>
+              <NavItem icon={<IcHome />} label="หน้าแรก"
+                href="/home" active={pathname === '/home'} onClick={onClose} />
+
+              <Divider />
+
+              <NavItem icon={<IcSearch />} label="ค้นหาบูธ"
+                href="/events/explore-booths"
+                active={pathname === '/events/explore-booths'}
+                onClick={onClose} />
+
+              <Divider />
+
+              {/* งานของฉัน dropdown */}
+              <NavItem
+                icon={<IcCalendar />} label="งานของฉัน"
+                open={eventsOpen} onToggle={() => setEventsOpen(!eventsOpen)}
               >
-                <div className="flex items-center gap-3">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    {isOrganizer ? (
-                      // Calendar icon for Organizer
-                      <>
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="3" y1="9" x2="21" y2="9"></line>
-                      </>
-                    ) : (
-                      // Store icon for Booth Manager
-                      <>
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="9" y1="3" x2="9" y2="21"></line>
-                      </>
-                    )}
-                  </svg>
-                  <span className="font-medium">{eventLabel}</span>
+                <div className="space-y-0.5 mb-2">
+                  {/* รายการงาน */}
+                  {organizedEvents.length > 0
+                    ? organizedEvents.map((ev) => (
+                        <SubLink key={ev.id} label={ev.name}
+                          href={`/events/${ev.id}`}
+                          active={pathname === `/events/${ev.id}`}
+                          onClick={onClose} />
+                      ))
+                    : <p className="pl-[2.2rem] py-1.5 text-xs text-white/35">ยังไม่มีงาน</p>
+                  }
                 </div>
-                <svg 
-                  width="16" 
-                  height="16" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2.5"
-                  className={`transition-transform duration-200 ${expandedSections.includes('events') ? 'rotate-180' : ''}`}
+
+                {/* Action buttons */}
+                <div className="space-y-1.5 pb-1">
+                  <ActionBtn icon={<IcPlus />} label="สร้างงาน Expo"
+                    onClick={() => go('/events/create')} />
+                  <ActionBtn icon={<IcKey />} label="ใส่โค้ดเข้าร่วมงาน"
+                    onClick={() => setJoinExpoModal(true)} />
+                </div>
+              </NavItem>
+            </>
+          )}
+
+          {/* ═══════ BOOTH MANAGER ═══════ */}
+          {userRole === 'booth_manager' && (
+            <>
+              {hasBoothGlobal ? (
+                /* มีบูธแล้ว → dropdown */
+                <NavItem
+                  icon={<IcBooth />} label="บูธของฉัน"
+                  open={boothOpen} onToggle={() => setBoothOpen(!boothOpen)}
                 >
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-              </button>
-
-              {/* Events List */}
-              {expandedSections.includes('events') && (
-                <div className="bg-white/5 py-2">
-                  {events.length > 0 ? (
-                    <>
-                      {/* Event List */}
-                      <div className="space-y-0.5 mb-3">
-                        {events.map((event) => (
-                          <Link
-                            key={event.id}
-                            href={isOrganizer ? `/events/${event.id}` : `/events/${event.id}?tab=booth`}
-                            onClick={onClose}
-                            className={`
-                              flex items-center gap-3 px-5 py-2.5 pl-14 transition text-sm group
-                              hover:bg-white/10
-                              ${pathname.includes(`/events/${event.id}`) ? 'bg-white/15' : ''}
-                            `}
-                          >
-                            <div className="w-1.5 h-1.5 rounded-full bg-white/70 flex-shrink-0"></div>
-                            <span className="flex-1 truncate">{event.name}</span>
-                            <svg 
-                              width="14" 
-                              height="14" 
-                              viewBox="0 0 24 24" 
-                              fill="none" 
-                              stroke="currentColor" 
-                              strokeWidth="2.5" 
-                              className="flex-shrink-0 opacity-0 group-hover:opacity-70 transition-opacity"
-                            >
-                              <path d="M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                            </svg>
-                          </Link>
-                        ))}
-                      </div>
-
-                      {/* Create/Join Button */}
-                      <div className="px-5 pt-1">
-                        <button 
-                          onClick={() => {
-                            if (isOrganizer) {
-                              router.push('/events/create');
-                              onClose();
-                            } else {
-                              setShowJoinModal(true);
-                            }
-                          }}
-                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-white/30 rounded-lg hover:bg-white/10 hover:border-white/50 transition-all text-sm font-medium"
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                          </svg>
-                          <span>{createLabel}</span>
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="px-5 py-2">
-                      <p className="text-xs text-white/50 text-center mb-2.5">
-                        {isOrganizer ? 'ยังไม่มีงานที่จัด' : 'ยังไม่มีงานที่ร่วมบูธ'}
-                      </p>
-                      <div className="pt-1">
-                        <button 
-                          onClick={() => {
-                            if (isOrganizer) {
-                              router.push('/events/create');
-                              onClose();
-                            } else {
-                              setShowJoinModal(true);
-                            }
-                          }}
-                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-white/30 rounded-lg hover:bg-white/10 hover:border-white/50 transition-all text-sm font-medium"
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                          </svg>
-                          <span>{createLabel}</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  <div className="space-y-0.5 pb-1">
+                    <SubLink label={boothName} href="/booths/my-booth"
+                      active={pathname === '/booths/my-booth'} onClick={onClose} />
+                    {eventsJoined.map((ev) => (
+                      <SubLink key={ev.id} label={ev.name}
+                        href={`/events/${ev.id}`}
+                        active={pathname === `/events/${ev.id}`}
+                        onClick={onClose} />
+                    ))}
+                  </div>
+                </NavItem>
+              ) : (
+                /* ยังไม่มีบูธ */
+                <>
+                  <div className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-white/40 cursor-default">
+                    <IcBooth /><span>บูธของฉัน</span>
+                  </div>
+                  <div className="space-y-1.5 pb-1">
+                    <ActionBtn icon={<IcPlus />} label="สร้างบูธ"
+                      onClick={() => go('/booths/create')} />
+                    <ActionBtn icon={<IcKey />} label="ใส่รหัสเข้าร่วมบูธ"
+                      onClick={() => go('/booths/my-booth')} />
+                  </div>
+                </>
               )}
-            </div>
-          </div>
 
-          {/* Bottom Menu - ออกจากระบบ */}
-          <div className="border-t border-white/20 mt-auto">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-5 py-4 hover:bg-white/10 transition"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-              </svg>
-              <span className="font-medium">ออกจากระบบ</span>
-            </button>
-          </div>
+              <Divider />
+
+              <NavItem icon={<IcSearch />} label="ค้นหางาน Expo"
+                href="/booths/explore-events"
+                active={pathname.startsWith('/booths/explore-events')}
+                onClick={onClose} />
+
+              <Divider />
+
+              <NavItem icon={<IcDoc />} label="คำขอของฉัน"
+                href="/booths/my-applications"
+                active={pathname === '/booths/my-applications'}
+                onClick={onClose} />
+
+              <NavItem icon={<IcMail />} label="คำเชิญที่ได้รับ"
+                href="/booths/my-invitations"
+                active={pathname === '/booths/my-invitations'}
+                onClick={onClose} />
+            </>
+          )}
+        </nav>
+
+        {/* ── bottom ── */}
+        <div className="px-3 py-3 border-t border-white/[0.12]">
+          <NavItem icon={<IcLogout />} label="ออกจากระบบ" onClick={handleLogout} />
         </div>
       </aside>
 
-      {/* Join Expo Modal */}
-      {showJoinModal && (
-        <JoinExpoModal onClose={() => setShowJoinModal(false)} />
-      )}
+      {joinExpoModal && <JoinExpoModal onClose={() => setJoinExpoModal(false)} />}
     </>
   );
 }

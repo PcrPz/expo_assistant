@@ -13,6 +13,8 @@ function transformBooth(rawBooth: any): Booth {
     expo_id: rawBooth.ExpoID || rawBooth.expo_id || '',
     booth_no: rawBooth.BoothNo || rawBooth.booth_no || '',
     type: (rawBooth.Type || rawBooth.type || 'small_booth') as BoothType,
+    price: String(rawBooth.Price ?? rawBooth.price ?? '0'),             // ← เพิ่ม
+    status: (rawBooth.Status || rawBooth.status || 'available') as import('../types/booth.types').BoothStatus, // ← เพิ่ม
     title: rawBooth.Title || rawBooth.title || null,
     detail: rawBooth.Detail || rawBooth.detail || null,
     company: rawBooth.Company || rawBooth.company || null,
@@ -24,6 +26,7 @@ function transformBooth(rawBooth: any): Booth {
     website1: rawBooth.Website1 || rawBooth.website1 || null,
     website2: rawBooth.Website2 || rawBooth.website2 || null,
     thumbnail: rawBooth.Thumbnail || rawBooth.thumbnail || null,
+    booth_group_id: rawBooth.BoothGroupID || rawBooth.booth_group_id || null,  // ← เพิ่ม
     created_at: rawBooth.CreatedAt || rawBooth.created_at || new Date().toISOString(),
     updated_at: rawBooth.UpdatedAt || rawBooth.updated_at || new Date().toISOString(),
   };
@@ -45,6 +48,7 @@ function cleanEmptyStrings(booth: Booth): Booth {
     website1: booth.website1 === '' ? null : booth.website1,
     website2: booth.website2 === '' ? null : booth.website2,
     thumbnail: booth.thumbnail === '' ? null : booth.thumbnail,
+    booth_group_id: booth.booth_group_id === '' ? null : booth.booth_group_id,
   };
 }
 
@@ -65,8 +69,10 @@ export async function getMyBooths(): Promise<Booth[]> {
     const rawData = await response.json();
     console.log('📦 [BoothAPI] Raw data:', rawData);
     
-    const booths = Array.isArray(rawData) 
-      ? rawData.map(b => cleanEmptyStrings(transformBooth(b)))
+    // ✅ Backend ใหม่ wrap ใน { manage_booth: [...] }
+    const list = rawData.manage_booth ?? rawData;
+    const booths = Array.isArray(list) 
+      ? list.map((b: any) => cleanEmptyStrings(transformBooth(b)))
       : [];
     
     console.log('✅ [BoothAPI] Transformed booths:', booths);
@@ -206,17 +212,20 @@ export async function createBooth(
       expo_id: expoId,
       booth_no: data.booth_no,
       type: data.type,
-      title: data.title || null,
-      detail: data.detail || null,
-      company: data.company || null,
+      price: data.price || '0',
+      status: (data.status || 'available') as import('../types/booth.types').BoothStatus,
+      title: null,
+      detail: null,
+      company: null,
       hall: data.hall || null,
       zone_id: data.zone_id || '',
       zone_name: null,
-      email: data.email || null,
-      tel: data.tel || null,
-      website1: data.website1 || null,
-      website2: data.website2 || null,
+      email: null,
+      tel: null,
+      website1: null,
+      website2: null,
       thumbnail: null,
+      booth_group_id: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -247,6 +256,10 @@ export async function updateBooth(
     formData.append('booth_id', boothId);
     formData.append('booth_no', data.booth_no || '');
     formData.append('type', data.type || '');
+    
+    // Price & Status (ใหม่)
+    if (data.price) formData.append('price', data.price);
+    if (data.status) formData.append('status', data.status);
     
     // Optional fields - only append if not null/empty
     if (data.title) formData.append('title', data.title);
@@ -313,6 +326,10 @@ export async function updateBoothWithThumbnail(
     formData.append('booth_id', boothId);
     formData.append('booth_no', updateData.booth_no || '');
     formData.append('type', updateData.type || '');
+    
+    // Price & Status (ใหม่)
+    if (updateData.price) formData.append('price', updateData.price);
+    if (updateData.status) formData.append('status', updateData.status);
     
     // Thumbnail file
     formData.append('thumbnail_file', file);

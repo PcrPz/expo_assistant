@@ -137,7 +137,7 @@ export function EventDetailHeader({
                     รอชำระเงิน
                   </span>
                 )}
-                {event.status === 'unpublished' && (
+                {event.status === 'unpublish' && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 border-2 border-blue-300 text-blue-700 text-xs font-bold rounded-full">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -146,7 +146,7 @@ export function EventDetailHeader({
                     พร้อมเผยแพร่
                   </span>
                 )}
-                {event.status === 'published' && (
+                {event.status === 'publish' && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 text-green-700 text-xs font-bold rounded-full">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="12" cy="12" r="10"></circle>

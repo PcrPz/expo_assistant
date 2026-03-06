@@ -191,7 +191,7 @@ export async function getMyEvents(): Promise<Event[]> {
 
 export async function getEventById(id: string): Promise<Event | null> {
   try {
-    const response = await fetchWithAuth(`${API_URL}/expo/${id}`);
+    const response = await fetchWithAuth(`${API_URL}/expo/get/${id}`);
     
     if (!response.ok) {
       console.error(`Failed to fetch event ${id}:`, response.status);
@@ -247,68 +247,51 @@ export async function getEventById(id: string): Promise<Event | null> {
 // Get Event with Role
 // ============================================
 
+// ─── Helper: ดึง expo detail จาก /expo/get/:id ───────────────
+async function fetchExpoDetail(eventId: string): Promise<any | null> {
+  try {
+    const res = await fetchWithAuth(`${API_URL}/expo/get/${eventId}`);
+    if (!res.ok) {
+      console.warn(`⚠️ fetchExpoDetail ${eventId} failed: ${res.status}`);
+      return null;
+    }
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+// ─── Main: getEventWithRole ───────────────────────────────────
+// Response: { expo: {...}, role: "owner"|"booth_staff_visitor"|... }
 export async function getEventWithRole(eventId: string): Promise<Event | null> {
   try {
-    const myEventsResponse = await fetchWithAuth(`${API_URL}/expo/get-my-expo-list`);
-    
-    if (myEventsResponse.ok) {
-      const myEventsData = await myEventsResponse.json();
-      
-      const foundEvent = myEventsData.manage_expo?.find(
-        (e: any) => e.ID === eventId || e.id === eventId
-      );
-      
-      if (foundEvent) {
-        const detailResponse = await fetchWithAuth(`${API_URL}/expo/${eventId}`);
-        
-        if (detailResponse.ok) {
-          const detailData = await detailResponse.json();
-          
-          // ✅ รองรับ response format ใหม่
-          let eventData: any;
-          let roleFromDetail: string | undefined;
+    // เรียก /expo/get/:id อย่างเดียว — backend ส่ง role มาให้เลย
+    const data = await fetchExpoDetail(eventId);
 
-          if (detailData.expo) {
-            // Format ใหม่
-            eventData = detailData.expo;
-            roleFromDetail = detailData.role;
-          } else {
-            // Format เดิม
-            eventData = detailData;
-            roleFromDetail = detailData.Role || detailData.role;
-          }
-          
-          const zones = await getZonesByExpoId(eventId);
-          
-          // ใช้ role จาก manage_expo list เป็นหลัก (เพราะแม่นกว่า)
-          const mergedData = {
-            ...eventData,
-            ID: eventId,
-            id: eventId,
-            expoID: eventId,
-            Role: foundEvent.Role || foundEvent.role || roleFromDetail,
-            role: foundEvent.Role || foundEvent.role || roleFromDetail,
-            zones: zones,
-          };
-          
-          return transformEventData(mergedData);
-        } else {
-          const zones = await getZonesByExpoId(eventId);
-          
-          const listDataWithZones = {
-            ...foundEvent,
-            ID: eventId,
-            id: eventId,
-            zones: zones,
-          };
-          
-          return transformEventData(listDataWithZones);
-        }
-      }
+    if (!data) {
+      console.error(`❌ Cannot load expo detail for ${eventId}`);
+      return null;
     }
-    
-    return await getEventById(eventId);
-    
+
+    // Response format: { expo: {...}, role: "..." }
+    const expoData = data.expo ?? data;
+    const role = data.role || expoData.Role || expoData.role || 'booth_staff_visitor';
+
+    const zones = await getZonesByExpoId(eventId).catch(() => []);
+
+    const merged = {
+      ...expoData,
+      ID: eventId,
+      id: eventId,
+      expoID: eventId,
+      Role: role,
+      role: role,
+      zones,
+    };
+
+    console.log(`✅ getEventWithRole: id=${eventId} role=${role}`);
+    return transformEventData(merged);
+
   } catch (error) {
     console.error('Failed to fetch event with role:', error);
     return null;
@@ -501,5 +484,69 @@ export async function updateEventStatus(id: string, status: string): Promise<boo
   } catch (error) {
     console.error(`Failed to update event status ${id}:`, error);
     return false;
+  }
+}
+// ============================================
+// Get Initial Payment (ดึงข้อมูลการชำระเงินเริ่มต้น)
+// ============================================
+
+export async function getPayments(expoId: string): Promise<any> {
+  try {
+    console.log('🔍 Checkout initial payment for expo:', expoId);
+    // ✨ NEW: POST /expo-payment/:expoId/checkout/initial_fee (no body)
+    const response = await fetchWithAuth(`${API_URL}/expo-payment/${expoId}/checkout/initial_fee`, {
+      method: 'POST',
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to checkout initial payment:', response.status);
+      return null;
+    }
+    
+    const payment = await response.json();
+    console.log('✅ Checkout response:', payment);
+    
+    return payment;
+  } catch (error) {
+    console.error('Failed to checkout initial payment:', error);
+    return null;
+  }
+}
+
+// ============================================
+// Confirm Payment (ชำระเงินมัดจำ)
+// ============================================
+
+export async function confirmPayment(
+  expoId: string,
+  paymentId: string,
+  paymentMethod: 'QRscan' | 'Credit Card'
+): Promise<boolean> {
+  try {
+    console.log('💳 Confirming payment:', { expoId, paymentId, paymentMethod });
+    
+    // ✨ NEW: POST /expo-payment/:expoId/confirm-payment (paymentId อยู่ใน body)
+    const response = await fetchWithAuth(
+      `${API_URL}/expo-payment/${expoId}/confirm-payment`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_id: paymentId, payment_method: paymentMethod }),
+      }
+    );
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      console.error('Payment confirmation failed:', error);
+      throw new Error(error.error || 'การชำระเงินล้มเหลว');
+    }
+    
+    const result = await response.json();
+    console.log('✅ Payment confirmed:', result);
+    
+    return true;
+  } catch (error: any) {
+    console.error('Failed to confirm payment:', error);
+    throw error;
   }
 }

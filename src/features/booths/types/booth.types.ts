@@ -6,11 +6,16 @@
 
 export type BoothType = "small_booth" | "big_booth" | "stage";
 
+// ✅ Booth Status (ใหม่)
+export type BoothStatus = "available" | "unavailable" | "pending" | "reserved";
+
 export interface Booth {
   booth_id: string;
   expo_id: string;
   booth_no: string;
   type: BoothType;
+  price: string;            // ← เพิ่มใหม่
+  status: BoothStatus;      // ← เพิ่มใหม่
   title: string | null;
   detail: string | null;
   company: string | null;
@@ -22,6 +27,7 @@ export interface Booth {
   website1: string | null;
   website2: string | null;
   thumbnail: string | null;
+  booth_group_id: string | null;  // ← เพิ่มใหม่
   created_at: string;
   updated_at: string;
 }
@@ -29,20 +35,17 @@ export interface Booth {
 export interface CreateBoothRequest {
   booth_no: string;
   type: BoothType;
-  title?: string;
-  detail?: string;
-  company?: string;
+  price: string;    // ← เพิ่มใหม่ (required)
+  status: string;   // ← เพิ่มใหม่ (default: "available")
   hall?: string;
   zone_id?: string;
-  email?: string;
-  tel?: string;
-  website1?: string;
-  website2?: string;
 }
 
 export interface UpdateBoothRequest {
   booth_no: string;
   type: BoothType;
+  price?: string;         // ← เพิ่มใหม่
+  status?: string;        // ← เพิ่มใหม่
   title?: string | null;
   detail?: string | null;
   company?: string | null;
@@ -95,3 +98,17 @@ export const BOOTH_TYPE_COLORS: Record<BoothType, string> = {
   big_booth: "bg-purple-100 text-purple-700",
   stage: "bg-orange-100 text-orange-700",
 };
+
+// ✅ Booth Status Labels (ใหม่)
+export const BOOTH_STATUS_LABELS: Record<BoothStatus, string> = {
+  available:   "ว่าง",
+  unavailable: "ไม่เปิดรับ",
+  pending:     "รอชำระเงิน",
+  reserved:    "จองแล้ว",
+};
+
+// ✅ Options สำหรับ Create/Edit (แค่ 2 ตัวแรกที่ organizer เลือกได้)
+export const BOOTH_STATUS_OPTIONS = [
+  { value: 'available',   label: 'ว่าง (เปิดรับคำขอ)' },
+  { value: 'unavailable', label: 'ไม่เปิดรับ (เชิญได้อย่างเดียว)' },
+];

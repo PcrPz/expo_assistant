@@ -22,7 +22,7 @@ export function EditDocumentModal({
   onSuccess,
 }: EditDocumentModalProps) {
   const [title, setTitle] = useState(document.Title);
-  const [status, setStatus] = useState<'published' | 'unpublished'>(document.Status);
+  const [status, setStatus] = useState<'publish' | 'unpublish'>(document.Status);
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fileError, setFileError] = useState('');
@@ -144,9 +144,9 @@ export function EditDocumentModal({
               <label className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition">
                 <input
                   type="radio"
-                  value="unpublished"
-                  checked={status === 'unpublished'}
-                  onChange={(e) => setStatus(e.target.value as 'unpublished')}
+                  value="unpublish"
+                  checked={status === 'unpublish'}
+                  onChange={(e) => setStatus(e.target.value as 'unpublish')}
                   disabled={isSubmitting}
                   className="w-4 h-4 text-[#3674B5]"
                 />
@@ -159,9 +159,9 @@ export function EditDocumentModal({
               <label className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition">
                 <input
                   type="radio"
-                  value="published"
-                  checked={status === 'published'}
-                  onChange={(e) => setStatus(e.target.value as 'published')}
+                  value="publish"
+                  checked={status === 'publish'}
+                  onChange={(e) => setStatus(e.target.value as 'publish')}
                   disabled={isSubmitting}
                   className="w-4 h-4 text-[#3674B5]"
                 />

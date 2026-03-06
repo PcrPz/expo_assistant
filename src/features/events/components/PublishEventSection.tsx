@@ -22,9 +22,9 @@ export function PublishEventSection({ eventId, onPublishSuccess }: PublishEventS
     try {
       setIsPublishing(true);
       
-      await updateEventStatus(eventId, 'published');
+      await updateEventStatus(eventId, 'publish');
       
-      console.log('✅ Event published successfully');
+      console.log('✅ Event publish successfully');
       
       setShowConfirmModal(false);
       onPublishSuccess();

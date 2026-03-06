@@ -8,7 +8,7 @@ export interface BoothDocument {
   DocID: string;               // Backend ส่งมาเป็น PascalCase
   BoothID: string;             // ✅ เพิ่ม BoothID
   Title: string;
-  Status: 'published' | 'unpublished';
+  Status: 'publish' | 'unpublish';
   PublishAt: string | null;    // ISO timestamp
   CreatedAt: string;           // ✅ เพิ่ม timestamp
   UpdatedAt: string;           // ✅ เพิ่ม timestamp
@@ -20,7 +20,7 @@ export interface BoothDocument {
 export interface CreateDocumentRequest {
   booth_id: string;
   title?: string;              // optional - ถ้าไม่ส่งจะใช้ชื่อไฟล์
-  status: 'published' | 'unpublished';
+  status: 'publish' | 'unpublish';
   file: File;
 }
 
@@ -31,7 +31,7 @@ export interface CreateDocumentRequest {
 export interface UpdateDocumentRequest {
   doc_id: string;
   title: string;
-  status: 'published' | 'unpublished';
+  status: 'publish' | 'unpublish';
   file?: File;                 // optional - ถ้าไม่ส่งจะไม่เปลี่ยนไฟล์
 }
 
@@ -48,6 +48,6 @@ export interface DeleteDocumentsRequest {
  */
 export interface CreateMultipleDocumentsRequest {
   booth_id: string;
-  status: 'published' | 'unpublished';
+  status: 'publish' | 'unpublish';
   files: File[];
 }

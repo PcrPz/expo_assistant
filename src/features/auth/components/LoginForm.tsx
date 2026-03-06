@@ -5,19 +5,24 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { LoginRequest } from '../types/auth.types';
+import { LoginRequest, UserRole } from '../types/auth.types';
 import { login } from '../api/authApi';
 import { useAuthStore } from '../store/authStore';
 
 export function LoginForm() {
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<UserRole>('organizer'); // ✅ Default: organizer
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const router = useRouter();
   const { refreshUser } = useAuthStore();
+
+  const handleToggle = () => {
+    setRole(prev => prev === 'organizer' ? 'booth_manager' : 'organizer');
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,28 +32,21 @@ export function LoginForm() {
     try {
       const loginData: LoginRequest = { 
         email: emailOrUsername, 
-        password 
+        password,
+        role  // ✅ ส่ง role: "organizer" หรือ "booth_manager"
       };
       
-      console.log('🔐 Login - Attempting login...');
+      console.log('🔐 Sending login data:', loginData);
       const response = await login(loginData);
       console.log('✅ Login successful:', response);
 
-      // ✅ โหลด User data ทันทีหลัง Login
-      console.log('📡 Login - Loading user data...');
       await refreshUser();
-      console.log('✅ Login - User data loaded');
-
-      // ✅ ดึง User จาก Store
       const currentUser = useAuthStore.getState().user;
-      console.log('👤 Current user role:', currentUser?.Role);
 
-      // ✅ Redirect ตาม Role
-      if (currentUser?.Role === 'booth_manager') {
-        console.log('🏪 Booth Manager - Redirecting to /booths/my-booth');
+      // Redirect ตาม role
+      if (role === 'booth_manager') {
         router.push('/booths/my-booth');
       } else {
-        console.log('🎪 Organizer - Redirecting to /home');
         router.push('/home');
       }
 
@@ -61,12 +59,14 @@ export function LoginForm() {
     }
   };
 
+  const isOrganizer = role === 'organizer';
+
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Form (60%) */}
       <div className="w-full lg:w-[60%] flex items-center justify-center px-6 lg:px-12 xl:px-20 py-8 bg-white">
         <div className="w-full max-w-xl -mt-12">
-          {/* Header - Centered */}
+          {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">
               เข้าสู่ระบบ
@@ -74,6 +74,55 @@ export function LoginForm() {
             <p className="text-gray-600">
               ยินดีต้อนรับกลับมา! กรุณากรอกข้อมูลของคุณ
             </p>
+          </div>
+
+          {/* ✅ Role Toggle - Fixed alignment */}
+          <div className="flex flex-col items-center gap-3 mb-8">
+            <p className="text-sm font-medium text-gray-700">
+              เลือกบทบาทที่ต้องการเข้าสู่ระบบ
+            </p>
+            
+            <div className="relative">
+              <button
+                type="button"
+                onClick={handleToggle}
+                className="relative w-80 h-16 rounded-full p-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-200"
+                style={{
+                  backgroundColor: isOrganizer ? '#3674B5' : '#749BC2',
+                }}
+              >
+                {/* Sliding Circle - ✅ Fixed width with gap */}
+                <div
+                  className="absolute top-1 h-14 rounded-full shadow-lg transition-all duration-300 ease-in-out bg-white"
+                  style={{
+                    width: 'calc(50% - 8px)',
+                    left: isOrganizer ? '4px' : 'calc(50% + 4px)',
+                  }}
+                />
+
+                {/* Labels - ✅ Centered with padding */}
+                <div className="relative flex h-full">
+                  <div className="w-1/2 flex items-center justify-center px-2">
+                    <span
+                      className={`font-semibold text-sm transition-colors duration-300 z-10 ${
+                        isOrganizer ? 'text-[#3674B5]' : 'text-white'
+                      }`}
+                    >
+                      ผู้จัดงาน
+                    </span>
+                  </div>
+                  <div className="w-1/2 flex items-center justify-center px-2">
+                    <span
+                      className={`font-semibold text-sm transition-colors duration-300 z-10 ${
+                        !isOrganizer ? 'text-[#749BC2]' : 'text-white'
+                      }`}
+                    >
+                      ผู้จัดการบูธ
+                    </span>
+                  </div>
+                </div>
+              </button>
+            </div>
           </div>
 
           {/* Error Message */}
@@ -151,17 +200,23 @@ export function LoginForm() {
               </Link>
             </div>
 
-            {/* Login Button */}
+            {/* ✅ Login Button - เปลี่ยนสีตาม role */}
             <button
               type="submit"
-              className={`w-full bg-[#3674B5] text-white font-bold py-4 px-6 rounded-xl shadow-md transition-all ${
+              className={`w-full text-white font-bold py-4 px-6 rounded-xl shadow-md transition-all ${
                 loading 
                   ? 'opacity-70 cursor-not-allowed' 
                   : 'hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]'
               }`}
+              style={{
+                backgroundColor: isOrganizer ? '#3674B5' : '#749BC2',
+              }}
               disabled={loading}
             >
-              {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
+              {loading 
+                ? 'กำลังเข้าสู่ระบบ...' 
+                : `สมัครสมาชิกในฐานะ${isOrganizer ? 'ผู้จัดงาน' : 'ผู้จัดการบูธ'}`
+              }
             </button>
           </form>
 
@@ -172,7 +227,7 @@ export function LoginForm() {
               href="/register" 
               className="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition"
             >
-              สมัครสมาชิก
+              เข้าสู่ระบบ
             </Link>
           </div>
         </div>

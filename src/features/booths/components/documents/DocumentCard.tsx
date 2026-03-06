@@ -67,7 +67,7 @@ export function DocumentCard({
     }
   };
 
-  const isPublished = document.Status === 'published';
+  const isPublished = document.Status === 'publish';
 
   // Format date
   const formatDate = (dateString: string | null) => {

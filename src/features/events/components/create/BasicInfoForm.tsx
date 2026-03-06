@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import type { CreateEventRequest } from '../../types/event.types';
+import { EVENT_CATEGORIES } from '../../constants/categories';
 
 interface BasicInfoFormProps {
   formData: CreateEventRequest;
@@ -14,19 +15,6 @@ export default function BasicInfoForm({ formData, onChange, onNext }: BasicInfoF
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
-
-  const categories = [
-    'อาหารและเครื่องดื่ม',
-    'แฟชั่นและเครื่องประดับ',
-    'เทคโนโลยีและนวัตกรรม',
-    'สัตว์เลี้ยงและอุปกรณ์',
-    'เด็กและครอบครัว',
-    'สุขภาพและความงาม',
-    'ศิลปะและหัตถกรรม',
-    'การศึกษาและอาชีพ',
-    'บ้านและการตกแต่ง',
-    'กีฬาและนันทนาการ',
-  ];
 
   useEffect(() => {
     if (formData.logoFile instanceof File) {
@@ -193,8 +181,10 @@ export default function BasicInfoForm({ formData, onChange, onNext }: BasicInfoF
               }`}
             >
               <option value="">เลือกประเภทงาน</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
+              {EVENT_CATEGORIES.map((cat) => (
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
+                </option>
               ))}
             </select>
             {errors.category && (
@@ -442,7 +432,7 @@ export default function BasicInfoForm({ formData, onChange, onNext }: BasicInfoF
                     <line x1="12" y1="16" x2="12.01" y2="16"></line>
                   </svg>
                   {errors.tel}
-                </p>
+              </p>
               )}
             </div>
           </div>

@@ -29,6 +29,8 @@ export function EditBoothModal({ expoId, booth, onClose, onSuccess }: EditBoothM
   const [formData, setFormData] = useState<{
     booth_no: string;
     type: BoothType;
+    price: string;
+    status: string;
     title: string;
     detail: string;
     company: string;
@@ -41,6 +43,8 @@ export function EditBoothModal({ expoId, booth, onClose, onSuccess }: EditBoothM
   }>({
     booth_no: booth.booth_no || '',
     type: booth.type || 'small_booth',
+    price: String(booth.price ?? '0'),
+    status: booth.status || 'available',
     title: booth.title || '',
     detail: booth.detail || '',
     company: booth.company || '',
@@ -149,6 +153,8 @@ export function EditBoothModal({ expoId, booth, onClose, onSuccess }: EditBoothM
       const updateData: UpdateBoothRequest = {
         booth_no: formData.booth_no,
         type: formData.type,
+        price: formData.price || '0',
+        status: formData.status || 'available',
         title: formData.title || null,
         detail: formData.detail || null,
         company: formData.company || null,
@@ -337,6 +343,45 @@ export function EditBoothModal({ expoId, booth, onClose, onSuccess }: EditBoothM
                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-[#3674B5] focus:ring-2 focus:ring-[#3674B5]/20 focus:outline-none transition"
                 placeholder="ชื่อบูธ (ถ้ามี)"
               />
+            </div>
+
+            {/* Price & Status */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Price */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  ราคา (บาท) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  className={`w-full px-4 py-2.5 rounded-lg border ${
+                    errors.price ? 'border-red-500' : 'border-gray-300'
+                  } focus:border-[#3674B5] focus:ring-2 focus:ring-[#3674B5]/20 focus:outline-none transition`}
+                  placeholder="0.00"
+                />
+                {errors.price && <p className="mt-1 text-sm text-red-500">{errors.price}</p>}
+              </div>
+
+              {/* Status */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  สถานะ <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-[#3674B5] focus:ring-2 focus:ring-[#3674B5]/20 focus:outline-none transition"
+                >
+                  <option value="available">ว่าง (เปิดรับคำขอ)</option>
+                  <option value="unavailable">ไม่เปิดรับ (เชิญได้อย่างเดียว)</option>
+                  <option value="pending">รอชำระเงิน</option>
+                  <option value="reserved">จองแล้ว</option>
+                </select>
+              </div>
             </div>
           </div>
 

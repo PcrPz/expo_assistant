@@ -5,12 +5,13 @@
 // ============================================
 
 export type EventRole = 
-  | 'system_admin'  // ระดับสูงสุด - จัดการระบบ
-  | 'owner'         // เจ้าของงาน - คนสร้างงาน (มีเพียงคนเดียว)
-  | 'admin'         // ผู้จัดการ - จัดการงาน
-  | 'staff'         // เจ้าหน้าที่
-  | 'event_staff'   // เจ้าหน้าที่งาน
-  | 'booth_staff'   // ผู้ออกบูธ
+  | 'system_admin'        // ระดับสูงสุด - จัดการระบบ
+  | 'owner'               // เจ้าของงาน - คนสร้างงาน (มีเพียงคนเดียว)
+  | 'admin'               // ผู้จัดการ - จัดการงาน
+  | 'staff'               // เจ้าหน้าที่
+  | 'event_staff'         // เจ้าหน้าที่งาน
+  | 'booth_staff'         // ผู้ออกบูธ (ชำระเงินแล้ว มีบูธในงาน)
+  | 'booth_staff_visitor' // booth_manager ที่เข้าดูข้อมูลงาน (read-only)
   | null
   | undefined;
 
@@ -109,6 +110,16 @@ export function isBoothStaff(role: EventRole): boolean {
   return role === 'booth_staff';
 }
 
+// ✅ booth_staff_visitor = booth_manager ที่ดูข้อมูลงานได้อย่างเดียว
+export function isBoothStaffVisitor(role: EventRole): boolean {
+  return role === 'booth_staff_visitor';
+}
+
+// ✅ ทั้ง booth_staff และ booth_staff_visitor ถือว่าเป็น booth side
+export function isBoothSide(role: EventRole): boolean {
+  return role === 'booth_staff' || role === 'booth_staff_visitor';
+}
+
 export function canEditEvent(role: EventRole): boolean {
   return ['system_admin', 'owner', 'admin'].includes(role || '');
 }
@@ -155,11 +166,14 @@ export function canRemoveStaff(userRole: EventRole, targetStaffRole: EventRole):
 
 export function getAvailableTabs(role: EventRole): Array<'detail' | 'staff' | 'booth' | 'dashboard' | 'applications'> {
   if (isEventOrganizer(role)) {
-    // ✅ Organizer เห็น: detail, staff, booth, dashboard, applications
     return ['detail', 'staff', 'booth', 'dashboard', 'applications'];
   }
   if (isBoothStaff(role)) {
     return ['detail', 'dashboard', 'booth'];
+  }
+  // ✅ booth_staff_visitor ดูได้แค่ detail อย่างเดียว
+  if (isBoothStaffVisitor(role)) {
+    return ['detail'];
   }
   return ['detail'];
 }
