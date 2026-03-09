@@ -58,7 +58,7 @@ export default function EventDetailPage() {
       if (isEventOrganizer(foundEvent.role)) {
         setActiveTab('detail');
       } else if (isBoothStaff(foundEvent.role)) {
-        setActiveTab('dashboard');
+        setActiveTab('detail');
       } else if (isBoothStaffVisitor(foundEvent.role)) {
         setActiveTab('detail'); // ดูได้แค่ detail
       }

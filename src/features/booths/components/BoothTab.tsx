@@ -3,7 +3,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getBoothsByExpoId, getMyBooths } from '../api/boothApi';
+import { getBoothsByExpoId } from '../api/boothApi';
+import { getMyBoothGlobal } from '../api/boothGlobalApi';
 import { CreateBoothModal } from './CreateBoothModal';
 import { getMinioFileUrl } from '@/src/features/minio/api/minioApi';
 import type { Booth } from '../types/booth.types';
@@ -74,7 +75,7 @@ const STATUS_CONFIG: Record<string, { label: string; dot: string }> = {
 export function BoothTab({ expoId, role }: BoothTabProps) {
   const router = useRouter();
   const [booths, setBooths] = useState<Booth[]>([]);
-  const [myBoothIds, setMyBoothIds] = useState<Set<string>>(new Set());
+  const [myBoothGroupId, setMyBoothGroupId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -90,10 +91,11 @@ export function BoothTab({ expoId, role }: BoothTabProps) {
       setIsLoading(true);
       const allBooths = await getBoothsByExpoId(expoId);
       setBooths(allBooths);
+
+      // ✅ ระบบใหม่: ดึง booth_group_id ของ user เพื่อใช้เทียบ
       if (role === 'booth_staff') {
-        const myBooths = await getMyBooths();
-        const myIds = new Set(myBooths.filter(b => b.expo_id === expoId).map(b => b.booth_id));
-        setMyBoothIds(myIds);
+        const { booth: myGroup } = await getMyBoothGlobal();
+        setMyBoothGroupId(myGroup?.id ?? null);
       }
     } catch (error) {
       console.error('Failed to load booths:', error);
@@ -112,8 +114,12 @@ export function BoothTab({ expoId, role }: BoothTabProps) {
     return matchesSearch && matchesType;
   });
 
-  const myBooths = role === 'booth_staff' ? filteredBooths.filter(b => myBoothIds.has(b.booth_id)) : [];
-  const otherBooths = role === 'booth_staff' ? filteredBooths.filter(b => !myBoothIds.has(b.booth_id)) : filteredBooths;
+  // ✅ เช็คจาก booth_group_id แทน booth_id set เดิม
+  const isMyBooth = (b: Booth) =>
+    role === 'booth_staff' && !!myBoothGroupId && b.booth_group_id === myBoothGroupId;
+
+  const myBooths   = role === 'booth_staff' ? filteredBooths.filter(b => isMyBooth(b))  : [];
+  const otherBooths = role === 'booth_staff' ? filteredBooths.filter(b => !isMyBooth(b)) : filteredBooths;
 
   // stats
   const stats = {

@@ -76,14 +76,7 @@ export function MyBoothDashboard() {
     <>
       <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-6" style={{ backgroundColor: '#F8FAFC' }}>
         <div className="max-w-md w-full text-center">
-          <div className="w-24 h-24 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg"
-            style={{ background: `linear-gradient(135deg, ${BLUE}, ${BLUE2})` }}>
-            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round">
-              <path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/>
-              <path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
-              <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
-            </svg>
-          </div>
+          <img src="/images/No_expo.png" alt="ยังไม่มีบูธ" className="w-64 h-64 object-contain mx-auto mb-2" />
           <h1 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">เริ่มต้นสร้างบูธของคุณ</h1>
           <p className="text-gray-500 text-sm mb-8 leading-relaxed">จัดการสินค้า ทีมงาน และเข้าร่วมงาน Expo ได้จากที่เดียว</p>
           <div className="flex gap-3 justify-center">
@@ -135,11 +128,11 @@ export function MyBoothDashboard() {
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <p className="text-white/60 text-[11px] font-semibold uppercase tracking-wider">ชื่อบูธ</p>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${roleInfo.color}`}>{roleInfo.label}</span>
+              <p className="text-white/60 text-[11px] font-semibold uppercase tracking-wider mb-1">ชื่อบูธ</p>
+              <div className="flex items-center gap-2.5 mb-0.5">
+                <h1 className="text-xl font-black text-white leading-tight truncate">{booth.title}</h1>
+                <span className={`flex-shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full ${roleInfo.color}`}>{roleInfo.label}</span>
               </div>
-              <h1 className="text-xl font-black text-white leading-tight truncate">{booth.title}</h1>
               {booth.company && <p className="text-white/70 text-sm mt-0.5 truncate">{booth.company}</p>}
               <div className="flex flex-wrap gap-2 mt-3">
                 {booth.email && (
@@ -248,7 +241,7 @@ export function MyBoothDashboard() {
 
               {/* Grid of event cards */}
               {booth.booth && booth.booth.length > 0 ? (
-                <div className="p-4 grid grid-cols-2 gap-3">
+                <div className="p-4 grid grid-cols-3 gap-3">
                   {booth.booth.map((event) => {
                     const imgUrl = getImageUrl(event.thumbnail);
                     return (
@@ -257,7 +250,7 @@ export function MyBoothDashboard() {
                         onClick={() => router.push(`/events/${event.expoID}`)}>
 
                         {/* Thumbnail */}
-                        <div className="h-28 relative overflow-hidden"
+                        <div className="h-24 relative overflow-hidden"
                           style={{ background: `linear-gradient(135deg, ${BLUE}, ${BLUE2})` }}>
                           {imgUrl
                             ? <img src={imgUrl} alt={event.expoTitle} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>

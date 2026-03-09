@@ -166,10 +166,12 @@ export function canRemoveStaff(userRole: EventRole, targetStaffRole: EventRole):
 
 export function getAvailableTabs(role: EventRole): Array<'detail' | 'staff' | 'booth' | 'dashboard' | 'applications'> {
   if (isEventOrganizer(role)) {
+    // ✅ Organizer เห็นทุก tab รวม dashboard
     return ['detail', 'staff', 'booth', 'dashboard', 'applications'];
   }
   if (isBoothStaff(role)) {
-    return ['detail', 'dashboard', 'booth'];
+    // ✅ booth_staff ไม่เห็น dashboard (เฉพาะ Organizer)
+    return ['detail', 'booth'];
   }
   // ✅ booth_staff_visitor ดูได้แค่ detail อย่างเดียว
   if (isBoothStaffVisitor(role)) {

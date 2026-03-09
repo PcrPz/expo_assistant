@@ -3,7 +3,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getBoothById, getBoothStaff } from '@/src/features/booths/api/boothApi';
+import { getBoothById } from '@/src/features/booths/api/boothApi';
+import { getMyBoothGlobal } from '@/src/features/booths/api/boothGlobalApi';
 import { getMinioFileUrl } from '@/src/features/minio/api/minioApi';
 import { useAuthStore } from '@/src/features/auth/store/authStore';
 import type { Booth } from '@/src/features/booths/types/booth.types';
@@ -21,7 +22,6 @@ import {
   canEditBooth,
   canDeleteBooth,
   canViewStaffTab,
-  isUserAssignedToBooth, 
   canCreateAnnouncement,
   canEditAnnouncement,
   canDeleteAnnouncement,
@@ -63,14 +63,29 @@ export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailCli
         return;
       }
       
+      // ✅ block booth_staff_visitor — ดูได้แค่ event detail เท่านั้น
+      if (userRole === 'booth_staff_visitor') {
+        console.log('🚫 booth_staff_visitor cannot access booth detail, redirecting...');
+        router.push(`/events/${eventId}`);
+        return;
+      }
+
       setBooth(boothData);
 
-      // ✅ ใช้ Email แทน UserID
-      if (user?.Email && userRole === 'booth_staff') {
-        const staffList = await getBoothStaff(eventId, boothId);
-        const assigned = isUserAssignedToBooth(user.Email, staffList);
+      // ✅ ระบบใหม่: เช็คจาก booth_group_id แทน staff list
+      // หาก booth.booth_group_id ตรงกับ id ของ booth_group ของ user → เป็นบูธของตัวเอง
+      if (userRole === 'booth_staff') {
+        const { booth: myBoothGroup } = await getMyBoothGlobal();
+        const assigned = !!(
+          myBoothGroup?.id &&
+          boothData.booth_group_id &&
+          myBoothGroup.id === boothData.booth_group_id
+        );
         setIsAssignedStaff(assigned);
-        console.log('✅ Is assigned staff:', assigned, 'Email:', user.Email);
+        console.log('✅ Is assigned (booth_group_id match):', assigned,
+          '| my group:', myBoothGroup?.id,
+          '| booth group:', boothData.booth_group_id
+        );
       } else {
         setIsAssignedStaff(false);
       }
