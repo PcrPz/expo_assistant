@@ -139,13 +139,35 @@ export function DashboardTab({ eventId }: DashboardTabProps) {
   const attendRate = useMemo(() => ticketPaid > 0 ? Math.round((ticketUsed / ticketPaid) * 100) : 0, [ticketPaid, ticketUsed]);
   const totalVisitors = useMemo(() => (data?.visitGender ?? []).reduce((s, g) => s + g.visitorCount, 0), [data]);
 
-  // visit-hour → AreaChart
-  const visitHourChart = useMemo<VisitHourChartPoint[]>(() =>
-    (data?.visitHour ?? []).map(v => ({
-      hour: v.hour.slice(11, 16),   // "09:00"
-      visitors: v.visitorCount,
-    }))
-  , [data]);
+  // visit-hour → แยกเป็น { date → AreaChart points[] }
+  const visitHourByDay = useMemo<Record<string, VisitHourChartPoint[]>>(() => {
+    const raw = data?.visitHour ?? [];
+    const grouped: Record<string, VisitHourChartPoint[]> = {};
+    raw.forEach(v => {
+      const date = v.hour.slice(0, 10);   // "2026-02-17"
+      const hour = v.hour.slice(11, 16);  // "09:00"
+      if (!grouped[date]) grouped[date] = [];
+      grouped[date].push({ hour, visitors: v.visitorCount });
+    });
+    // sort each day by hour
+    Object.values(grouped).forEach(arr => arr.sort((a, b) => a.hour.localeCompare(b.hour)));
+    return grouped;
+  }, [data]);
+
+  const visitHourDays = useMemo(() => Object.keys(visitHourByDay).sort(), [visitHourByDay]);
+
+  const [selectedHourDay, setSelectedHourDay] = useState<string>('');
+  // auto-select first day when data loads
+  useEffect(() => {
+    if (visitHourDays.length > 0 && !visitHourDays.includes(selectedHourDay)) {
+      setSelectedHourDay(visitHourDays[0]);
+    }
+  }, [visitHourDays]);
+
+  const visitHourChart = useMemo<VisitHourChartPoint[]>(
+    () => visitHourByDay[selectedHourDay] ?? [],
+    [visitHourByDay, selectedHourDay],
+  );
 
   // zone-hour → pivot → LineChart (dynamic zones)
   const { zoneHourChart, zoneNames } = useMemo(() => {
@@ -255,28 +277,73 @@ export function DashboardTab({ eventId }: DashboardTabProps) {
       </div>
 
       {/* ══ Section 2: ผู้เข้าชมรายชั่วโมง ══════════════════ */}
-      <Section title="ผู้เข้าชมรายชั่วโมง"  empty={visitHourChart.length === 0}>
-        {visitHourChart.length > 0 && (
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={visitHourChart} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="gradVisit" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor={BLUE} stopOpacity={0.2}/>
-                  <stop offset="95%" stopColor={BLUE} stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false}/>
-              <XAxis dataKey="hour" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} padding={{ left: 16, right: 16 }}/>
-              <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} label={{ value: 'จำนวน (คน)', angle: -90, position: 'insideLeft', offset: 20, style: { fontSize: 10, fill: '#9CA3AF' } }}/>
-              <Tooltip content={<ChartTooltip/>}/>
-              <Area type="monotone" dataKey="visitors" name="ผู้เข้าชม" stroke={BLUE} strokeWidth={2.5}
-                fill="url(#gradVisit)"
-                dot={{ r: 4, fill: BLUE, strokeWidth: 0 }}
-                activeDot={{ r: 6, fill: BLUE, stroke: 'white', strokeWidth: 2 }}/>
-            </AreaChart>
-          </ResponsiveContainer>
-        )}
-      </Section>
+      {visitHourDays.length > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-6 pt-5 pb-4 flex items-start justify-between">
+            <div>
+              <h3 className="font-black text-gray-900 text-base">ผู้เข้าชมรายชั่วโมง</h3>
+              {/* Segmented Control */}
+              <div className="flex mt-3 p-0.5 rounded-xl gap-0.5" style={{ backgroundColor: '#F1F5F9' }}>
+                {visitHourDays.map(day => {
+                  const active = day === selectedHourDay;
+                  const label  = new Date(day).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+                  return (
+                    <button
+                      key={day}
+                      onClick={() => setSelectedHourDay(day)}
+                      className="px-4 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all"
+                      style={{
+                        fontWeight:  active ? 700 : 500,
+                        color:       active ? BLUE : '#9CA3AF',
+                        background:  active ? 'white' : 'transparent',
+                        boxShadow:   active ? '0 1px 4px rgba(0,0,0,0.10)' : 'none',
+                      }}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {visitHourChart.length > 0 && (
+              <div className="text-right">
+                <p className="text-2xl font-black tabular-nums" style={{ color: BLUE }}>
+                  {visitHourChart.reduce((s, p) => s + p.visitors, 0).toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">คนรวมวันนี้</p>
+              </div>
+            )}
+          </div>
+          {/* Chart */}
+          <div className="p-5">
+            {visitHourChart.length > 0 ? (
+              <ResponsiveContainer width="100%" height={220}>
+                <AreaChart data={visitHourChart} margin={{ top: 5, right: 16, left: 8, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="gradVisit" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%"  stopColor={BLUE} stopOpacity={0.18}/>
+                      <stop offset="95%" stopColor={BLUE} stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false}/>
+                  <XAxis dataKey="hour" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false}
+                    tickLine={false} padding={{ left: 20, right: 20 }}/>
+                  <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} width={36}/>
+                  <Tooltip content={<ChartTooltip/>}/>
+                  <Area type="monotone" dataKey="visitors" name="ผู้เข้าชม" stroke={BLUE} strokeWidth={2.5}
+                    fill="url(#gradVisit)"
+                    dot={{ r: 4, fill: BLUE, strokeWidth: 0 }}
+                    activeDot={{ r: 6, fill: BLUE, stroke: 'white', strokeWidth: 2 }}/>
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center py-10">
+                <p className="text-sm text-gray-400">ยังไม่มีข้อมูลวันนี้</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ══ Section 3: Demographic ═══════════════════════════ */}
       <div className="grid grid-cols-2 gap-5">
@@ -284,8 +351,8 @@ export function DashboardTab({ eventId }: DashboardTabProps) {
         {/* Gender Donut */}
         <Section title="เพศผู้เข้าชม"  empty={genderChart.length === 0}>
           {genderChart.length > 0 && (
-            <>
-              <ResponsiveContainer width="100%" height={200}>
+            <div className="flex items-center gap-4">
+              <ResponsiveContainer width="55%" height={200}>
                 <PieChart>
                   <Pie data={genderChart} cx="50%" cy="50%" innerRadius={55} outerRadius={80}
                     dataKey="value" paddingAngle={3}>
@@ -299,21 +366,27 @@ export function DashboardTab({ eventId }: DashboardTabProps) {
               {(() => {
                 const total = genderChart.reduce((s, g) => s + g.value, 0);
                 return (
-                  <div className="flex justify-center gap-3 mt-2">
-                    {genderChart.map((g, i) => (
-                      <div key={i} className="flex-1 rounded-xl px-3 py-2.5 text-center border border-gray-100"
-                        style={{ backgroundColor: g.color + '12' }}>
-                        <p className="text-[11px] font-semibold mb-1" style={{ color: g.color }}>{g.name}</p>
-                        <p className="text-base font-black text-gray-900">{g.value.toLocaleString()}</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">
-                          {total > 0 ? Math.round((g.value / total) * 100) : 0}%
-                        </p>
-                      </div>
-                    ))}
+                  <div className="flex-1 space-y-3">
+                    {genderChart.map((g, i) => {
+                      const pct = total > 0 ? Math.round((g.value / total) * 100) : 0;
+                      return (
+                        <div key={i}>
+                          <div className="flex justify-between mb-1">
+                            <span className="text-sm font-bold text-gray-700">{g.name}</span>
+                            <span className="text-sm font-black text-gray-900">{pct}%</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                            <div className="h-full rounded-full transition-all"
+                              style={{ width: `${pct}%`, backgroundColor: g.color }}/>
+                          </div>
+                          <p className="text-xs text-gray-400 mt-0.5">{g.value.toLocaleString()} คน</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               })()}
-            </>
+            </div>
           )}
         </Section>
 
@@ -359,10 +432,10 @@ export function DashboardTab({ eventId }: DashboardTabProps) {
         <Section title="ผู้เข้าชมแต่ละโซนรายชั่วโมง"  empty={zoneHourChart.length === 0}>
           {zoneHourChart.length > 0 && (
             <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={zoneHourChart} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              <LineChart data={zoneHourChart} margin={{ top: 5, right: 16, left: 8, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false}/>
                 <XAxis dataKey="hour" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} padding={{ left: 20, right: 20 }}/>
-                <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false}/>
+                <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} width={36}/>
                 <Tooltip content={<ChartTooltip/>}/>
                 <Legend wrapperStyle={{ fontSize: 11 }}/>
                 {/* Dynamic: สร้าง Line ตามจำนวน Zone จริง */}

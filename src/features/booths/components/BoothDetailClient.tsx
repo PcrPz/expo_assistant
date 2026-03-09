@@ -17,6 +17,7 @@ import { ProductsTab } from './products/ProductsTab';
 import { AnnouncementsTab } from './announcements/AnnouncementTab';
 import { QueueTab } from '@/src/features/booths/components/queue/QueueTab';
 import { FormsTab } from './forms/FormsTab';
+import { BoothDashboardTab } from './dashboard/BoothDashboardTab';
 import { FileText } from 'lucide-react';
 import { 
   canEditBooth,
@@ -25,7 +26,8 @@ import {
   canCreateAnnouncement,
   canEditAnnouncement,
   canDeleteAnnouncement,
-  canPublishAnnouncement
+  canPublishAnnouncement,
+  isOrganizer,
 } from '@/src/features/booths/utils/permissions';
 
 interface BoothDetailClientProps {
@@ -34,7 +36,7 @@ interface BoothDetailClientProps {
   userRole: EventRole;
 }
 
-type TabType = 'detail' | 'staff' | 'documents' | 'products' | 'announcements' | 'queue' | 'forms';
+type TabType = 'detail' | 'staff' | 'documents' | 'products' | 'announcements' | 'queue' | 'forms' | 'dashboard';
 
 export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailClientProps) {
   const router = useRouter();
@@ -291,6 +293,24 @@ export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailCli
             >
               แบบสอบถาม
             </TabButton>
+
+            {/* Dashboard — เฉพาะ organizer หรือ booth_staff ที่ assigned */}
+            {(isOrganizer(userRole) || isAssignedStaff) && (
+              <TabButton
+                active={activeTab === 'dashboard'}
+                onClick={() => setActiveTab('dashboard')}
+                icon={
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <rect x="2" y="2" width="8" height="8" rx="1"/>
+                    <rect x="14" y="2" width="8" height="8" rx="1"/>
+                    <rect x="2" y="14" width="8" height="8" rx="1"/>
+                    <rect x="14" y="14" width="8" height="8" rx="1"/>
+                  </svg>
+                }
+              >
+                Dashboard
+              </TabButton>
+            )}
             </div>
 
 
@@ -351,6 +371,13 @@ export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailCli
                 expoId={eventId}
                 userRole={userRole}
                 isAssignedStaff={isAssignedStaff}
+              />
+            )}
+
+            {activeTab === 'dashboard' && (isOrganizer(userRole) || isAssignedStaff) && (
+              <BoothDashboardTab
+                expoId={eventId}
+                boothId={boothId}
               />
             )}
           </div>
