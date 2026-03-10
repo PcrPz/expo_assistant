@@ -333,6 +333,33 @@ export function canViewFormResponses(userRole: EventRole | undefined, isAssigned
 // ============================================================
 
 /** รวม permissions ทั้งหมดในออบเจ็กต์เดียว */
+// ─── Events ───────────────────────────────────────────────────────────────────
+export function canViewEvents(userRole: EventRole | undefined): boolean {
+  return true; // ทุก role ที่ผ่านเข้ามาดูได้
+}
+
+export function canManageEvents(
+  userRole: EventRole | undefined,
+  isAssignedStaff: boolean
+): boolean {
+  if (!userRole) return false;
+  if (ORGANIZER_ROLES.includes(userRole)) return true;
+  if (userRole === 'booth_staff' && isAssignedStaff) return true;
+  return false;
+}
+
+export function canCreateEvent(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
+  return canManageEvents(userRole, isAssignedStaff);
+}
+
+export function canEditEvent(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
+  return canManageEvents(userRole, isAssignedStaff);
+}
+
+export function canDeleteEvent(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
+  return canManageEvents(userRole, isAssignedStaff);
+}
+
 export function getBoothPermissions(
   userRole: EventRole | undefined,
   isAssignedStaff: boolean,
@@ -365,6 +392,9 @@ export function getBoothPermissions(
     canViewForms:         canViewForms(userRole),
     canManageForms:       canManageForms(userRole, isAssignedStaff),
     canViewFormResponses: canViewFormResponses(userRole, isAssignedStaff),
+    // Events
+    canViewEvents:    canViewEvents(userRole),
+    canManageEvents:  canManageEvents(userRole, isAssignedStaff),
   };
 }
 

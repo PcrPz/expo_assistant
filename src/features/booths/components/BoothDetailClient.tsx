@@ -18,6 +18,7 @@ import { AnnouncementsTab } from './announcements/AnnouncementTab';
 import { QueueTab } from '@/src/features/booths/components/queue/QueueTab';
 import { FormsTab } from './forms/FormsTab';
 import { BoothDashboardTab } from './dashboard/BoothDashboardTab';
+import { EventsTab } from './events/EventsTab';
 import { FileText } from 'lucide-react';
 import { 
   canEditBooth,
@@ -27,6 +28,9 @@ import {
   canEditAnnouncement,
   canDeleteAnnouncement,
   canPublishAnnouncement,
+  canCreateEvent,
+  canEditEvent,
+  canDeleteEvent,
   isOrganizer,
 } from '@/src/features/booths/utils/permissions';
 
@@ -36,7 +40,7 @@ interface BoothDetailClientProps {
   userRole: EventRole;
 }
 
-type TabType = 'detail' | 'staff' | 'documents' | 'products' | 'announcements' | 'queue' | 'forms' | 'dashboard';
+type TabType = 'detail' | 'staff' | 'documents' | 'products' | 'announcements' | 'queue' | 'forms' | 'events' | 'dashboard';
 
 export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailClientProps) {
   const router = useRouter();
@@ -294,6 +298,21 @@ export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailCli
               แบบสอบถาม
             </TabButton>
 
+            <TabButton
+              active={activeTab === 'events'}
+              onClick={() => setActiveTab('events')}
+              icon={
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+              }
+            >
+              กิจกรรม
+            </TabButton>
+
             {/* Dashboard — เฉพาะ organizer หรือ booth_staff ที่ assigned */}
             {(isOrganizer(userRole) || isAssignedStaff) && (
               <TabButton
@@ -371,6 +390,16 @@ export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailCli
                 expoId={eventId}
                 userRole={userRole}
                 isAssignedStaff={isAssignedStaff}
+              />
+            )}
+
+            {activeTab === 'events' && (
+              <EventsTab
+                expoID={eventId}
+                boothID={boothId}
+                canCreate={canCreateEvent(userRole, isAssignedStaff)}
+                canEdit={canEditEvent(userRole, isAssignedStaff)}
+                canDelete={canDeleteEvent(userRole, isAssignedStaff)}
               />
             )}
 
