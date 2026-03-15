@@ -164,10 +164,10 @@ export function canRemoveStaff(userRole: EventRole, targetStaffRole: EventRole):
   return false;
 }
 
-export function getAvailableTabs(role: EventRole): Array<'detail' | 'staff' | 'booth' | 'dashboard' | 'applications'> {
+export function getAvailableTabs(role: EventRole): Array<'detail' | 'staff' | 'booth' | 'dashboard' | 'applications' | 'tickets'> {
   if (isEventOrganizer(role)) {
-    // ✅ Organizer เห็นทุก tab รวม dashboard
-    return ['detail', 'staff', 'booth', 'dashboard', 'applications'];
+    // ✅ Organizer เห็นทุก tab รวม dashboard และ tickets
+    return ['detail', 'staff', 'booth', 'dashboard', 'applications', 'tickets'];
   }
   if (isBoothStaff(role)) {
     // ✅ booth_staff ไม่เห็น dashboard (เฉพาะ Organizer)

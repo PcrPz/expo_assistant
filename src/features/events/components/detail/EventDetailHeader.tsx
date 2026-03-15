@@ -5,8 +5,7 @@ import React from 'react';
 import { getMinioFileUrl } from '@/src/features/minio/api/minioApi';
 import type { Event, EventRole } from '../../types/event.types';
 
-// ✅ Tab Type - ลบ invitations
-type TabType = 'detail' | 'staff' | 'booth' | 'dashboard' | 'applications';
+type TabType = 'detail' | 'staff' | 'booth' | 'dashboard' | 'applications' | 'tickets';
 
 interface EventDetailHeaderProps {
   event: Event;
@@ -16,12 +15,12 @@ interface EventDetailHeaderProps {
   onTabChange: (tab: TabType) => void;
 }
 
-export function EventDetailHeader({ 
-  event, 
-  role, 
-  activeTab, 
-  availableTabs, 
-  onTabChange 
+export function EventDetailHeader({
+  event,
+  role,
+  activeTab,
+  availableTabs,
+  onTabChange,
 }: EventDetailHeaderProps) {
   const logoUrl = getMinioFileUrl(event.thumbnail || event.logo);
   const defaultLogo = 'https://via.placeholder.com/80x80/5B9BD5/FFFFFF?text=Logo';
@@ -37,142 +36,167 @@ export function EventDetailHeader({
 
   const roleName = roleNames[role || ''] || 'ผู้เข้าชม';
 
-  // ✅ Tab Labels แยกตาม Role
   const getTabLabel = (tab: TabType): string => {
     if (role === 'booth_staff') {
-      const boothStaffLabels: Record<TabType, string> = {
-        detail: 'รายละเอียด',
-        staff: 'Staff',
-        booth: 'บูธทั้งหมด',
-        dashboard: 'บูธของฉัน',
-        applications: 'คำขอเข้าบูธ',
+      const labels: Record<TabType, string> = {
+        detail: 'Expo', staff: 'Staff', booth: 'All Booths',
+        dashboard: 'My Booth', applications: 'Applications', tickets: 'Tickets',
       };
-      return boothStaffLabels[tab];
+      return labels[tab];
     }
-    
-    const defaultLabels: Record<TabType, string> = {
-      detail: 'Expo',
-      staff: 'Staff',
-      booth: 'Booth',
-      dashboard: 'Dashboard',
-      applications: 'คำขอเข้าบูธ',
+    const labels: Record<TabType, string> = {
+      detail: 'Expo', staff: 'Staff', booth: 'Booth',
+      dashboard: 'Dashboard', applications: 'Applications', tickets: 'Tickets',
     };
-    return defaultLabels[tab];
+    return labels[tab];
   };
 
-  // ✅ Icons สำหรับแต่ละ Tab (เพิ่ม 2 icons ใหม่)
   const getTabIcon = (tab: TabType): React.ReactElement => {
     const icons: Record<TabType, React.ReactElement> = {
       detail: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
         </svg>
       ),
       staff: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       ),
       booth: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="9" y1="3" x2="9" y2="21"></line>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <line x1="9" y1="3" x2="9" y2="21" />
         </svg>
       ),
       dashboard: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
         </svg>
       ),
-      // ✅ Icon ใหม่: คำขอเข้าบูธ
       applications: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-          <circle cx="8.5" cy="7" r="4"></circle>
-          <polyline points="17 11 19 13 23 9"></polyline>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="8.5" cy="7" r="4" />
+          <polyline points="17 11 19 13 23 9" />
+        </svg>
+      ),
+      tickets: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 9a3 3 0 1 1 0 6V19a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a3 3 0 1 1 0-6V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v4z" />
         </svg>
       ),
     };
     return icons[tab];
   };
 
+  // ── Scale constants ──
+  // Logo = 80px, cover = 40px
+  // Logo pulled up by LOGO/2 = 40px → ครึ่งบนจมใน cover, ครึ่งล่างใน white
+  const LOGO = 88;
+  const COVER = 88;
+  const LOGO_PULL = LOGO / 2;
+
   return (
-    <div className="bg-white border-b border-gray-200 shadow-sm sticky top-14 z-10">
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <div className="flex items-center justify-between gap-6">
-          {/* Left: Logo + Event Name */}
-          <div className="flex items-center gap-4 min-w-0 flex-1">
-            <div className="flex-shrink-0">
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden bg-gray-100 border-2 border-gray-200">
-                <img
-                  src={logoUrl || defaultLogo}
-                  alt={event.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = defaultLogo;
-                  }}
-                />
-              </div>
+    <div className="sticky top-14 z-10 shadow-sm">
+
+      {/* Cover Banner — height = COVER px */}
+      <div
+        style={{
+          height: `${COVER}px`,
+          background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5f8a 40%, #3674B5 70%, #498AC3 100%)',
+          position: 'relative',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute', inset: 0, opacity: 0.07,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Ccircle cx='20' cy='20' r='2'/%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
+      </div>
+
+      {/* White zone */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-screen-2xl mx-auto px-8">
+
+          {/* Identity row */}
+          <div
+            className="flex items-center gap-5"
+            style={{ paddingTop: '8px', paddingBottom: '12px' }}
+          >
+            {/* Logo — marginTop pulls it up so half sits in cover, half in white */}
+            <div
+              style={{
+                width: `${LOGO}px`,
+                height: `${LOGO}px`,
+                marginTop: `-${LOGO_PULL}px`,
+                flexShrink: 0,
+                borderRadius: '14px',
+                overflow: 'hidden',
+                border: '3px solid white',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
+                background: '#e2e8f0',
+                position: 'relative',
+                zIndex: 2,
+              }}
+            >
+              <img
+                src={logoUrl || defaultLogo}
+                alt={event.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={(e) => { e.currentTarget.src = defaultLogo; }}
+              />
             </div>
 
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900 truncate">
+            {/* name + status + role */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 flex-wrap mb-1">
+                <h1 className="text-xl font-bold text-gray-900 leading-tight truncate">
                   {event.name}
                 </h1>
-                {/* ✅ Status Badge */}
                 {event.status === 'pending' && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-[#FFFBDE] to-[#FFF8E1] border-2 border-[#FFDC82] text-gray-900 text-xs font-bold rounded-full">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="12" y1="8" x2="12" y2="12"></line>
-                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-50 text-orange-600 border border-orange-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 flex-shrink-0" />
                     รอชำระเงิน
                   </span>
                 )}
                 {event.status === 'unpublish' && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 border-2 border-blue-300 text-blue-700 text-xs font-bold rounded-full">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                    </svg>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border"
+                    style={{ background: '#EEF4FB', color: '#3674B5', borderColor: '#B8D0EA' }}>
+                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#3674B5' }} />
                     พร้อมเผยแพร่
                   </span>
                 )}
                 {event.status === 'publish' && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 text-green-700 text-xs font-bold rounded-full">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border"
+                    style={{ background: '#E8F4FD', color: '#2563a8', borderColor: '#93C5E8' }}>
+                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#498AC3' }} />
                     เผยแพร่แล้ว
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-600 mt-1">
-                บทบาทของคุณคือ <span className="font-medium text-gray-900">{roleName}</span>
+              <p className="text-sm text-gray-500">
+                บทบาทของคุณคือ <span className="font-semibold text-gray-700">{roleName}</span>
               </p>
             </div>
           </div>
 
-          {/* Right: Tabs (Desktop) */}
-          <div className="hidden md:flex items-center gap-1">
+          {/* Tabs — desktop */}
+          <div className="hidden md:flex items-center -mb-px">
             {availableTabs.map((tab) => (
               <button
                 key={tab}
                 onClick={() => onTabChange(tab)}
                 className={`
-                  flex items-center gap-2 px-5 py-2.5 font-medium rounded-lg transition-all relative
+                  flex items-center gap-2 px-6 py-3.5 text-[15px] font-medium transition-all border-b-2 whitespace-nowrap
                   ${activeTab === tab
-                    ? 'text-white bg-[#5B9BD5] shadow-md'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    ? 'text-[#3674B5] border-[#3674B5] bg-blue-50'
+                    : 'text-gray-500 border-transparent hover:text-gray-800 hover:bg-gray-50'
                   }
                 `}
               >
@@ -181,26 +205,27 @@ export function EventDetailHeader({
               </button>
             ))}
           </div>
-        </div>
 
-        {/* Tabs (Mobile) */}
-        <div className="md:hidden mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {availableTabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => onTabChange(tab)}
-              className={`
-                flex items-center gap-2 px-4 py-2 font-medium rounded-lg transition whitespace-nowrap flex-shrink-0
-                ${activeTab === tab
-                  ? 'text-white bg-[#5B9BD5] shadow-md'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }
-              `}
-            >
-              {getTabIcon(tab)}
-              <span className="text-sm">{getTabLabel(tab)}</span>
-            </button>
-          ))}
+          {/* Tabs — mobile */}
+          <div className="md:hidden flex gap-1 overflow-x-auto pb-2 pt-1 scrollbar-hide">
+            {availableTabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => onTabChange(tab)}
+                className={`
+                  flex items-center gap-2 px-4 py-3 text-sm font-medium transition whitespace-nowrap flex-shrink-0 border-b-2
+                  ${activeTab === tab
+                    ? 'text-[#3674B5] border-[#3674B5] bg-blue-50'
+                    : 'text-gray-500 border-transparent hover:text-gray-700 hover:bg-gray-50'
+                  }
+                `}
+              >
+                {getTabIcon(tab)}
+                <span>{getTabLabel(tab)}</span>
+              </button>
+            ))}
+          </div>
+
         </div>
       </div>
     </div>

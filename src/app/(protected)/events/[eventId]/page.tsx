@@ -20,11 +20,15 @@ import { DetailTab } from '@/src/features/events/components/detail/DetailTab';
 // ✅ เพิ่ม Components ใหม่
 import { PaymentDepositSection } from '@/src/features/events/components/PaymentDepositSection';
 import { PublishEventSection } from '@/src/features/events/components/PublishEventSection';
+
 import { BoothApplicationsTab } from '@/src/features/events/components/BoothApplicationsTab';
 import { DashboardTab } from '@/src/features/events/components/detail/DashboardTab';
+import { TicketsTab } from '@/src/features/events/components/tickets/TicketsTab';
+import { getTicketList } from '@/src/features/events/api/ticketApi';
+import { NoTicketWarningSection } from '@/src/features/events/components/NoTicketWarningSection';
 
 // ✅ Tab Type - ลบ invitations
-type TabType = 'detail' | 'staff' | 'booth' | 'dashboard' | 'applications';
+type TabType = 'detail' | 'staff' | 'booth' | 'dashboard' | 'applications' | 'tickets';
 
 export default function EventDetailPage() {
   const params = useParams();
@@ -34,6 +38,7 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState<Event | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('detail');
+  const [hasTickets, setHasTickets] = useState(false);
 
   useEffect(() => {
     loadEvent();
@@ -53,6 +58,16 @@ export default function EventDetailPage() {
       
       console.log('✅ Event loaded with role:', foundEvent.role);
       setEvent(foundEvent);
+
+      // ✅ เช็คว่ามีตั๋วหรือยัง (เฉพาะ organizer)
+      if (isEventOrganizer(foundEvent.role)) {
+        try {
+          const tickets = await getTicketList(foundEvent.expoID);
+          setHasTickets(tickets.length > 0);
+        } catch {
+          setHasTickets(false);
+        }
+      }
       
       // Set default tab based on role
       if (isEventOrganizer(foundEvent.role)) {
@@ -71,10 +86,21 @@ export default function EventDetailPage() {
     }
   };
 
-  // ✅ Refresh event after payment
+  // ✅ Refresh event after payment or ticket change
   const handlePaymentSuccess = () => {
     console.log('💰 Payment successful, refreshing event...');
     loadEvent();
+  };
+
+  // ✅ Refresh hasTickets แบบ realtime เมื่อสร้าง/ลบตั๋ว
+  const refreshTickets = async () => {
+    if (!event) return;
+    try {
+      const tickets = await getTicketList(event.expoID);
+      setHasTickets(tickets.length > 0);
+    } catch {
+      setHasTickets(false);
+    }
   };
 
   if (isLoading) {
@@ -116,7 +142,7 @@ export default function EventDetailPage() {
         onTabChange={setActiveTab}
       />
 
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-screen-2xl mx-auto px-8 py-6 space-y-6">
         {/* ✅ Payment Deposit Section - แสดงเฉพาะ Owner + Pending */}
         {isEventOrganizer(event.role) && event.status === 'pending' && (
           <PaymentDepositSection 
@@ -127,10 +153,14 @@ export default function EventDetailPage() {
 
         {/* ✅ Publish Event Section - แสดงเฉพาะ Owner/Admin + Unpublish */}
         {(event.role === 'owner' || event.role === 'admin') && event.status === 'unpublish' && (
-          <PublishEventSection 
-            eventId={event.expoID}
-            onPublishSuccess={handlePaymentSuccess}
-          />
+          hasTickets ? (
+            <PublishEventSection 
+              eventId={event.expoID}
+              onPublishSuccess={handlePaymentSuccess}
+            />
+          ) : (
+            <NoTicketWarningSection onGoToTickets={() => setActiveTab('tickets')} />
+          )
         )}
 
         {/* Tab Content */}
@@ -163,6 +193,15 @@ export default function EventDetailPage() {
           {/* ✅ TAB ใหม่: คำขอเข้าบูธ */}
           {activeTab === 'applications' && isEventOrganizer(event.role) && (
             <BoothApplicationsTab eventId={event.expoID} />
+          )}
+
+          {/* ✅ TAB ใหม่: ตั๋ว */}
+          {activeTab === 'tickets' && isEventOrganizer(event.role) && (
+            <TicketsTab
+              expoID={event.expoID}
+              canManage={event.role === 'owner' || event.role === 'admin'}
+              onTicketsChange={refreshTickets}
+            />
           )}
         </div>
       </div>
