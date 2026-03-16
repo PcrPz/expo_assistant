@@ -9,6 +9,7 @@ import { useAuthStore } from '@/src/features/auth/store/authStore';
 import { logout as logoutApi } from '@/src/features/auth/api/authApi';
 import { getProfilePicUrl } from '@/src/features/minio/api/minioApi';
 import { tokenManager } from '@/src/lib/auth/tokenManager';
+import { NotificationBell } from '@/src/features/notifications/components/NotificationBell';
 
 interface DashboardNavbarProps {
   onToggleSidebar: () => void;
@@ -67,15 +68,7 @@ export function DashboardNavbar({ onToggleSidebar }: DashboardNavbarProps) {
 
         {/* Right: Notification + Profile */}
         <div className="flex items-center gap-3">
-          <button
-            className="p-2 hover:bg-white/10 rounded-full transition-colors relative"
-            aria-label="Notifications"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-              <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
-            </svg>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-          </button>
+          <NotificationBell />
 
           <div className="relative">
             <button
