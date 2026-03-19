@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Upload, FileText, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { createDocument } from '../../api/documentApi';
 
 interface CreateDocumentModalProps {
@@ -12,277 +12,187 @@ interface CreateDocumentModalProps {
   onSuccess: () => void;
 }
 
-export function CreateDocumentModal({
-  expoId,
-  boothId,
-  onClose,
-  onSuccess,
-}: CreateDocumentModalProps) {
+export function CreateDocumentModal({ expoId, boothId, onClose, onSuccess }: CreateDocumentModalProps) {
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState<'publish' | 'unpublish'>('unpublish');
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fileError, setFileError] = useState('');
 
-  // ✅ ขนาดไฟล์สูงสุด 20MB
-  const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB in bytes
+  const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
-    
-    // Clear previous errors
     setFileError('');
-    
-    if (selectedFile) {
-      // ✅ ตรวจสอบประเภทไฟล์
-      const allowedTypes = [
-        'application/pdf',
-        'image/jpeg',
-        'image/png'
-      ];
-      
-      if (!allowedTypes.includes(selectedFile.type)) {
-        setFileError('กรุณาเลือกไฟล์ PDF, JPEG หรือ PNG เท่านั้น');
-        e.target.value = '';
-        return;
-      }
-      
-      // ✅ ตรวจสอบขนาดไฟล์
-      if (selectedFile.size > MAX_FILE_SIZE) {
-        const sizeMB = (selectedFile.size / 1024 / 1024).toFixed(2);
-        setFileError(`ไฟล์มีขนาด ${sizeMB} MB ซึ่งเกินขนาดที่อนุญาต (20 MB)`);
-        e.target.value = '';
-        return;
-      }
-      
-      setFile(selectedFile);
-      
-      // Auto-fill title
-      if (!title) {
-        const filename = selectedFile.name.replace(/\.(pdf|jpg|jpeg|png)$/i, '');
-        setTitle(filename);
-      }
+    if (!selectedFile) return;
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+    if (!allowedTypes.includes(selectedFile.type)) {
+      setFileError('กรุณาเลือกไฟล์ PDF, JPEG หรือ PNG เท่านั้น');
+      e.target.value = ''; return;
     }
+    if (selectedFile.size > MAX_FILE_SIZE) {
+      setFileError(`ไฟล์มีขนาด ${(selectedFile.size / 1024 / 1024).toFixed(2)} MB เกินขนาดที่อนุญาต (20 MB)`);
+      e.target.value = ''; return;
+    }
+    setFile(selectedFile);
+    if (!title) setTitle(selectedFile.name.replace(/\.(pdf|jpg|jpeg|png)$/i, ''));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!file) {
-      setFileError('กรุณาเลือกไฟล์');
-      return;
-    }
-
-    // ✅ Double check ขนาดไฟล์ก่อน submit
-    if (file.size > MAX_FILE_SIZE) {
-      const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-      setFileError(`ไฟล์มีขนาด ${sizeMB} MB ซึ่งเกินขนาดที่อนุญาต (20 MB)`);
-      return;
-    }
-
+    if (!file) { setFileError('กรุณาเลือกไฟล์'); return; }
+    if (file.size > MAX_FILE_SIZE) { setFileError('ไฟล์เกินขนาดที่อนุญาต (20 MB)'); return; }
     try {
       setIsSubmitting(true);
-
-      await createDocument(expoId, boothId, {
-        booth_id: boothId,
-        title: title || undefined,
-        status,
-        file,
-      });
-
+      await createDocument(expoId, boothId, { booth_id: boothId, title: title || undefined, status, file });
       alert('เพิ่มเอกสารสำเร็จ');
       onSuccess();
     } catch (error: any) {
       alert(error.message || 'ไม่สามารถเพิ่มเอกสารได้');
-    } finally {
-      setIsSubmitting(false);
-    }
+    } finally { setIsSubmitting(false); }
   };
 
-  const getFileTypeLabel = (file: File) => {
-    if (file.type === 'application/pdf') return 'PDF';
-    if (file.type === 'image/jpeg') return 'JPEG';
-    if (file.type === 'image/png') return 'PNG';
-    return 'ไฟล์';
-  };
+  const inputCls = 'w-full px-3.5 py-3 rounded-xl border border-gray-200 text-[15px] focus:outline-none focus:border-[#3674B5] focus:ring-2 focus:ring-[#3674B5]/15 transition bg-white';
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">เพิ่มเอกสาร</h2>
-          <button
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="text-gray-400 hover:text-gray-600 transition"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
+    <>
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={onClose} />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md flex flex-col" onClick={e => e.stopPropagation()}>
 
-        {/* Content */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* File Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              ไฟล์เอกสาร <span className="text-red-500">*</span>
-            </label>
-            
-            {!file ? (
-              <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition
-                ${fileError 
-                  ? 'border-red-300 bg-red-50 hover:bg-red-100' 
-                  : 'border-gray-300 hover:border-[#3674B5] hover:bg-blue-50'
-                }`}>
-                <Upload className={`h-8 w-8 mb-2 ${fileError ? 'text-red-400' : 'text-gray-400'}`} />
-                <span className="text-sm text-gray-600">คลิกเพื่อเลือกไฟล์</span>
-                <span className="text-xs text-gray-400 mt-1">PDF, JPEG, PNG</span>
-                <span className="text-xs text-[#3674B5] font-medium mt-1">ขนาดไฟล์สูงสุด 20 MB</span>
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  disabled={isSubmitting}
-                />
-              </label>
-            ) : (
-              <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <FileText className="h-8 w-8 text-blue-600 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {file.name}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {getFileTypeLabel(file)} • {(file.size / 1024 / 1024).toFixed(2)} MB
-                  </p>
-                  {/* ✅ แสดง Progress Bar ถ้าไฟล์ใกล้ขีดจำกัด */}
-                  {file.size > MAX_FILE_SIZE * 0.8 && (
-                    <div className="mt-2">
-                      <div className="w-full bg-gray-200 rounded-full h-1.5">
-                        <div 
-                          className={`h-1.5 rounded-full ${
-                            file.size > MAX_FILE_SIZE ? 'bg-red-500' : 'bg-yellow-500'
-                          }`}
-                          style={{ width: `${Math.min((file.size / MAX_FILE_SIZE) * 100, 100)}%` }}
-                        ></div>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {((file.size / MAX_FILE_SIZE) * 100).toFixed(0)}% ของขนาดสูงสุด
-                      </p>
-                    </div>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFile(null);
-                    setFileError('');
-                  }}
-                  disabled={isSubmitting}
-                  className="text-red-600 hover:text-red-700 transition disabled:opacity-50"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg,#3674B5,#498AC3)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
+                </svg>
               </div>
-            )}
-
-            {/* ✅ Error Message */}
-            {fileError && (
-              <div className="mt-2 flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-red-800">ไม่สามารถอัปโหลดไฟล์ได้</p>
-                  <p className="text-sm text-red-600 mt-1">{fileError}</p>
-                </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">เพิ่มเอกสาร</h2>
+                <p className="text-xs text-gray-400">อัปโหลดเอกสารเข้าบูธ</p>
               </div>
-            )}
-          </div>
-
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              ชื่อเอกสาร
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="ถ้าไม่ระบุจะใช้ชื่อไฟล์"
-              disabled={isSubmitting}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3674B5] focus:border-[#3674B5] outline-none transition disabled:bg-gray-100"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              ถ้าไม่ระบุ ระบบจะใช้ชื่อไฟล์เป็นชื่อเอกสาร
-            </p>
-          </div>
-
-          {/* Status */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              สถานะ <span className="text-red-500">*</span>
-            </label>
-            <div className="space-y-2">
-              <label className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition">
-                <input
-                  type="radio"
-                  value="unpublish"
-                  checked={status === 'unpublish'}
-                  onChange={(e) => setStatus(e.target.value as 'unpublish')}
-                  disabled={isSubmitting}
-                  className="w-4 h-4 text-[#3674B5]"
-                />
-                <div>
-                  <p className="text-sm font-medium text-gray-900">ยังไม่เผยแพร่</p>
-                  <p className="text-xs text-gray-500">เก็บไว้ภายในระบบก่อน</p>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition">
-                <input
-                  type="radio"
-                  value="publish"
-                  checked={status === 'publish'}
-                  onChange={(e) => setStatus(e.target.value as 'publish')}
-                  disabled={isSubmitting}
-                  className="w-4 h-4 text-[#3674B5]"
-                />
-                <div>
-                  <p className="text-sm font-medium text-gray-900">เผยแพร่</p>
-                  <p className="text-xs text-gray-500">แสดงให้ผู้เข้าชมเห็น</p>
-                </div>
-              </label>
             </div>
+            <button onClick={onClose} disabled={isSubmitting}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
-            >
+          {/* Body */}
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+            {/* File upload */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                ไฟล์เอกสาร <span className="text-red-500">*</span>
+              </label>
+              {!file ? (
+                <label className={`flex flex-col items-center justify-center h-32 border-2 border-dashed rounded-xl cursor-pointer transition ${
+                  fileError ? 'border-red-300 bg-red-50' : 'border-[#D1D9E6] hover:border-[#3674B5] hover:bg-[#F0F6FF]'
+                }`}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={fileError ? '#F87171' : '#9CA3AF'} strokeWidth="1.5" strokeLinecap="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span className="mt-2 text-sm text-gray-600 font-medium">คลิกเพื่อเลือกไฟล์</span>
+                  <span className="text-xs text-gray-400 mt-0.5">PDF, JPEG, PNG</span>
+                  <span className="text-xs font-semibold mt-0.5 text-[#3674B5]">ขนาดไฟล์สูงสุด 20 MB</span>
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                    onChange={handleFileChange} className="hidden" disabled={isSubmitting} />
+                </label>
+              ) : (
+                <div className="flex items-center gap-3 px-4 py-3.5 bg-[#EBF3FC] border border-[#BFDBFE] rounded-xl">
+                  <div className="w-9 h-9 bg-[#3674B5] rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{file.name}</p>
+                    <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                  </div>
+                  <button type="button" onClick={() => { setFile(null); setFileError(''); }} disabled={isSubmitting}
+                    className="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-gray-400 hover:text-red-500 transition flex-shrink-0">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+              )}
+              {fileError && (
+                <div className="mt-2 flex items-center gap-2 text-xs text-red-600">
+                  <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />{fileError}
+                </div>
+              )}
+            </div>
+
+            {/* Title */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">ชื่อเอกสาร</label>
+              <input type="text" value={title} onChange={e => setTitle(e.target.value)}
+                placeholder="ถ้าไม่ระบุจะใช้ชื่อไฟล์" disabled={isSubmitting} className={inputCls} />
+              <p className="mt-1 text-xs text-gray-400">ถ้าไม่ระบุ ระบบจะใช้ชื่อไฟล์เป็นชื่อเอกสาร</p>
+            </div>
+
+            {/* Status */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                สถานะ <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2.5">
+                {[
+                  { value: 'unpublish', label: 'ยังไม่เผยแพร่', desc: 'เก็บไว้ภายในระบบก่อน', dot: '#9CA3AF' },
+                  { value: 'publish',   label: 'เผยแพร่',        desc: 'แสดงให้ผู้เข้าชมเห็น', dot: '#16A34A' },
+                ].map(opt => {
+                  const sel = status === opt.value;
+                  return (
+                    <button key={opt.value} type="button"
+                      onClick={() => setStatus(opt.value as 'publish' | 'unpublish')}
+                      className={`relative flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all ${
+                        sel ? 'border-[#3674B5] bg-[#EBF3FC]' : 'border-gray-200 bg-white hover:border-gray-300'
+                      }`}>
+                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: opt.dot }} />
+                      <div>
+                        <p className={`text-sm font-semibold ${sel ? 'text-[#3674B5]' : 'text-gray-700'}`}>{opt.label}</p>
+                        <p className={`text-[11px] mt-0.5 ${sel ? 'text-[#3674B5]/70' : 'text-gray-400'}`}>{opt.desc}</p>
+                      </div>
+                      {sel && (
+                        <div className="absolute top-2 right-2 w-4 h-4 bg-[#3674B5] rounded-full flex items-center justify-center">
+                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </form>
+
+          {/* Footer */}
+          <div className="px-6 py-[18px] border-t border-gray-100 flex gap-3 flex-shrink-0">
+            <button type="button" onClick={onClose} disabled={isSubmitting}
+              className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition disabled:opacity-50">
               ยกเลิก
             </button>
-            <button
-              type="submit"
-              disabled={isSubmitting || !file || !!fileError}
-              className="flex-1 px-4 py-2 bg-[#3674B5] text-white rounded-lg hover:bg-[#2d5a8f] transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  กำลังเพิ่ม...
-                </span>
-              ) : (
-                'เพิ่มเอกสาร'
-              )}
+            <button type="submit" disabled={isSubmitting || !file || !!fileError}
+              onClick={handleSubmit as any}
+              className="flex-1 py-2.5 rounded-xl text-white text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg,#3674B5,#498AC3)' }}>
+              {isSubmitting
+                ? <><svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><circle className="opacity-25" cx="12" cy="12" r="10"/><path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>กำลังเพิ่ม...</>
+                : <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>เพิ่มเอกสาร</>
+              }
             </button>
           </div>
-        </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -1,7 +1,7 @@
 // src/app/(protected)/events/[eventId]/page.tsx
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getEventWithRole } from '@/src/features/events/api/eventApi';
 import type { Event } from '@/src/features/events/types/event.types';
@@ -26,14 +26,17 @@ import { DashboardTab } from '@/src/features/events/components/detail/DashboardT
 import { TicketsTab } from '@/src/features/events/components/tickets/TicketsTab';
 import { getTicketList } from '@/src/features/events/api/ticketApi';
 import { NoTicketWarningSection } from '@/src/features/events/components/NoTicketWarningSection';
+import { ExpoAnnouncementTab } from '@/src/features/events/components/announcements/ExpoAnnouncementTab';
+import { CheckoutTab } from '@/src/features/events/components/checkout/CheckoutTab';
 
-// ✅ Tab Type - ลบ invitations
-type TabType = 'detail' | 'staff' | 'booth' | 'dashboard' | 'applications' | 'tickets';
+// ✅ Tab Type
+type TabType = 'detail' | 'staff' | 'booth' | 'dashboard' | 'applications' | 'tickets' | 'announcements' | 'checkout';
 
 export default function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
   const eventId = params.eventId as string;
+  const searchParams = useSearchParams();
   
   const [event, setEvent] = useState<Event | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,6 +61,10 @@ export default function EventDetailPage() {
       
       console.log('✅ Event loaded with role:', foundEvent.role);
       setEvent(foundEvent);
+
+      // ✅ รับ tab จาก query param (เช่น navigate จาก noti)
+      const tabParam = searchParams.get('tab') as TabType | null;
+      if (tabParam) { setActiveTab(tabParam); return; }
 
       // ✅ เช็คว่ามีตั๋วหรือยัง (เฉพาะ organizer)
       if (isEventOrganizer(foundEvent.role)) {
@@ -202,6 +209,16 @@ export default function EventDetailPage() {
               canManage={event.role === 'owner' || event.role === 'admin'}
               onTicketsChange={refreshTickets}
             />
+          )}
+
+          {/* ✅ TAB ใหม่: ประกาศจากงาน */}
+          {activeTab === 'announcements' && (
+            <ExpoAnnouncementTab expoID={event.expoID} role={event.role} />
+          )}
+
+          {/* ✅ TAB ใหม่: สรุปและจัดการการเงิน */}
+          {activeTab === 'checkout' && (
+            <CheckoutTab expoID={event.expoID} role={event.role} onComplete={loadEvent} />
           )}
         </div>
       </div>

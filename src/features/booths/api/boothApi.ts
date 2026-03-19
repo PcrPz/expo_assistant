@@ -257,9 +257,9 @@ export async function updateBooth(
     formData.append('booth_no', data.booth_no || '');
     formData.append('type', data.type || '');
     
-    // Price & Status (ใหม่)
-    if (data.price) formData.append('price', data.price);
-    if (data.status) formData.append('status', data.status);
+    // Price & Status — ใช้ != null เพราะ '0' เป็น falsy แต่ต้องส่ง
+    if (data.price != null) formData.append('price', data.price);
+    if (data.status != null) formData.append('status', data.status);
     
     // Optional fields - only append if not null/empty
     if (data.title) formData.append('title', data.title);
@@ -327,9 +327,9 @@ export async function updateBoothWithThumbnail(
     formData.append('booth_no', updateData.booth_no || '');
     formData.append('type', updateData.type || '');
     
-    // Price & Status (ใหม่)
-    if (updateData.price) formData.append('price', updateData.price);
-    if (updateData.status) formData.append('status', updateData.status);
+    // Price & Status — ใช้ != null เพราะ '0' เป็น falsy แต่ต้องส่ง
+    if (updateData.price != null) formData.append('price', updateData.price);
+    if (updateData.status != null) formData.append('status', updateData.status);
     
     // Thumbnail file
     formData.append('thumbnail_file', file);

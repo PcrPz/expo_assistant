@@ -29,17 +29,17 @@ export function QueueList({
   isAssignedStaff,
 }: QueueListProps) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-50 to-blue-50 px-5 py-4 border-b border-slate-200">
-        <h4 className="font-bold text-slate-900">รายการคิว</h4>
-        <p className="text-xs text-slate-600 mt-0.5">
+      <div className="px-5 py-[18px] border-b border-[#F0F4F8]">
+        <h4 className="text-base font-bold text-gray-900">รายการคิว</h4>
+        <p className="text-xs text-gray-400 mt-0.5">
           {queues.length} คิว
         </p>
       </div>
 
       {/* List */}
-      <div className="divide-y divide-slate-100 max-h-[600px] overflow-y-auto">
+      <div className="divide-y divide-[#F8FAFC] max-h-[500px] overflow-y-auto">
         {queues.map((queue, index) => (
           <QueueListItem
             key={queue.QueueID || `queue-${index}`}

@@ -1,16 +1,16 @@
-// src/features/products/components/products/ProductDetailModal.tsx
+// src/features/booths/components/products/ProductDetailModal.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Edit2, Trash2 } from 'lucide-react';
-import { getProductDetail, deleteProduct } from '../../api/productApi';
+import { Package } from 'lucide-react';
+import { getProductDetail } from '../../api/productApi';
+import { getMinioFileUrl } from '@/src/features/minio/api/minioApi';
 import type { ProductDetail } from '../../types/product.types';
-import { ImageSlider } from './ImageSlider';
 
 interface ProductDetailModalProps {
   productId: string;
   expoId: string;
-  boothId: string; // ✅ เพิ่ม boothId
+  boothId: string;
   canManage: boolean;
   onClose: () => void;
   onEdit: (product: ProductDetail) => void;
@@ -18,212 +18,198 @@ interface ProductDetailModalProps {
 }
 
 export function ProductDetailModal({
-  productId,
-  expoId,
-  boothId, // ✅ เพิ่ม boothId
-  canManage,
-  onClose,
-  onEdit,
-  onRefresh,
+  productId, expoId, boothId, canManage, onClose, onEdit, onRefresh,
 }: ProductDetailModalProps) {
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
 
-  useEffect(() => {
-    loadProduct();
-  }, [productId, expoId]);
+  useEffect(() => { loadProduct(); }, [productId, expoId]);
 
   const loadProduct = async () => {
     try {
       setIsLoading(true);
       const data = await getProductDetail(expoId, productId);
       setProduct(data);
-    } catch (error) {
-      console.error('Failed to load product:', error);
+      setActiveIdx(0);
+    } catch {
       alert('ไม่สามารถโหลดข้อมูลสินค้าได้');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      setIsDeleting(true);
-      // ✅ ส่ง boothId ด้วย
-      await deleteProduct(expoId, boothId, productId);
-      alert('ลบสินค้าสำเร็จ');
-      onRefresh();
-      onClose();
-    } catch (error: any) {
-      alert(error.message || 'ไม่สามารถลบสินค้าได้');
-    } finally {
-      setIsDeleting(false);
-      setShowDeleteModal(false);
-    }
-  };
-
   const formatPrice = (price: string) => {
     try {
-      const numPrice = parseFloat(price);
-      return new Intl.NumberFormat('th-TH', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(numPrice);
-    } catch {
-      return price;
-    }
+      const num = parseFloat(price);
+      if (num === 0) return 'ฟรี';
+      return `฿${new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num)}`;
+    } catch { return price; }
   };
 
-  if (isLoading || !product) {
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-xl p-8">
-          <div className="w-8 h-8 border-4 border-[#3674B5] border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      </div>
-    );
-  }
+  // ✅ รวม Thumbnail + Pics[] เป็น gallery เดียว — thumbnail อยู่หน้าสุด
+  const buildGallery = (p: ProductDetail): string[] => {
+    const pics = p.Pics?.filter(Boolean) ?? [];
+    if (p.Thumbnail) {
+      // ป้องกัน thumbnail ซ้ำกับ Pics
+      const hasDup = pics.some(pic => pic === p.Thumbnail);
+      return hasDup ? pics : [p.Thumbnail, ...pics];
+    }
+    return pics;
+  };
+
+  const allImages = product ? buildGallery(product) : [];
+  const isFree = product ? parseFloat(product.Price) === 0 : false;
+
+  const prev = () => setActiveIdx(i => (i === 0 ? allImages.length - 1 : i - 1));
+  const next = () => setActiveIdx(i => (i === allImages.length - 1 ? 0 : i + 1));
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        {/* ✅ Modal Container - Flex Column + Max Height */}
-        <div className="bg-white rounded-xl w-full max-w-5xl max-h-[90vh] flex flex-col">
-          
-          {/* ✅ Header - Fixed */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
-            <h2 className="text-2xl font-bold text-gray-900">รายละเอียดสินค้า</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition"
-            >
-              <X className="h-6 w-6" />
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={onClose} />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* ขยายเป็น max-w-3xl เพื่อให้ไม่แน่นเกิน */}
+        <div
+          className="bg-white rounded-2xl shadow-2xl w-full flex flex-col"
+          style={{ maxWidth: '780px', maxHeight: '90vh' }}
+          onClick={e => e.stopPropagation()}
+        >
+
+          {/* ── Header ── */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
+            <h2 className="text-[16px] font-bold text-gray-900">รายละเอียดสินค้า</h2>
+            <button onClick={onClose}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
             </button>
           </div>
 
-          {/* ✅ Content - Scrollable */}
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
-              {/* Left: Image Slider */}
-              <div>
-                <ImageSlider
-                  images={product.Pics || []}
-                  thumbnail={product.Thumbnail}
-                />
-              </div>
+          {/* ── Loading ── */}
+          {isLoading || !product ? (
+            <div className="flex items-center justify-center py-20">
+              <svg className="animate-spin h-7 w-7 text-[#3674B5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle className="opacity-25" cx="12" cy="12" r="10"/>
+                <path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+              </svg>
+            </div>
+          ) : (
+            <>
+              {/* ── Body: 2 col ── */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="grid grid-cols-[1fr_1fr] min-h-[360px]">
 
-              {/* Right: Product Info */}
-              <div className="flex flex-col">
-                {/* Product Details */}
-                <div className="space-y-6 flex-1">
-                  {/* Title */}
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  {/* ── LEFT: รูปภาพ ── */}
+                  <div className="p-5 bg-[#FAFBFC] flex flex-col gap-3 border-r border-[#F0F4F8]">
+
+                    {/* Main image — ใหญ่ขึ้น */}
+                    <div
+                      className="relative rounded-xl overflow-hidden bg-[#F0F4F8] flex items-center justify-center group w-full"
+                      style={{ aspectRatio: '1/1' }}
+                    >
+                      {allImages.length > 0 ? (
+                        <>
+                          <img
+                            src={getMinioFileUrl(allImages[activeIdx]) || ''}
+                            alt={product.Title}
+                            className="w-full h-full object-contain"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
+                          {allImages.length > 1 && (
+                            <>
+                              <button onClick={prev}
+                                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 rounded-full flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+                              </button>
+                              <button onClick={next}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 rounded-full flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                              </button>
+                              <span className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/50 text-white text-[11px] rounded-full">
+                                {activeIdx + 1} / {allImages.length}
+                              </span>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <Package className="h-20 w-20 text-gray-300" />
+                      )}
+                    </div>
+
+                    {/* Thumbnail strip */}
+                    {allImages.length > 1 && (
+                      <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                        {allImages.map((img, i) => (
+                          <button key={i} onClick={() => setActiveIdx(i)}
+                            className={`flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
+                              i === activeIdx ? 'border-[#3674B5]' : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                            style={{ width: '52px', height: '52px' }}>
+                            <img
+                              src={getMinioFileUrl(img) || ''}
+                              alt={`รูป ${i + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ── RIGHT: ข้อมูล ── */}
+                  <div className="p-5 flex flex-col gap-4 overflow-y-auto">
+
+                    {/* ชื่อ */}
+                    <h3 className="text-[17px] font-bold text-gray-900 leading-snug">
                       {product.Title}
                     </h3>
-                  </div>
 
-                  {/* Price */}
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-[#3674B5]">
-                      ฿{formatPrice(product.Price)}
-                    </span>
-                  </div>
-
-                  <div className="border-t border-gray-200"></div>
-
-                  {/* Description */}
-                  {product.Detail && (
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-900 mb-3">
-                        รายละเอียดสินค้า
-                      </h4>
-                      <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                        {product.Detail}
+                    {/* ราคา */}
+                    <div className="bg-[#EBF3FC] rounded-xl px-5 py-4">
+                      <p className="text-[10px] font-bold text-[#3674B5]/70 uppercase tracking-[.06em] mb-1">ราคา</p>
+                      <p className={`text-[26px] font-extrabold leading-none ${isFree ? 'text-green-600' : 'text-[#3674B5]'}`}>
+                        {formatPrice(product.Price)}
                       </p>
                     </div>
-                  )}
-                </div>
 
-                {/* Action Buttons - Stick to bottom */}
-                {canManage && (
-                  <div className="pt-6 mt-6 border-t border-gray-200">
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => onEdit(product)}
-                        className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition font-medium"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                        แก้ไขสินค้า
-                      </button>
-
-                      <button
-                        onClick={() => setShowDeleteModal(true)}
-                        disabled={isDeleting}
-                        className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition font-medium disabled:opacity-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        ลบสินค้า
-                      </button>
+                    {/* รายละเอียด */}
+                    <div className="border-t border-[#F0F4F8] pt-4 flex-1">
+                      <p className="text-[11px] font-bold text-gray-400 uppercase tracking-[.06em] mb-2">รายละเอียด</p>
+                      {product.Detail ? (
+                        <p className="text-[14px] text-gray-600 leading-relaxed whitespace-pre-wrap">
+                          {product.Detail}
+                        </p>
+                      ) : (
+                        <p className="text-[14px] text-gray-300 italic">ยังไม่มีรายละเอียดสินค้า</p>
+                      )}
                     </div>
                   </div>
+
+                </div>
+              </div>
+
+              {/* ── Footer ── */}
+              <div className="px-6 py-4 border-t border-gray-100 flex gap-3 flex-shrink-0">
+                <button onClick={onClose}
+                  className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition">
+                  ปิด
+                </button>
+                {canManage && (
+                  <button onClick={() => onEdit(product)}
+                    className="flex-1 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 transition flex items-center justify-center gap-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    แก้ไขสินค้า
+                  </button>
                 )}
               </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </div>
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4"
-          onClick={() => setShowDeleteModal(false)}
-        >
-          <div 
-            className="bg-white rounded-xl w-full max-w-md"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                  <Trash2 className="h-6 w-6 text-red-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900">ลบสินค้า</h3>
-                  <p className="text-sm text-gray-500 mt-0.5">ไม่สามารถย้อนกลับได้</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6">
-              <p className="text-gray-700">
-                คุณต้องการลบสินค้า <span className="font-semibold">"{product.Title}"</span> หรือไม่?
-              </p>
-            </div>
-
-            <div className="p-6 border-t border-gray-200 bg-gray-50 flex gap-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                disabled={isDeleting}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-white transition disabled:opacity-50"
-              >
-                ยกเลิก
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50"
-              >
-                {isDeleting ? 'กำลังลบ...' : 'ลบสินค้า'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }

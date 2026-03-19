@@ -5,7 +5,7 @@ import React from 'react';
 import { getMinioFileUrl } from '@/src/features/minio/api/minioApi';
 import type { Event, EventRole } from '../../types/event.types';
 
-type TabType = 'detail' | 'staff' | 'booth' | 'dashboard' | 'applications' | 'tickets';
+type TabType = 'detail' | 'staff' | 'booth' | 'dashboard' | 'applications' | 'tickets' | 'announcements' | 'checkout';
 
 interface EventDetailHeaderProps {
   event: Event;
@@ -30,23 +30,27 @@ export function EventDetailHeader({
     owner: 'เจ้าของงาน',
     admin: 'ผู้จัดการ',
     staff: 'เจ้าหน้าที่',
-    event_staff: 'เจ้าหน้าที่งาน',
     booth_staff: 'ผู้ร่วมออกบูธ',
   };
 
   const roleName = roleNames[role || ''] || 'ผู้เข้าชม';
 
+  console.log('🎪 EventDetailHeader — event:', event);
+  console.log('🎪 event.status:', event.status);
+
   const getTabLabel = (tab: TabType): string => {
     if (role === 'booth_staff') {
       const labels: Record<TabType, string> = {
         detail: 'Expo', staff: 'Staff', booth: 'All Booths',
-        dashboard: 'My Booth', applications: 'Applications', tickets: 'Tickets',
+        dashboard: 'My Booth', applications: 'Applications',
+        tickets: 'Tickets', announcements: 'Announcement', checkout: 'Checkout',
       };
       return labels[tab];
     }
     const labels: Record<TabType, string> = {
       detail: 'Expo', staff: 'Staff', booth: 'Booth',
-      dashboard: 'Dashboard', applications: 'Applications', tickets: 'Tickets',
+      dashboard: 'Dashboard', applications: 'Applications',
+      tickets: 'Tickets', announcements: 'Announcement', checkout: 'Checkout',
     };
     return labels[tab];
   };
@@ -90,13 +94,21 @@ export function EventDetailHeader({
           <path d="M2 9a3 3 0 1 1 0 6V19a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a3 3 0 1 1 0-6V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v4z" />
         </svg>
       ),
+      announcements: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 11l19-9-9 19-2-8-8-2z" />
+        </svg>
+      ),
+      checkout: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2" />
+          <line x1="2" y1="10" x2="22" y2="10" />
+        </svg>
+      ),
     };
     return icons[tab];
   };
 
-  // ── Scale constants ──
-  // Logo = 80px, cover = 40px
-  // Logo pulled up by LOGO/2 = 40px → ครึ่งบนจมใน cover, ครึ่งล่างใน white
   const LOGO = 88;
   const COVER = 88;
   const LOGO_PULL = LOGO / 2;
@@ -104,7 +116,7 @@ export function EventDetailHeader({
   return (
     <div className="sticky top-14 z-10 shadow-sm">
 
-      {/* Cover Banner — height = COVER px */}
+      {/* Cover Banner */}
       <div
         style={{
           height: `${COVER}px`,
@@ -129,7 +141,7 @@ export function EventDetailHeader({
             className="flex items-center gap-5"
             style={{ paddingTop: '8px', paddingBottom: '12px' }}
           >
-            {/* Logo — marginTop pulls it up so half sits in cover, half in white */}
+            {/* Logo */}
             <div
               style={{
                 width: `${LOGO}px`,

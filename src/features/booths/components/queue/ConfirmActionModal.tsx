@@ -26,34 +26,24 @@ export function ConfirmActionModal({
       onClick={onCancel}
     >
       <div
-        className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className={`p-6 border-b ${isComplete ? 'bg-emerald-50 border-emerald-100' : 'bg-amber-50 border-amber-100'}`}>
-          <div className="flex items-start gap-4">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 ${
-              isComplete ? 'bg-emerald-100' : 'bg-amber-100'
-            }`}>
-              {isComplete ? (
-                <CheckCircle className="w-7 h-7 text-emerald-600" />
-              ) : (
-                <SkipForward className="w-7 h-7 text-amber-600" />
-              )}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${isComplete ? 'bg-green-500' : 'bg-amber-500'}`}>
+              {isComplete ? <CheckCircle className="w-5 h-5 text-white" /> : <SkipForward className="w-5 h-5 text-white" />}
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-xl font-bold text-gray-900">
-                {isComplete ? 'ทำคิวเสร็จสิ้น?' : 'ข้ามคิว?'}
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                คิวหมายเลข #{queueNumber}
-              </p>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">{isComplete ? 'ทำคิวเสร็จสิ้น?' : 'ข้ามคิว?'}</h3>
+              <p className="text-xs text-gray-400">คิวหมายเลข #{queueNumber}</p>
             </div>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-4">
+        <div className="px-5 py-4 space-y-3">
           {isComplete ? (
             <>
               <p className="text-gray-700">
@@ -95,21 +85,19 @@ export function ConfirmActionModal({
         </div>
 
         {/* Actions */}
-        <div className="p-6 bg-gray-50 border-t border-gray-200 flex gap-3">
+        <div className="px-5 py-4 border-t border-gray-100 flex gap-3">
           <button
             onClick={onCancel}
             disabled={isProcessing}
-            className="flex-1 px-5 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-white font-medium transition disabled:opacity-50"
+            className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition disabled:opacity-50"
           >
             ยกเลิก
           </button>
           <button
             onClick={onConfirm}
             disabled={isProcessing}
-            className={`flex-1 px-5 py-3 rounded-xl font-medium transition disabled:opacity-50 ${
-              isComplete
-                ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2 ${
+              isComplete ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-amber-500 text-white hover:bg-amber-600'
             }`}
           >
             {isProcessing ? (

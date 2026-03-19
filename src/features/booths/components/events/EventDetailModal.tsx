@@ -67,12 +67,12 @@ export function EventDetailModal({
         <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
           
           {/* Blue Header */}
-          <div className="relative h-28 bg-gradient-to-br from-[#3674B5] via-[#498AC3] to-[#749BC2] p-6 flex-shrink-0">
+          <div className="relative bg-gradient-to-br from-[#3674B5] via-[#498AC3] to-[#749BC2] px-6 py-5 flex-shrink-0">
             <div className="absolute inset-0 bg-white/5" />
             <div className="relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg border border-white/30">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="w-11 h-11 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                     <line x1="16" y1="2" x2="16" y2="6"/>
                     <line x1="8" y1="2" x2="8" y2="6"/>
@@ -80,13 +80,13 @@ export function EventDetailModal({
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white drop-shadow-lg line-clamp-1">{event.Title}</h2>
-                  <p className="text-white/80 text-sm mt-0.5">รายละเอียดกิจกรรม</p>
+                  <h2 className="text-base font-bold text-white line-clamp-1">{event.Title}</h2>
+                  <p className="text-white/70 text-xs mt-0.5">รายละเอียดกิจกรรม</p>
                 </div>
               </div>
               <button onClick={onClose}
-                className="w-10 h-10 bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-colors flex items-center justify-center">
-                <X className="w-5 h-5 text-white" />
+                className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center justify-center">
+                <X className="w-4 h-4 text-white" />
               </button>
             </div>
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16" />
@@ -94,7 +94,7 @@ export function EventDetailModal({
           </div>
 
           {/* Scrollable Content */}
-          <div className="overflow-y-auto flex-1 p-6 space-y-6">
+          <div className="overflow-y-auto flex-1 p-5 space-y-5">
 
             {/* Image Gallery */}
             {allPics.length > 0 && (
@@ -201,20 +201,20 @@ export function EventDetailModal({
           </div>
 
           {/* Footer */}
-          <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3 flex-shrink-0">
+          <div className="px-5 py-4 border-t border-gray-100 flex gap-3 flex-shrink-0 bg-white">
             <button onClick={onClose}
-              className="flex-1 px-5 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-white font-medium transition-colors">
+              className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition">
               ปิด
             </button>
             {canManage && (
               <>
                 <button onClick={onEdit}
-                  className="flex items-center justify-center gap-2 px-5 py-3 bg-amber-50 text-amber-700 rounded-xl hover:bg-amber-100 font-medium transition-colors border-2 border-amber-200">
+                  className="flex-1 py-2.5 rounded-xl bg-[#FEF3C7] text-amber-600 text-sm font-semibold hover:bg-amber-100 transition flex items-center justify-center gap-2 border border-amber-200">
                   <Edit2 className="w-4 h-4" />
                   แก้ไข
                 </button>
                 <button onClick={() => setShowDeleteModal(true)}
-                  className="flex items-center justify-center gap-2 px-5 py-3 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 font-medium transition-colors border-2 border-red-200">
+                  className="flex-1 py-2.5 rounded-xl bg-red-50 text-red-500 text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2 border border-red-200">
                   <Trash2 className="w-4 h-4" />
                   ลบ
                 </button>

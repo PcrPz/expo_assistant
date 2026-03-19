@@ -326,7 +326,7 @@ export function CreateBoothModal({ expoId, onClose, onSuccess }: CreateBoothModa
                       key={opt.value}
                       type="button"
                       onClick={() => setFormData({ ...formData, status: opt.value })}
-                      className={`relative flex flex-col items-start gap-1.5 p-3.5 rounded-xl border-2 transition-all text-left ${
+                      className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-center ${
                         isSelected
                           ? 'border-[#3674B5] bg-[#EBF3FC]'
                           : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
@@ -348,7 +348,7 @@ export function CreateBoothModal({ expoId, onClose, onSuccess }: CreateBoothModa
                         {opt.desc}
                       </p>
                       {isSelected && (
-                        <div className="absolute top-2.5 right-2.5 w-4 h-4 bg-[#3674B5] rounded-full flex items-center justify-center">
+                        <div className="absolute top-2 right-2 w-4 h-4 bg-[#3674B5] rounded-full flex items-center justify-center">
                           <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
                             <polyline points="20 6 9 17 4 12"/>
                           </svg>

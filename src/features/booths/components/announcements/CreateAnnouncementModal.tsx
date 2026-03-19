@@ -94,41 +94,35 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden">
         <form onSubmit={handleSubmit}>
-          {/* Blue Header */}
-          <div className="relative h-28 bg-gradient-to-br from-[#3674B5] via-[#498AC3] to-[#749BC2] p-6">
-            <div className="absolute inset-0 bg-white/5"></div>
-            <div className="relative z-10 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg border border-white/30">
-                  <Plus className="w-7 h-7 text-white" strokeWidth={2.5} />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white drop-shadow-lg">สร้างประกาศใหม่</h2>
-                  <p className="text-white/80 text-sm mt-0.5">สร้างประกาศหรือโปรโมชั่นสำหรับบูธของคุณ</p>
-                </div>
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg,#3674B5,#498AC3)' }}>
+                <Plus className="w-5 h-5 text-white" strokeWidth={2.5} />
               </div>
-              <button
-                type="button"
-                onClick={handleClose}
-                disabled={isLoading}
-                className="w-10 h-10 bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-colors flex items-center justify-center"
-              >
-                <X className="w-5 h-5 text-white" />
-              </button>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">สร้างประกาศใหม่</h2>
+                <p className="text-xs text-gray-400">สร้างประกาศหรือโปรโมชั่นสำหรับบูธ</p>
+              </div>
             </div>
+            <button type="button" onClick={handleClose} disabled={isLoading}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition">
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
           {/* Content */}
-          <div className="p-6 space-y-5 max-h-[calc(90vh-12rem)] overflow-y-auto">
+          <div className="px-6 py-5 space-y-5 flex-1 overflow-y-auto min-h-0">
             {error && (
               <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4">
                 <p className="text-sm text-red-600 font-medium">⚠️ {error}</p>
               </div>
             )}
 
-            <div className="bg-gradient-to-br from-blue-50 to-sky-50 border-2 border-blue-200 rounded-2xl p-4">
+            <div className="bg-[#EBF3FC] border border-[#BFDBFE] rounded-xl p-3.5">
               <div className="flex gap-3">
                 <Info className="w-5 h-5 text-[#3674B5] flex-shrink-0 mt-0.5" />
                 <div>
@@ -151,7 +145,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 placeholder="เช่น โปรโมชั่นพิเศษ ลด 50%"
                 disabled={isLoading}
                 maxLength={200}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#3674B5] focus:ring-4 focus:ring-[#3674B5]/20 disabled:opacity-50 disabled:bg-gray-50 transition-all"
+                className="w-full px-4 py-3 border border-[#E2E8F0] rounded-xl focus:outline-none focus:border-[#3674B5] focus:ring-2 focus:ring-[#3674B5]/15 disabled:opacity-50 transition"
               />
               <p className="text-xs text-gray-500">{title.length}/200 ตัวอักษร</p>
             </div>
@@ -177,7 +171,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 type="button"
                 onClick={() => document.getElementById('file-upload')?.click()}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-[#498AC3] text-[#3674B5] rounded-xl hover:bg-blue-50 hover:border-[#3674B5] transition-colors font-medium disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-[#BFDBFE] text-[#3674B5] text-sm font-semibold rounded-xl hover:bg-[#EBF3FC] hover:border-[#3674B5] transition disabled:opacity-50"
               >
                 <Upload className="w-5 h-5" />
                 <span>เลือกรูปภาพ</span>
@@ -232,19 +226,19 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
 
           {/* Actions */}
-          <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
+          <div className="px-6 py-[18px] border-t border-gray-100 flex gap-3 flex-shrink-0">
             <button
               type="button"
               onClick={handleClose}
               disabled={isLoading}
-              className="flex-1 px-5 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-white font-medium transition-colors disabled:opacity-50"
+              className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition disabled:opacity-50"
             >
               ยกเลิก
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 px-5 py-3 bg-[#3674B5] text-white rounded-xl hover:bg-[#2d5d96] font-medium transition-all shadow-md hover:shadow-lg disabled:opacity-50"
+              className="flex-1 py-2.5 rounded-xl text-white text-sm font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2" style={{ background: 'linear-gradient(135deg,#3674B5,#498AC3)' }}
             >
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">

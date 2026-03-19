@@ -9,7 +9,6 @@ import type { EventRole } from '@/src/features/events/types/event.types';
  * ─────────────────────────────────────────────────────────────
  *  system_admin / owner / admin  → จัดการได้ทุกอย่างทุกบูธ
  *  staff                         → จัดการได้ทุกอย่างทุกบูธ (ยกเว้น สร้าง/ลบบูธ)
- *  event_staff                   → ดูได้อย่างเดียว (read-only ทุก tab)
  *  booth_staff (assigned)        → จัดการได้เฉพาะบูธตัวเอง
  *  booth_staff (not assigned)    → ดูได้อย่างเดียว (read-only)
  *  booth_staff_visitor           → ไม่มีสิทธิ์เข้า booth detail เลย (block ที่ page)
@@ -19,7 +18,8 @@ import type { EventRole } from '@/src/features/events/types/event.types';
 // ─── Role Groups ───────────────────────────────────────────────
 const ORGANIZER_ROLES: EventRole[] = ['system_admin', 'owner', 'admin'];
 const ALL_MANAGE_ROLES: EventRole[] = ['system_admin', 'owner', 'admin', 'staff'];
-const READ_ONLY_ROLES: EventRole[]  = ['event_staff', 'booth_staff_visitor'];
+// ลบ event_staff ออก เหลือแค่ booth_staff_visitor
+const READ_ONLY_ROLES: EventRole[]  = ['booth_staff_visitor'];
 
 // ─── Helper ────────────────────────────────────────────────────
 
@@ -61,11 +61,6 @@ export function canDeleteBooth(userRole: EventRole | undefined): boolean {
   return ORGANIZER_ROLES.includes(userRole);
 }
 
-/**
- * ดูบูธ
- * - booth_staff_visitor ไม่มีสิทธิ์ (ถูก block ที่ page level แล้ว แต่ใส่ไว้ครบ)
- * - ทุก role อื่นดูได้
- */
 export function canViewBooth(userRole: EventRole | undefined): boolean {
   if (!userRole) return false;
   if (userRole === 'booth_staff_visitor') return false;
@@ -76,7 +71,6 @@ export function canViewBooth(userRole: EventRole | undefined): boolean {
 // BOOTH STAFF MANAGEMENT
 // ============================================================
 
-/** จัดการ staff (เชิญ/ลบ) */
 export function canManageBoothStaff(
   userRole: EventRole | undefined,
   isAssignedStaff: boolean
@@ -95,7 +89,6 @@ export function canAddStaffToBooth(
   return canManageBoothStaff(userRole, isAssignedStaff);
 }
 
-/** ลบ staff — booth_staff ลบตัวเองไม่ได้ */
 export function canRemoveStaffFromBooth(
   userRole: EventRole | undefined,
   isAssignedStaff: boolean,
@@ -116,7 +109,6 @@ export function canRemoveStaffFromBooth(
 // TAB VISIBILITY
 // ============================================================
 
-/** Staff Tab */
 export function canViewStaffTab(
   userRole: EventRole | undefined,
   isAssignedStaff: boolean
@@ -124,9 +116,6 @@ export function canViewStaffTab(
   return canManageBoothStaff(userRole, isAssignedStaff);
 }
 
-/** Documents / Products / Announcements / Queue Tabs
- *  ทุกคนดูได้ ยกเว้น booth_staff_visitor (ถูก block ก่อนถึง tab แล้ว)
- */
 export function canViewContentTabs(
   userRole: EventRole | undefined,
   isAssignedStaff: boolean
@@ -160,19 +149,15 @@ export function canManageDocuments(
 export function canCreateDocument(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageDocuments(userRole, isAssignedStaff);
 }
-
 export function canEditDocument(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageDocuments(userRole, isAssignedStaff);
 }
-
 export function canDeleteDocument(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageDocuments(userRole, isAssignedStaff);
 }
-
 export function canPublishDocument(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageDocuments(userRole, isAssignedStaff);
 }
-
 export function canDownloadDocument(userRole: EventRole | undefined): boolean {
   if (!userRole) return false;
   if (userRole === 'booth_staff_visitor') return false;
@@ -200,11 +185,9 @@ export function canManageProducts(role?: EventRole, isAssignedStaff?: boolean): 
 export function canCreateProduct(role?: EventRole, isAssignedStaff?: boolean): boolean {
   return canManageProducts(role, isAssignedStaff);
 }
-
 export function canEditProduct(role?: EventRole, isAssignedStaff?: boolean): boolean {
   return canManageProducts(role, isAssignedStaff);
 }
-
 export function canDeleteProduct(role?: EventRole, isAssignedStaff?: boolean): boolean {
   return canManageProducts(role, isAssignedStaff);
 }
@@ -233,15 +216,12 @@ export function canManageAnnouncements(
 export function canCreateAnnouncement(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageAnnouncements(userRole, isAssignedStaff);
 }
-
 export function canEditAnnouncement(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageAnnouncements(userRole, isAssignedStaff);
 }
-
 export function canDeleteAnnouncement(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageAnnouncements(userRole, isAssignedStaff);
 }
-
 export function canPublishAnnouncement(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageAnnouncements(userRole, isAssignedStaff);
 }
@@ -270,19 +250,15 @@ export function canManageQueue(
 export function canCreateQueue(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageQueue(userRole, isAssignedStaff);
 }
-
 export function canEditQueue(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageQueue(userRole, isAssignedStaff);
 }
-
 export function canDeleteQueue(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageQueue(userRole, isAssignedStaff);
 }
-
 export function canCallNextQueue(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageQueue(userRole, isAssignedStaff);
 }
-
 export function canToggleQueueStatus(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageQueue(userRole, isAssignedStaff);
 }
@@ -311,15 +287,12 @@ export function canManageForms(
 export function canCreateForm(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageForms(userRole, isAssignedStaff);
 }
-
 export function canEditForm(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageForms(userRole, isAssignedStaff);
 }
-
 export function canDeleteForm(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageForms(userRole, isAssignedStaff);
 }
-
 export function canViewFormResponses(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   if (!userRole) return false;
   if (userRole === 'booth_staff_visitor') return false;
@@ -329,13 +302,11 @@ export function canViewFormResponses(userRole: EventRole | undefined, isAssigned
 }
 
 // ============================================================
-// HELPERS
+// EVENTS
 // ============================================================
 
-/** รวม permissions ทั้งหมดในออบเจ็กต์เดียว */
-// ─── Events ───────────────────────────────────────────────────────────────────
 export function canViewEvents(userRole: EventRole | undefined): boolean {
-  return true; // ทุก role ที่ผ่านเข้ามาดูได้
+  return true;
 }
 
 export function canManageEvents(
@@ -351,14 +322,16 @@ export function canManageEvents(
 export function canCreateEvent(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageEvents(userRole, isAssignedStaff);
 }
-
 export function canEditEvent(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageEvents(userRole, isAssignedStaff);
 }
-
 export function canDeleteEvent(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageEvents(userRole, isAssignedStaff);
 }
+
+// ============================================================
+// HELPERS
+// ============================================================
 
 export function getBoothPermissions(
   userRole: EventRole | undefined,
@@ -366,48 +339,38 @@ export function getBoothPermissions(
   currentUserEmail?: string | undefined
 ) {
   return {
-    canView:            canViewBooth(userRole),
-    canCreate:          canCreateBooth(userRole),
-    canEdit:            canEditBooth(userRole, isAssignedStaff),
-    canDelete:          canDeleteBooth(userRole),
-    canManageStaff:     canManageBoothStaff(userRole, isAssignedStaff),
-    canAddStaff:        canAddStaffToBooth(userRole, isAssignedStaff),
-    canRemoveStaff:     (targetStaffEmail: string) =>
-                          canRemoveStaffFromBooth(userRole, isAssignedStaff, targetStaffEmail, currentUserEmail),
-    canViewStaffTab:    canViewStaffTab(userRole, isAssignedStaff),
-    canViewContentTabs: canViewContentTabs(userRole, isAssignedStaff),
-    // Documents
-    canViewDocuments:   canViewDocuments(userRole),
-    canManageDocuments: canManageDocuments(userRole, isAssignedStaff),
-    // Products
-    canViewProducts:    canViewProducts(userRole),
-    canManageProducts:  canManageProducts(userRole, isAssignedStaff),
-    // Announcements
+    canView:                canViewBooth(userRole),
+    canCreate:              canCreateBooth(userRole),
+    canEdit:                canEditBooth(userRole, isAssignedStaff),
+    canDelete:              canDeleteBooth(userRole),
+    canManageStaff:         canManageBoothStaff(userRole, isAssignedStaff),
+    canAddStaff:            canAddStaffToBooth(userRole, isAssignedStaff),
+    canRemoveStaff:         (targetStaffEmail: string) =>
+                              canRemoveStaffFromBooth(userRole, isAssignedStaff, targetStaffEmail, currentUserEmail),
+    canViewStaffTab:        canViewStaffTab(userRole, isAssignedStaff),
+    canViewContentTabs:     canViewContentTabs(userRole, isAssignedStaff),
+    canViewDocuments:       canViewDocuments(userRole),
+    canManageDocuments:     canManageDocuments(userRole, isAssignedStaff),
+    canViewProducts:        canViewProducts(userRole),
+    canManageProducts:      canManageProducts(userRole, isAssignedStaff),
     canViewAnnouncements:   canViewAnnouncements(userRole),
     canManageAnnouncements: canManageAnnouncements(userRole, isAssignedStaff),
-    // Queue
-    canViewQueue:    canViewQueue(userRole),
-    canManageQueue:  canManageQueue(userRole, isAssignedStaff),
-    // Forms
-    canViewForms:         canViewForms(userRole),
-    canManageForms:       canManageForms(userRole, isAssignedStaff),
-    canViewFormResponses: canViewFormResponses(userRole, isAssignedStaff),
-    // Events
-    canViewEvents:    canViewEvents(userRole),
-    canManageEvents:  canManageEvents(userRole, isAssignedStaff),
+    canViewQueue:           canViewQueue(userRole),
+    canManageQueue:         canManageQueue(userRole, isAssignedStaff),
+    canViewForms:           canViewForms(userRole),
+    canManageForms:         canManageForms(userRole, isAssignedStaff),
+    canViewFormResponses:   canViewFormResponses(userRole, isAssignedStaff),
+    canViewEvents:          canViewEvents(userRole),
+    canManageEvents:        canManageEvents(userRole, isAssignedStaff),
   };
 }
 
-/** เช็คว่าเป็น organizer หรือไม่ */
 export function isOrganizer(userRole: EventRole | undefined): boolean {
   if (!userRole) return false;
   return ALL_MANAGE_ROLES.includes(userRole);
 }
 
-/**
- * @deprecated ระบบเก่า — ไม่ใช้แล้ว
- * ใช้ booth_group_id เทียบกัน ใน BoothDetailClient แทน
- */
+/** @deprecated ใช้ booth_group_id เทียบแทน */
 export function isUserAssignedToBooth(
   userEmail: string | undefined,
   boothStaffList: Array<{ email: string; is_staff: boolean }>

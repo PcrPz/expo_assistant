@@ -115,14 +115,14 @@ export const NOTI_CONFIG: Record<NotiType, NotiConfig> = {
     icon: ClipboardList,
     iconColor: '#5B8FC9',
     iconBg: '#EEF4FB',
-    group: 'A',
+    group: 'B',
     label: 'มีคำขอร่วมออกบูธใหม่',
   },
   booth_invite_join: {
     icon: MailOpen,
     iconColor: '#5B8FC9',
     iconBg: '#EEF4FB',
-    group: 'A',
+    group: 'B',
     label: 'ได้รับคำเชิญร่วมออกบูธ',
   },
   booth_response_join: {

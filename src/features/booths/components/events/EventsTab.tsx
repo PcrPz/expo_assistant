@@ -113,17 +113,17 @@ export function EventsTab({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">กิจกรรมของบูธ</h2>
-          <p className="text-sm text-gray-500 mt-1">จัดการกิจกรรมและอีเวนต์ต่างๆ ของบูธ</p>
+          <h2 className="text-lg font-bold text-gray-900">กิจกรรมของบูธ</h2>
+          <p className="text-sm text-gray-400 mt-0.5">จัดการกิจกรรมและอีเวนต์ต่างๆ ของบูธ</p>
         </div>
         {canCreate && (
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3674B5] text-white rounded-lg hover:bg-[#2d5d96] transition font-medium"
+            className="flex items-center gap-2 px-4 py-2 bg-[#3674B5] text-white text-sm font-semibold rounded-xl hover:bg-[#2d5a8f] transition flex-shrink-0"
           >
             <Plus className="w-4 h-4" />
             สร้างกิจกรรม
@@ -140,13 +140,13 @@ export function EventsTab({
             placeholder="ค้นหากิจกรรม..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-9 pr-4 py-2.5 text-[14px] border border-[#E2E8F0] rounded-xl focus:outline-none focus:border-[#3674B5] focus:ring-2 focus:ring-[#3674B5]/15 transition bg-white"
           />
         </div>
         <select
           value={dateFilter}
           onChange={(e) => setDateFilter(e.target.value as typeof dateFilter)}
-          className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white w-full sm:w-[180px]"
+          className="px-4 py-2.5 text-[14px] border border-[#E2E8F0] rounded-xl focus:outline-none focus:border-[#3674B5] bg-white w-full sm:w-[180px]"
         >
           <option value="all">ทั้งหมด</option>
           <option value="upcoming">กำลังจะมาถึง</option>
@@ -163,8 +163,8 @@ export function EventsTab({
           ))}
         </div>
       ) : sortedEvents.length === 0 ? (
-        <div className="text-center py-16 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white shadow-sm mb-4">
+        <div className="text-center py-12 bg-white rounded-2xl border border-[#E2E8F0]">
+          <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#93C5FD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
               <line x1="16" y1="2" x2="16" y2="6"/>
@@ -172,10 +172,10 @@ export function EventsTab({
               <line x1="3" y1="10" x2="21" y2="10"/>
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <h3 className="text-sm font-semibold text-gray-500">
             {searchQuery || dateFilter !== 'all' ? 'ไม่พบกิจกรรมที่ค้นหา' : 'ยังไม่มีกิจกรรม'}
           </h3>
-          <p className="text-gray-600 mb-4">
+          <p className="text-xs text-gray-400 mt-1">
             {searchQuery || dateFilter !== 'all'
               ? 'ลองเปลี่ยนคำค้นหาหรือตัวกรองของคุณ'
               : canCreate
@@ -185,7 +185,7 @@ export function EventsTab({
           {canCreate && !searchQuery && dateFilter === 'all' && (
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#3674B5] text-white rounded-lg hover:bg-[#2d5d96] transition font-medium"
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#3674B5] text-white text-sm font-semibold rounded-xl hover:bg-[#2d5a8f] transition"
             >
               <Plus className="w-4 h-4" />
               สร้างกิจกรรมแรก

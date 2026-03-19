@@ -76,44 +76,35 @@ export function AnnouncementDetailModal({
   return (
     <>
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
-          {/* Blue Gradient Header */}
-          <div className="relative h-32 bg-gradient-to-br from-[#3674B5] via-[#498AC3] to-[#749BC2] p-6">
-            <div className="absolute inset-0 bg-white/5"></div>
-            <div className="relative z-10 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg border border-white/30">
-                  <ImageIcon className="w-8 h-8 text-white" strokeWidth={2.5} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    {isPublished ? (
-                      <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500 text-white rounded-full text-xs font-semibold">
-                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-                        เผยแพร่แล้ว
-                      </div>
-                    ) : (
-                      <div className="px-3 py-1 bg-white/30 backdrop-blur-sm text-white rounded-full text-xs font-semibold">
-                        ฉบับร่าง
-                      </div>
-                    )}
-                  </div>
-                  <h2 className="text-2xl font-bold text-white drop-shadow-lg">
-                    {announcement.Title}
-                  </h2>
+        <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg,#3674B5,#498AC3)' }}>
+                <ImageIcon className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-gray-900 line-clamp-1">{announcement.Title}</h2>
+                <div className="flex items-center gap-2 mt-0.5">
+                  {isPublished ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-600">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>เผยแพร่แล้ว
+                    </span>
+                  ) : (
+                    <span className="text-[11px] font-semibold text-gray-400">ฉบับร่าง</span>
+                  )}
                 </div>
               </div>
-              <button
-                onClick={onClose}
-                className="w-10 h-10 bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-colors flex items-center justify-center"
-              >
-                <X className="w-5 h-5 text-white" />
-              </button>
             </div>
+            <button onClick={onClose}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition">
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
           {/* Content */}
-          <div className="p-6 space-y-6 max-h-[calc(90vh-12rem)] overflow-y-auto">
+          <div className="px-6 py-5 space-y-5 overflow-y-auto flex-1 min-h-0">
             {/* Date */}
             {announcement.PublishAt && (
               <div className="flex items-center gap-3 text-gray-600">
@@ -137,7 +128,7 @@ export function AnnouncementDetailModal({
 
             {/* Detail */}
             {announcement.Detail && (
-              <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-2xl p-6 border border-blue-100">
+              <div className="bg-[#EBF3FC] rounded-xl p-4 border border-[#BFDBFE]">
                 <h3 className="text-sm font-semibold text-[#3674B5] mb-3">รายละเอียด</h3>
                 <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
                   {announcement.Detail}
@@ -191,10 +182,10 @@ export function AnnouncementDetailModal({
           </div>
 
           {/* Actions Footer */}
-          <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3 flex-wrap">
+          <div className="px-5 py-4 border-t border-gray-100 flex gap-2 flex-wrap flex-shrink-0">
             <button
               onClick={onClose}
-              className="px-5 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-white font-medium transition-colors"
+              className="px-4 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition"
             >
               ปิด
             </button>
@@ -204,7 +195,7 @@ export function AnnouncementDetailModal({
               <button
                 onClick={() => setShowPublishConfirm(true)}
                 disabled={isPublishing}
-                className="flex items-center gap-2 px-5 py-3 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 font-medium transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2.5 bg-green-50 text-green-700 border border-green-200 text-sm font-semibold rounded-xl hover:bg-green-100 transition disabled:opacity-50"
               >
                 <Send className="w-4 h-4" />
                 เผยแพร่ประกาศ
@@ -215,7 +206,7 @@ export function AnnouncementDetailModal({
               <>
                 <button
                   onClick={onEdit}
-                  className="flex items-center gap-2 px-5 py-3 bg-amber-100 text-amber-700 rounded-xl hover:bg-amber-200 font-medium transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-[#FEF3C7] text-amber-600 border border-amber-200 text-sm font-semibold rounded-xl hover:bg-amber-100 transition"
                 >
                   <Edit2 className="w-4 h-4" />
                   แก้ไข
@@ -223,7 +214,7 @@ export function AnnouncementDetailModal({
 
                 <button
                   onClick={() => setShowDeleteModal(true)}
-                  className="flex items-center gap-2 px-5 py-3 bg-red-100 text-red-700 rounded-xl hover:bg-red-200 font-medium transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-500 border border-red-200 text-sm font-semibold rounded-xl hover:bg-red-100 transition"
                 >
                   <Trash2 className="w-4 h-4" />
                   ลบ
@@ -269,16 +260,16 @@ export function AnnouncementDetailModal({
           onClick={() => setShowPublishConfirm(false)}
         >
           <div 
-            className="bg-white rounded-3xl w-full max-w-md shadow-2xl"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 border-b border-gray-100">
               <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                  <Send className="w-7 h-7 text-emerald-600" />
+                <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center flex-shrink-0">
+                  <Send className="w-5 h-5 text-green-500" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">เผยแพร่ประกาศ?</h3>
+                  <h3 className="text-lg font-bold text-gray-900">เผยแพร่ประกาศ</h3>
                   <p className="text-sm text-gray-500 mt-1">การดำเนินการนี้ไม่สามารถย้อนกลับได้</p>
                 </div>
               </div>
@@ -301,18 +292,18 @@ export function AnnouncementDetailModal({
               </div>
             </div>
 
-            <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3 rounded-b-3xl">
+            <div className="px-5 py-[18px] border-t border-gray-100 flex gap-3">
               <button
                 onClick={() => setShowPublishConfirm(false)}
                 disabled={isPublishing}
-                className="flex-1 px-5 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-white font-medium transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition disabled:opacity-50"
               >
                 ยกเลิก
               </button>
               <button
                 onClick={handlePublish}
                 disabled={isPublishing}
-                className="flex-1 px-5 py-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 font-medium transition-all shadow-md hover:shadow-lg disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl bg-green-500 text-white text-sm font-semibold hover:bg-green-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isPublishing ? (
                   <span className="flex items-center justify-center gap-2">
@@ -335,13 +326,13 @@ export function AnnouncementDetailModal({
           onClick={() => setShowDeleteModal(false)}
         >
           <div 
-            className="bg-white rounded-3xl w-full max-w-md shadow-2xl"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 border-b border-gray-100">
               <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center flex-shrink-0">
-                  <Trash2 className="w-7 h-7 text-red-600" />
+                <div className="w-10 h-10 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+                  <Trash2 className="w-5 h-5 text-red-500" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900">ลบประกาศ?</h3>
@@ -359,18 +350,18 @@ export function AnnouncementDetailModal({
               </div>
             </div>
 
-            <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3 rounded-b-3xl">
+            <div className="px-5 py-[18px] border-t border-gray-100 flex gap-3">
               <button
                 onClick={() => setShowDeleteModal(false)}
                 disabled={isDeleting}
-                className="flex-1 px-5 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-white font-medium transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition disabled:opacity-50"
               >
                 ยกเลิก
               </button>
               <button
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
-                className="flex-1 px-5 py-3 bg-red-100 text-red-700 rounded-xl hover:bg-red-200 font-medium transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition disabled:opacity-50"
               >
                 {isDeleting ? (
                   <span className="flex items-center justify-center gap-2">

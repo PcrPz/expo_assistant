@@ -14,7 +14,7 @@ const GROUP_A_TYPES: NotiItem['Type'][] = [
   'expo_invitation',
   'booth_group_invitation',
   'booth_request_join',
-  'booth_invite_join',
+
 ];
 
 export function useNotification() {

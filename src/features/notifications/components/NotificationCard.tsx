@@ -108,7 +108,7 @@ export function NotificationCard({ noti, onMarkRead, onMarkAccepted }: Props) {
           case 'expo_payment_confirmed': {
             const expo = await getExpoInfo(d.ExpoID);
             if (!expo || cancelled) break;
-            setDisplayTitle(`ชำระค่า ${d.Title ?? ''} งาน ${expo.Title} สำเร็จ`);
+            setDisplayTitle(`ชำระค่าใช้จ่ายภายในงาน ${expo.Title} สำเร็จ`);
             setSubtext(`${expo.Title} · ${timeAgo(noti.CreatedAt)}`);
             break;
           }
@@ -234,13 +234,13 @@ export function NotificationCard({ noti, onMarkRead, onMarkAccepted }: Props) {
       case 'expo_payment_confirmed':
         router.push(`/events/${detail.ExpoID}`); break;
       case 'expo_close_payment':
-        router.push(`/events/${detail.ExpoID}/close-payment`); break;
+        router.push(`/events/${detail.ExpoID}?tab=checkout`); break;
       case 'expo_noti':
         router.push(`/events/${detail.ExpoID}/announcements/${detail.ExpoNotiID}`); break;
       case 'booth_request_join':
         router.push(`/events/${detail.ExpoID}?tab=applications`); break;
       case 'booth_invite_join':
-        router.push(`/booths/booth-group/${detail.BoothGroupID}?tab=invitations`); break;
+        router.push('/booths/my-invitations'); break;
     }
   }
 
@@ -261,9 +261,7 @@ export function NotificationCard({ noti, onMarkRead, onMarkAccepted }: Props) {
         ok = await respondExpoInvitation(noti.NotiID, accepted); break;
       case 'booth_group_invitation':
         ok = await respondBoothGroupInvitation(noti.NotiID, accepted); break;
-      case 'booth_request_join':
-      case 'booth_invite_join':
-        ok = await respondJoinBooth(detail.RequestID, accepted); break;
+
     }
 
     if (ok) {

@@ -13,6 +13,12 @@ interface EditTicketModalProps {
   onSuccess: () => void;
 }
 
+const TicketIcon = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 9a3 3 0 1 1 0 6V19a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a3 3 0 1 1 0-6V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v4z"/>
+  </svg>
+);
+
 export function EditTicketModal({ expoID, ticket, onClose, onSuccess }: EditTicketModalProps) {
   const [title, setTitle] = useState(ticket.Title);
   const [detail, setDetail] = useState(ticket.Detail ?? '');
@@ -43,10 +49,16 @@ export function EditTicketModal({ expoID, ticket, onClose, onSuccess }: EditTick
       <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100">
-          <div>
-            <h3 className="font-bold text-gray-900">แก้ไขประเภทตั๋ว</h3>
-            <p className="text-xs text-gray-400 mt-0.5 max-w-[260px] truncate">{ticket.Title}</p>
+        <div className="flex items-center justify-between px-6 py-[18px] border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg, #3674B5, #498AC3)' }}>
+              <TicketIcon />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-gray-900">แก้ไขประเภทตั๋ว</h3>
+              <p className="text-xs text-gray-400 mt-0.5 max-w-[240px] truncate">{ticket.Title}</p>
+            </div>
           </div>
           <button onClick={onClose} disabled={isSubmitting}
             className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition disabled:opacity-40">
@@ -57,38 +69,38 @@ export function EditTicketModal({ expoID, ticket, onClose, onSuccess }: EditTick
         {/* Body */}
         <div className="px-6 py-5 space-y-5">
           {error && (
-            <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2.5">
+            <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2.5">
               <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />{error}
             </div>
           )}
 
           {/* Name */}
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-semibold text-gray-700">
               ชื่อประเภทตั๋ว <span className="text-red-400">*</span>
             </label>
             <input
               autoFocus type="text" value={title}
               onChange={e => { setTitle(e.target.value); setError(''); }}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#3674B5]/25 focus:border-[#3674B5] bg-gray-50 hover:bg-white transition-colors"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[#3674B5]/20 focus:border-[#3674B5] bg-gray-50 hover:bg-white transition-colors"
             />
           </div>
 
           {/* Detail */}
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-semibold text-gray-700">
               รายละเอียด <span className="font-normal text-gray-400 text-xs">— ไม่บังคับ</span>
             </label>
             <textarea
               value={detail} onChange={e => setDetail(e.target.value)}
               rows={3}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#3674B5]/25 focus:border-[#3674B5] bg-gray-50 hover:bg-white transition-colors resize-none"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[#3674B5]/20 focus:border-[#3674B5] bg-gray-50 hover:bg-white transition-colors resize-none"
             />
           </div>
 
           {/* Price */}
           <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-semibold text-gray-700">
               ราคา <span className="text-red-400">*</span>
             </label>
             <div className="relative flex items-center">
@@ -96,7 +108,7 @@ export function EditTicketModal({ expoID, ticket, onClose, onSuccess }: EditTick
               <input
                 type="number" value={price} min="0" step="0.01"
                 onChange={e => { setPrice(e.target.value); setError(''); }}
-                className="w-full pl-8 pr-20 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#3674B5]/25 focus:border-[#3674B5] bg-gray-50 hover:bg-white transition-colors"
+                className="w-full pl-8 pr-20 py-3 border border-gray-200 rounded-xl text-[15px] focus:outline-none focus:ring-2 focus:ring-[#3674B5]/20 focus:border-[#3674B5] bg-gray-50 hover:bg-white transition-colors"
               />
               {isFree && (
                 <span className="absolute right-3 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full pointer-events-none">
@@ -109,13 +121,14 @@ export function EditTicketModal({ expoID, ticket, onClose, onSuccess }: EditTick
         </div>
 
         {/* Footer */}
-        <div className="flex gap-2.5 px-6 pb-6">
+        <div className="flex gap-2.5 px-6 py-[18px] border-t border-gray-100">
           <button onClick={onClose} disabled={isSubmitting}
-            className="flex-1 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-50 transition disabled:opacity-50">
+            className="flex-1 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50 transition disabled:opacity-50">
             ยกเลิก
           </button>
           <button onClick={handleSubmit} disabled={isSubmitting}
-            className="flex-1 py-2.5 bg-[#3674B5] text-white rounded-xl text-sm font-medium hover:bg-[#2d5d96] transition shadow-sm disabled:opacity-50 flex items-center justify-center gap-2">
+            className="flex-1 py-2.5 text-white rounded-xl text-sm font-semibold transition shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
+            style={{ background: 'linear-gradient(135deg, #3674B5, #498AC3)' }}>
             {isSubmitting
               ? <><div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />กำลังบันทึก...</>
               : <><Save className="w-4 h-4" />บันทึก</>}

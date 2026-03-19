@@ -35,10 +35,10 @@ const TYPE_CONFIG: Record<string, { label: string; color: string; bg: string; ic
 };
 
 const STATUS_CONFIG: Record<string, { label: string; dot: string }> = {
-  available:   { label: 'ว่าง',       dot: '#22C55E' },
+  available:   { label: 'ว่าง',         dot: '#22C55E' },
   unavailable: { label: 'เชิญเท่านั้น', dot: '#9CA3AF' },
-  pending:     { label: 'รอชำระเงิน', dot: '#F59E0B' },
-  reserved:    { label: 'จองแล้ว',    dot: '#EF4444' },
+  pending:     { label: 'รอชำระเงิน',   dot: '#F59E0B' },
+  reserved:    { label: 'จองแล้ว',      dot: '#EF4444' },
 };
 
 export function BoothTab({ expoId, role }: BoothTabProps) {
@@ -108,7 +108,15 @@ export function BoothTab({ expoId, role }: BoothTabProps) {
   return (
     <div className="space-y-4">
 
-      {/* ── Top bar: pills + toolbar in one card ── */}
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">จัดการบูธในงาน</h2>
+          <p className="text-sm text-gray-400 mt-0.5">รายการบูธทั้งหมดภายในงาน</p>
+        </div>
+      </div>
+
+      {/* ── Top bar ── */}
       <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
 
         {/* Row 1 — Stat pills (organizer only) */}
@@ -131,7 +139,6 @@ export function BoothTab({ expoId, role }: BoothTabProps) {
           </div>
         )}
 
-        {/* Divider */}
         {canCreate && booths.length > 0 && <div className="border-t border-gray-100 mx-4"/>}
 
         {/* Row 2 — Toolbar */}
@@ -194,18 +201,32 @@ export function BoothTab({ expoId, role }: BoothTabProps) {
             </button>
           </div>
 
-          {/* Create */}
+          {/* ── Explore + Create (organizer only) ── */}
           {canCreate && (
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="ml-auto flex items-center gap-2 px-4 py-2.5 text-white text-sm font-semibold rounded-xl transition shadow-sm hover:shadow-md hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg, #3674B5, #498AC3)' }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              สร้างบูธ
-            </button>
+            <div className="ml-auto flex items-center gap-2">
+              {/* สำรวจบูธ */}
+              <button
+                onClick={() => router.push(`/events/${expoId}/explore-booths`)}
+                className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border-2 border-[#3674B5] text-[#3674B5] hover:bg-[#3674B5] hover:text-white transition"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+                สำรวจบูธ
+              </button>
+
+              {/* สร้างบูธ */}
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="flex items-center gap-2 px-4 py-2.5 text-white text-sm font-semibold rounded-xl transition shadow-sm hover:shadow-md hover:opacity-90"
+                style={{ background: 'linear-gradient(135deg, #3674B5, #498AC3)' }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                สร้างบูธ
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -263,7 +284,7 @@ export function BoothTab({ expoId, role }: BoothTabProps) {
   );
 }
 
-// ── Section ──────────────────────────────────────────────────────
+// ── Section ───────────────────────────────────────────────────
 function Section({ title, count, booths, viewMode, isMyBooth, onClickBooth }: {
   title: string; count: number; accentColor: string;
   booths: Booth[]; viewMode: 'grid' | 'list'; isMyBooth: boolean;
@@ -292,7 +313,7 @@ function Section({ title, count, booths, viewMode, isMyBooth, onClickBooth }: {
   );
 }
 
-// ── Booth Card ───────────────────────────────────────────────────
+// ── Booth Card ────────────────────────────────────────────────
 function BoothCard({ booth, isMyBooth, viewMode, onClick }: {
   booth: Booth; isMyBooth: boolean; viewMode: 'grid' | 'list'; onClick: () => void;
 }) {
@@ -302,7 +323,7 @@ function BoothCard({ booth, isMyBooth, viewMode, onClick }: {
   const displayName = booth.title?.trim() ? booth.title : booth.booth_no;
   const isNameFromTitle = !!booth.title?.trim();
 
-  // ── LIST ─────────────────────────────────────────────────────
+  // ── LIST ─────────────────────────────────────────────────
   if (viewMode === 'list') {
     return (
       <div
@@ -356,7 +377,7 @@ function BoothCard({ booth, isMyBooth, viewMode, onClick }: {
     );
   }
 
-  // ── GRID ─────────────────────────────────────────────────────
+  // ── GRID ─────────────────────────────────────────────────
   return (
     <div
       onClick={onClick}
@@ -389,21 +410,18 @@ function BoothCard({ booth, isMyBooth, viewMode, onClick }: {
 
         {thumbnailUrl && <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"/>}
 
-        {/* Type badge */}
         <div className="absolute top-2 left-2">
           <span className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold backdrop-blur-sm" style={{ backgroundColor: `${cfg.color}CC`, color: 'white' }}>
             {cfg.icon}{cfg.label}
           </span>
         </div>
 
-        {/* My badge */}
         {isMyBooth && (
           <div className="absolute top-2 right-2">
             <span className="px-2 py-1 bg-white/90 text-[#3674B5] text-[10px] font-bold rounded-lg shadow backdrop-blur-sm">ของฉัน</span>
           </div>
         )}
 
-        {/* Status */}
         <div className="absolute bottom-2 right-2 flex items-center gap-1.5 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm">
           <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: statusCfg.dot }}/>
           <span className="text-[10px] font-semibold text-gray-700">{statusCfg.label}</span>

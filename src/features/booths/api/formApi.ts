@@ -186,6 +186,73 @@ export async function submitFormAnswer(
   return await response.json();
 }
 
+// ══════════════════════════════════════════════════════════════
+// FORM RESULTS — 3 APIs จาก booth-dashboard
+// ══════════════════════════════════════════════════════════════
+
+const DASH_URL = (expoId: string, boothId: string) =>
+  `${API_URL}/booth-dashboard/${expoId}/${boothId}`;
+
+/**
+ * Get form average rating per question
+ * GET /booth-dashboard/:expoID/:boothID/form-avg
+ * Response: [{ ResponseID, Title, AverageRating, ResponseCount }]
+ */
+export async function getFormAvg(expoId: string, boothId: string) {
+  try {
+    const res = await fetchWithAuth(`${DASH_URL(expoId, boothId)}/form-avg`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (Array.isArray(data) ? data : []).map((d: any) => ({
+      responseId:    String(d.ResponseID   ?? d.response_id   ?? ''),
+      title:         d.Title              ?? d.title          ?? '',
+      averageRating: parseFloat(d.AverageRating ?? d.average_rating ?? 0),
+      responseCount: d.ResponseCount      ?? d.response_count ?? 0,
+    }));
+  } catch { return []; }
+}
+
+/**
+ * Get rating distribution per question
+ * GET /booth-dashboard/:expoID/:boothID/form-rating-count
+ * Response: [{ question_no, question_title, "1":n, "2":n, "3":n, "4":n, "5":n }]
+ */
+export async function getFormRatingCount(expoId: string, boothId: string) {
+  try {
+    const res = await fetchWithAuth(`${DASH_URL(expoId, boothId)}/form-rating-count`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (Array.isArray(data) ? data : []).map((d: any) => ({
+      questionNo:    String(d.question_no ?? d.QuestionNo ?? ''),
+      questionTitle: d.question_title ?? d.QuestionTitle ?? '',
+      rating1: d['1'] ?? 0,
+      rating2: d['2'] ?? 0,
+      rating3: d['3'] ?? 0,
+      rating4: d['4'] ?? 0,
+      rating5: d['5'] ?? 0,
+    }));
+  } catch { return []; }
+}
+
+/**
+ * Get raw form responses (text answers + metadata)
+ * GET /booth-dashboard/:expoID/:boothID/form-response
+ * Response: { questions: { "1": "title" }, responses: [{ user_id, age_group, gender, "1": "val" }] }
+ */
+export async function getFormResponse(expoId: string, boothId: string) {
+  try {
+    const res = await fetchWithAuth(`${DASH_URL(expoId, boothId)}/form-response`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return {
+      questions: (data.questions ?? {}) as Record<string, string>,
+      responses: (data.responses ?? []) as Record<string, string>[],
+    };
+  } catch { return null; }
+}
+
+// ══════════════════════════════════════════════════════════════
+
 /**
  * Get form results (สรุปผลคำตอบ)
  * ⚠️ MOCK FUNCTION - Backend ยังไม่มี API นี้

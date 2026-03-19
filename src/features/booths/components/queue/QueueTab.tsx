@@ -83,7 +83,7 @@ export function QueueTab({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
       <QueueHeader
         canCreate={canCreate}
@@ -93,17 +93,17 @@ export function QueueTab({
 
       {/* Empty State */}
       {queues.length === 0 ? (
-        <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl border-2 border-slate-200 p-16">
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] p-10">
           <div className="text-center max-w-md mx-auto">
-            <div className="w-20 h-20 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+              <svg className="w-7 h-7 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">
+            <h3 className="text-sm font-semibold text-gray-500 mb-1">
               ยังไม่มีระบบคิว
             </h3>
-            <p className="text-slate-600 mb-6">
+            <p className="text-xs text-gray-400 mb-0">
               {canCreate 
                 ? 'เริ่มต้นสร้างระบบคิวเพื่อจัดการผู้เข้าชมบูธของคุณ'
                 : 'ยังไม่มีระบบคิวในบูธนี้'}
@@ -111,7 +111,7 @@ export function QueueTab({
             {canCreate && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#3674B5] to-[#498AC3] text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all font-medium"
+                className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#3674B5] text-white text-sm font-semibold rounded-xl hover:bg-[#2d5a8f] transition"
               >
                 <Plus className="w-5 h-5" />
                 สร้างระบบคิว
@@ -120,7 +120,7 @@ export function QueueTab({
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Left: Queue List */}
           <div className="lg:col-span-1">
             <QueueList

@@ -9,7 +9,6 @@ export type EventRole =
   | 'owner'               // เจ้าของงาน - คนสร้างงาน (มีเพียงคนเดียว)
   | 'admin'               // ผู้จัดการ - จัดการงาน
   | 'staff'               // เจ้าหน้าที่
-  | 'event_staff'         // เจ้าหน้าที่งาน
   | 'booth_staff'         // ผู้ออกบูธ (ชำระเงินแล้ว มีบูธในงาน)
   | 'booth_staff_visitor' // booth_manager ที่เข้าดูข้อมูลงาน (read-only)
   | null
@@ -103,7 +102,7 @@ export interface CreateEventResponse {
 // ============================================
 
 export function isEventOrganizer(role: EventRole): boolean {
-  return ['system_admin', 'owner', 'admin', 'staff', 'event_staff'].includes(role || '');
+  return ['system_admin', 'owner', 'admin', 'staff'].includes(role || '');
 }
 
 export function isBoothStaff(role: EventRole): boolean {
@@ -143,10 +142,10 @@ export function canEditAdmin(role: EventRole): boolean {
 export function canChangeStaffRole(userRole: EventRole, targetRole: EventRole): boolean {
   if (userRole === 'system_admin') return true;
   if (userRole === 'owner' && targetRole !== 'system_admin') return true;
-  if (userRole === 'admin' && ['staff', 'event_staff', 'booth_staff'].includes(targetRole || '')) {
+  if (userRole === 'admin' && ['staff', 'booth_staff'].includes(targetRole || '')) {
     return true;
   }
-  if (userRole === 'staff' && ['event_staff', 'booth_staff'].includes(targetRole || '')) {
+  if (userRole === 'staff' && ['booth_staff'].includes(targetRole || '')) {
     return true;
   }
   return false;
@@ -158,22 +157,24 @@ export function canRemoveStaff(userRole: EventRole, targetStaffRole: EventRole):
   if (userRole === 'admin' && !['admin', 'owner', 'system_admin'].includes(targetStaffRole || '')) {
     return true;
   }
-  if (userRole === 'staff' && ['event_staff', 'booth_staff'].includes(targetStaffRole || '')) {
+  if (userRole === 'staff' && ['booth_staff'].includes(targetStaffRole || '')) {
     return true;
   }
   return false;
 }
 
-export function getAvailableTabs(role: EventRole): Array<'detail' | 'staff' | 'booth' | 'dashboard' | 'applications' | 'tickets'> {
+export function getAvailableTabs(role: EventRole): Array<'detail' | 'staff' | 'booth' | 'dashboard' | 'applications' | 'tickets' | 'announcements' | 'checkout'> {
   if (isEventOrganizer(role)) {
-    // ✅ Organizer เห็นทุก tab รวม dashboard และ tickets
-    return ['detail', 'staff', 'booth', 'dashboard', 'applications', 'tickets'];
+    // owner/admin/system_admin เห็น checkout ด้วย
+    if (role === 'owner' || role === 'admin' || role === 'system_admin') {
+      return ['detail', 'staff', 'booth', 'dashboard', 'applications', 'tickets', 'announcements', 'checkout'];
+    }
+    // staff ไม่เห็น checkout
+    return ['detail', 'staff', 'booth', 'dashboard', 'applications', 'tickets', 'announcements'];
   }
   if (isBoothStaff(role)) {
-    // ✅ booth_staff ไม่เห็น dashboard (เฉพาะ Organizer)
-    return ['detail', 'booth'];
+    return ['detail', 'booth', 'announcements'];
   }
-  // ✅ booth_staff_visitor ดูได้แค่ detail อย่างเดียว
   if (isBoothStaffVisitor(role)) {
     return ['detail'];
   }

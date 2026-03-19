@@ -15,29 +15,29 @@ export function QueueHeader({
   onRefresh,
 }: QueueHeaderProps) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-start justify-between">
       <div>
-        <h3 className="text-2xl font-bold text-slate-900">ระบบคิว</h3>
-        <p className="text-sm text-slate-600 mt-1">
+        <h3 className="text-lg font-bold text-gray-900">ระบบคิว</h3>
+        <p className="text-sm text-gray-400 mt-0.5">
           จัดการคิวและเรียกลำดับผู้เข้าชมบูธ
         </p>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 flex-shrink-0">
         <button
           onClick={onRefresh}
-          className="inline-flex items-center gap-2 px-4 py-2.5 border-2 border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 transition font-medium"
+          className="inline-flex items-center gap-2 px-3 py-2 border border-[#E2E8F0] text-gray-500 text-sm font-semibold rounded-xl hover:bg-gray-50 transition"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className="w-3.5 h-3.5" />
           รีเฟรช
         </button>
 
         {canCreate && (
           <button
             onClick={onCreateClick}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#3674B5] to-[#498AC3] text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#3674B5] text-white text-sm font-semibold rounded-xl hover:bg-[#2d5a8f] transition"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             สร้างระบบคิว
           </button>
         )}

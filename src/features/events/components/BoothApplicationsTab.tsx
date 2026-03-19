@@ -23,7 +23,7 @@ const STATUS_CONFIG: Record<JoinFormStatus, { label: string; bg: string; text: s
 function StatusBadge({ status }: { status: JoinFormStatus }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.text}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold ${cfg.bg} ${cfg.text}`}>
       <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dot}`}/>
       {cfg.label}
     </span>
@@ -121,14 +121,17 @@ function DetailModal({ form, onClose, onRespond, isRequest }: {
         onClick={e => e.stopPropagation()}>
 
         {/* header */}
-        <div className="flex-shrink-0 flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
-          <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${lightClass} ${textClass}`}>
-            {isRequest
-              ? <><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/></svg>คำขอเข้าร่วม</>
-              : <><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>คำเชิญจากงาน</>
-            }
+        <div className="flex-shrink-0 flex items-center justify-between px-5 py-[18px] border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold ${lightClass} ${textClass}`}>
+              {isRequest
+                ? <><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/></svg>คำขอเข้าร่วม</>
+                : <><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>คำเชิญจากงาน</>
+              }
+            </span>
+            <StatusBadge status={form.status as JoinFormStatus} />
           </div>
-          <button onClick={onClose} className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 transition">
+          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 transition">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
@@ -250,7 +253,7 @@ function DetailModal({ form, onClose, onRespond, isRequest }: {
 
         {/* footer — เฉพาะ request + pending */}
         {isRequest && isPending && (
-          <div className="flex-shrink-0 px-5 py-4 border-t border-gray-100 flex gap-2.5 bg-white">
+          <div className="flex-shrink-0 px-5 py-[18px] border-t border-gray-100 flex gap-2.5 bg-white">
             <button onClick={() => { onClose(); onRespond(form, 'reject'); }} disabled={!!(form.status === 'accepted' && form.paymentId)}
               className="flex-1 py-2.5 rounded-xl border-2 border-red-100 bg-white text-red-500 text-sm font-semibold hover:bg-red-50 transition flex items-center justify-center gap-1.5">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -298,27 +301,27 @@ function RequestsTable({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespon
   // cols: [ชื่อบูธกลุ่ม | บูธ | สถานะ | การดำเนินการ | รายละเอียด]
   return (
     <>
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
         {/* header */}
-        <div className="grid grid-cols-[1fr_100px_140px_180px_48px] border-b border-gray-200 bg-gray-50">
-          <div className="px-5 py-3 text-xs font-semibold text-gray-500">ชื่อบูธ</div>
-          <div className="px-4 py-3 text-xs font-semibold text-gray-500">บูธในงาน</div>
-          <div className="px-4 py-3 text-xs font-semibold text-gray-500">สถานะ</div>
-          <div className="px-4 py-3 text-xs font-semibold text-gray-500">ดำเนินการ</div>
-          <div className="border-l border-gray-200"/>
+        <div className="grid grid-cols-[1fr_80px_140px_190px_52px] border-b border-gray-100 bg-gray-50">
+          <div className="px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">ชื่อบูธ</div>
+          <div className="px-3 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">บูธ</div>
+          <div className="px-3 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">สถานะ</div>
+          <div className="px-3 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">ดำเนินการ</div>
+          <div className="border-l border-gray-100"/>
         </div>
 
         {sorted.map((form, i) => {
           const isPending = form.status === 'pending';
           return (
             <div key={form.requestId}
-              className={`grid grid-cols-[1fr_100px_140px_180px_48px] items-center transition-colors ${
+              className={`grid grid-cols-[1fr_80px_140px_190px_52px] items-center transition-colors ${
                 i !== sorted.length - 1 ? 'border-b border-gray-100' : ''
-              } ${isPending ? 'bg-amber-50/30 hover:bg-amber-50/60' : 'hover:bg-gray-50/60'}`}>
+              } ${isPending ? 'bg-amber-50/40 hover:bg-amber-50/70 border-l-2 border-l-amber-400' : 'hover:bg-gray-50/60'}`}>
 
               {/* ชื่อบูธกลุ่ม */}
-              <div className="px-5 py-4 flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center text-xs font-black text-white bg-[#3674B5] relative">
+              <div className="px-6 py-3.5 flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-sm font-black text-white bg-[#3674B5] relative">
                   {form.boothGroupTitle?.charAt(0)?.toUpperCase() || '?'}
                   {isPending && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-white"/>}
                 </div>
@@ -329,17 +332,17 @@ function RequestsTable({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespon
               </div>
 
               {/* บูธ */}
-              <div className="px-4 py-3.5">
+              <div className="px-3 py-3.5">
                 <span className="text-sm font-bold text-[#3674B5]">{form.boothNo}</span>
               </div>
 
               {/* สถานะ */}
-              <div className="px-4 py-3.5">
+              <div className="px-3 py-3.5">
                 <StatusBadge status={form.status as JoinFormStatus} />
               </div>
 
               {/* การดำเนินการ — เฉพาะ pending */}
-              <div className="px-4 py-3.5 flex items-center gap-2" onClick={e => e.stopPropagation()}>
+              <div className="px-3 py-3.5 flex items-center gap-2" onClick={e => e.stopPropagation()}>
                 {isPending ? (
                   <>
                     <button onClick={() => onRespond(form, 'reject')}
@@ -368,7 +371,7 @@ function RequestsTable({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespon
               {/* ดูรายละเอียด — แยก column */}
               <div className="px-2 py-3.5 flex items-center justify-center border-l border-gray-100">
                 <button onClick={() => setSelectedForm(form)}
-                  className="w-8 h-8 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition flex items-center justify-center"
+                  className="w-8 h-8 rounded-lg text-gray-400 hover:bg-[#EEF4FB] hover:text-[#3674B5] transition flex items-center justify-center"
                   title="ดูรายละเอียด">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="9 18 15 12 9 6"/>
@@ -395,22 +398,22 @@ function InvitesTable({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespond
 
   return (
     <>
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-        <div className="grid grid-cols-[1fr_110px_130px_48px] border-b border-gray-200 bg-gray-50">
-          <div className="px-5 py-3 text-xs font-semibold text-gray-500">ชื่อบูธ</div>
-          <div className="px-4 py-3 text-xs font-semibold text-gray-500">บูธในงาน</div>
-          <div className="px-4 py-3 text-xs font-semibold text-gray-500">สถานะ</div>
-          <div className="border-l border-gray-200"/>
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+        <div className="grid grid-cols-[1fr_80px_140px_52px] border-b border-gray-100 bg-gray-50">
+          <div className="px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">ชื่อบูธ</div>
+          <div className="px-3 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">บูธ</div>
+          <div className="px-3 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">สถานะ</div>
+          <div className="border-l border-gray-100"/>
         </div>
 
         {sorted.map((form, i) => (
           <div key={form.requestId}
-            className={`grid grid-cols-[1fr_110px_130px_48px] items-center transition-colors ${
+            className={`grid grid-cols-[1fr_80px_140px_52px] items-center transition-colors ${
               i !== sorted.length - 1 ? 'border-b border-gray-100' : ''
             } hover:bg-gray-50/60`}>
 
-            <div className="px-5 py-3.5 flex items-center gap-3 min-w-0">
-              <div className="w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center text-xs font-black text-white bg-[#498AC3]">
+            <div className="px-6 py-3.5 flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-sm font-black text-white bg-[#498AC3]">
                 {form.boothGroupTitle?.charAt(0)?.toUpperCase() || '?'}
               </div>
               <div className="min-w-0">
@@ -419,11 +422,11 @@ function InvitesTable({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespond
               </div>
             </div>
 
-            <div className="px-4 py-3.5">
+            <div className="px-3 py-3.5">
               <span className="text-sm font-bold text-[#498AC3]">{form.boothNo}</span>
             </div>
 
-            <div className="px-4 py-3.5">
+            <div className="px-3 py-3.5">
               <StatusBadge status={form.status as JoinFormStatus} />
             </div>
 
@@ -575,7 +578,7 @@ function RequestsTab({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespond:
 
   return (
     <div className="space-y-4">
-      <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-4 flex items-center justify-between">
+      <div className="bg-blue-50 border border-blue-100 rounded-2xl px-6 py-[18px] flex items-center justify-between">
         <div>
           <p className="text-sm font-bold text-[#3674B5]">คำขอเข้าร่วมทั้งหมด</p>
           <p className="text-xs text-blue-400 mt-0.5">บูธกลุ่มส่งคำขอมายังงานของคุณ</p>
@@ -628,7 +631,7 @@ function InvitesTab({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespond: 
 
   return (
     <div className="space-y-4">
-      <div className="bg-sky-50 border border-sky-100 rounded-2xl px-5 py-4 flex items-center justify-between">
+      <div className="bg-sky-50 border border-sky-100 rounded-2xl px-6 py-[18px] flex items-center justify-between">
         <div>
           <p className="text-sm font-bold text-[#498AC3]">คำเชิญจากงาน</p>
           <p className="text-xs text-sky-400 mt-0.5">บูธกลุ่มที่คุณส่งคำเชิญไป</p>
@@ -662,7 +665,7 @@ function InvitesTab({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespond: 
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="bg-white rounded-2xl border-2 border-gray-200 p-12 text-center">
+    <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-16 text-center">
       <div className="w-14 h-14 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5">
           <path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/>
@@ -725,7 +728,10 @@ export function BoothApplicationsTab({ eventId }: BoothApplicationsTabProps) {
 
       {/* page header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900">การเข้าร่วมบูธ</h2>
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">การเข้าร่วมบูธ</h2>
+          <p className="text-sm text-gray-400 mt-0.5">จัดการคำขอและคำเชิญเข้าร่วมบูธในงาน</p>
+        </div>
         <button onClick={loadForms} className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition" title="รีเฟรช">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
@@ -733,54 +739,42 @@ export function BoothApplicationsTab({ eventId }: BoothApplicationsTabProps) {
         </button>
       </div>
 
-      {/* 2 main tabs — UI ต่างกันชัดเจน */}
-      <div className="grid grid-cols-2 gap-3">
-        <button onClick={() => setActiveTab('requests')}
-          className={`relative rounded-2xl p-4 text-left transition-all border-2 ${
-            activeTab === 'requests'
-              ? 'bg-[#3674B5] border-[#3674B5] shadow-md shadow-blue-200'
-              : 'bg-white border-gray-200 hover:border-blue-200 hover:shadow-sm'
-          }`}>
-          <div className="flex items-center justify-between mb-2">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-              stroke={activeTab === 'requests' ? 'white' : '#3674B5'} strokeWidth="2">
-              <path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/>
-            </svg>
-            {pendingRequests > 0 && (
-              <span className={`text-xs font-black px-2 py-0.5 rounded-full ${
-                activeTab === 'requests' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'
-              }`}>
-                {pendingRequests} รอ
+      {/* Tab bar */}
+      <div className="flex gap-1 bg-white border border-gray-200 rounded-2xl p-1 shadow-sm">
+        {([
+          { id: 'requests' as MainTab, label: 'คำขอเข้าร่วม', count: requests.length, pending: pendingRequests,
+            icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/></svg>,
+            activeGradient: 'linear-gradient(135deg, #3674B5, #498AC3)', activeShadow: 'rgba(54,116,181,0.25)',
+          },
+          { id: 'invites' as MainTab, label: 'คำเชิญจากงาน', count: invites.length, pending: 0,
+            icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>,
+            activeGradient: 'linear-gradient(135deg, #498AC3, #749BC2)', activeShadow: 'rgba(73,138,195,0.25)',
+          },
+        ] as const).map(tab => {
+          const active = activeTab === tab.id;
+          return (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl transition-all text-sm font-semibold"
+              style={{
+                background: active ? tab.activeGradient : 'transparent',
+                color: active ? 'white' : '#6B7280',
+                boxShadow: active ? `0 2px 8px ${tab.activeShadow}` : 'none',
+              }}>
+              {tab.icon}
+              <span className="font-bold">{tab.label}</span>
+              <span className="text-xs font-black px-2 py-0.5 rounded-full"
+                style={{ background: active ? 'rgba(255,255,255,0.2)' : '#F3F4F6', color: active ? 'white' : '#6B7280' }}>
+                {tab.count}
               </span>
-            )}
-          </div>
-          <p className={`text-sm font-bold ${activeTab === 'requests' ? 'text-white' : 'text-gray-900'}`}>
-            คำขอเข้าร่วม
-          </p>
-          <p className={`text-xs mt-0.5 ${activeTab === 'requests' ? 'text-white/70' : 'text-gray-400'}`}>
-            {requests.length} รายการ
-          </p>
-        </button>
-
-        <button onClick={() => setActiveTab('invites')}
-          className={`rounded-2xl p-4 text-left transition-all border-2 ${
-            activeTab === 'invites'
-              ? 'bg-[#498AC3] border-[#498AC3] shadow-md shadow-sky-200'
-              : 'bg-white border-gray-200 hover:border-sky-200 hover:shadow-sm'
-          }`}>
-          <div className="flex items-center justify-between mb-2">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-              stroke={activeTab === 'invites' ? 'white' : '#498AC3'} strokeWidth="2">
-              <path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/>
-            </svg>
-          </div>
-          <p className={`text-sm font-bold ${activeTab === 'invites' ? 'text-white' : 'text-gray-900'}`}>
-            คำเชิญจากงาน
-          </p>
-          <p className={`text-xs mt-0.5 ${activeTab === 'invites' ? 'text-white/70' : 'text-gray-400'}`}>
-            {invites.length} รายการ
-          </p>
-        </button>
+              {tab.pending > 0 && (
+                <span className="text-xs font-black px-2 py-0.5 rounded-full"
+                  style={{ background: active ? 'rgba(251,191,36,0.3)' : '#FEF3C7', color: active ? 'white' : '#B45309' }}>
+                  {tab.pending} รอ
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* content */}

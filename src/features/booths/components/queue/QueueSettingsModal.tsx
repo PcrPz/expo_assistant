@@ -63,39 +63,29 @@ export function QueueSettingsModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <form onSubmit={handleSubmit}>
           {/* Header */}
-          <div className="relative bg-gradient-to-br from-[#3674B5] to-[#5B9BD5] px-6 py-8 text-white overflow-hidden">
-            <div className="absolute inset-0 bg-white/5"></div>
-            <div className="relative z-10 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30">
-                  <Settings className="w-7 h-7 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold">ตั้งค่าคิว</h2>
-                  <p className="text-blue-100 text-sm mt-1">แก้ไขข้อมูลและสถานะคิว</p>
-                </div>
+          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-amber-500">
+                <Settings className="w-5 h-5 text-white" />
               </div>
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={isSubmitting}
-                className="text-white/80 hover:text-white transition"
-              >
-                <X className="w-6 h-6" />
-              </button>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">ตั้งค่าคิว</h2>
+                <p className="text-xs text-gray-400">แก้ไขข้อมูลและสถานะคิว</p>
+              </div>
             </div>
-            {/* Decorative circles */}
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full"></div>
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full"></div>
+            <button type="button" onClick={onClose} disabled={isSubmitting}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition">
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
           {/* Content */}
-          <div className="p-6 space-y-5">
+          <div className="px-6 py-5 space-y-5">
             {/* Error */}
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4">
@@ -234,12 +224,12 @@ export function QueueSettingsModal({
           </div>
 
           {/* Actions */}
-          <div className="p-6 bg-gray-50 border-t border-gray-200 flex gap-3">
+          <div className="px-6 py-[18px] border-t border-gray-100 flex gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex-1 px-5 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-white font-medium transition disabled:opacity-50"
+              className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition disabled:opacity-50"
             >
               ยกเลิก
             </button>

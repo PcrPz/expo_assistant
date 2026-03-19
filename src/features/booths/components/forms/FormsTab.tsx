@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Plus, RefreshCw } from 'lucide-react';
+import { FileText, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { getBoothForm, updateFormStatus, deleteBoothForm } from '../../api/formApi';
 
 import type { EventRole } from '@/src/features/events/types/event.types';
@@ -102,12 +102,12 @@ export function FormsTab({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">แบบสอบถาม</h3>
-          <p className="text-sm text-gray-500 mt-1">
+          <h3 className="text-lg font-bold text-gray-900">แบบสอบถาม</h3>
+          <p className="text-sm text-gray-400 mt-0.5">
             รับ feedback จากผู้เข้าชมงาน
           </p>
         </div>
@@ -115,10 +115,10 @@ export function FormsTab({
 
       {/* Empty State */}
       {!form && (
-        <div className="bg-white rounded-lg border border-gray-200 p-12">
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] p-10">
           <div className="text-center">
-            <FileText className="mx-auto h-12 w-12 text-gray-300" />
-            <h3 className="mt-4 text-lg font-semibold text-gray-900">
+            <FileText className="h-6 w-6 text-gray-400" />
+            <h3 className="text-sm font-semibold text-gray-500">
               ยังไม่มีแบบสอบถาม
             </h3>
             <p className="text-sm text-gray-500 mt-2">
@@ -129,7 +129,7 @@ export function FormsTab({
             {canManage && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#3674B5] text-white rounded-lg hover:bg-[#2d5a8f] transition"
+                className="mt-4 mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#3674B5] text-white text-sm font-semibold rounded-xl hover:bg-[#2d5a8f] transition"
               >
                 <Plus className="h-4 w-4" />
                 สร้างแบบสอบถาม
@@ -198,28 +198,54 @@ export function FormsTab({
 
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-md p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">ลบแบบสอบถาม</h3>
-            <p className="text-gray-600 mb-4">
-              คุณแน่ใจหรือไม่ว่าต้องการลบแบบสอบถามนี้?
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-              >
-                ยกเลิก
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-              >
-                ลบแบบสอบถาม
-              </button>
+        <>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={() => setShowDeleteConfirm(false)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+                    <Trash2 className="h-5 w-5 text-red-500" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900">ลบแบบสอบถาม</h2>
+                    <p className="text-xs text-gray-400">การดำเนินการนี้ไม่สามารถย้อนกลับได้</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowDeleteConfirm(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+              <div className="px-6 py-5 space-y-4">
+                <div className="bg-gray-50 rounded-xl px-4 py-3 text-center">
+                  <p className="text-xs text-gray-400">ลบ</p>
+                  <p className="text-[15px] font-bold text-gray-900 mt-0.5">แบบสอบถามของบูธ</p>
+                </div>
+                <ul className="space-y-1.5">
+                  {['แบบสอบถามและคำตอบทั้งหมดจะถูกลบถาวร', 'ผู้เข้าชมจะไม่สามารถตอบแบบสอบถามได้อีก'].map(item => (
+                    <li key={item} className="flex items-center gap-2 text-sm text-red-600">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="px-6 py-[18px] border-t border-gray-100 flex gap-3">
+                <button onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition">
+                  ยกเลิก
+                </button>
+                <button onClick={handleDelete}
+                  className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition flex items-center justify-center gap-2">
+                  <Trash2 className="h-4 w-4" />ยืนยันการลบ
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

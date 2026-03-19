@@ -1,124 +1,79 @@
 /**
  * Form Permissions
  * Permissions สำหรับระบบแบบสอบถามของบูธ
+ * Pattern เดียวกับ canViewDocuments / canViewProducts / canViewQueue
+ * → ดูได้ทุก role ยกเว้น booth_staff_visitor
+ * → จัดการได้เฉพาะ organizer + booth_staff ที่ isAssignedStaff
  */
 
 import type { EventRole } from '@/src/features/events/types/event.types';
 
 // ============================================
-// FORM PERMISSIONS
+// VIEW
 // ============================================
 
 /**
- * สามารถดูแบบสอบถามได้
- * Booth Staff → เห็นได้ทั้ง publish/unpublish
- * Visitor → เห็นได้เฉพาะ publish (แต่ไม่ทำใน Web)
+ * ดูแบบสอบถามได้ — ทุก role ยกเว้น booth_staff_visitor
+ * เหมือน canViewDocuments / canViewProducts / canViewQueue
  */
-export function canViewForm(
-  userRole: EventRole | undefined,
-  isAssignedStaff: boolean
-): boolean {
+export function canViewForms(userRole: EventRole | undefined): boolean {
   if (!userRole) return false;
-  
-  // System Admin, Owner, Admin, Staff → ดูได้ทั้งหมด
-  if (['system_admin', 'owner', 'admin', 'staff'].includes(userRole)) {
-    return true;
-  }
-
-  // Booth Staff → ดูได้เฉพาะบูธตัวเอง
-  if (userRole === 'booth_staff') {
-    return isAssignedStaff;
-  }
-
-  return false;
+  if (userRole === 'booth_staff_visitor') return false;
+  return true;
 }
 
+// ============================================
+// MANAGE (สร้าง / แก้ไข / ลบ / publish)
+// ============================================
+
 /**
- * สามารถจัดการแบบสอบถามได้ (สร้าง/แก้ไข/ลบ)
+ * จัดการแบบสอบถามได้ — organizer ทุก role + booth_staff ที่ isAssignedStaff
  */
 export function canManageForms(
   userRole: EventRole | undefined,
   isAssignedStaff: boolean
 ): boolean {
   if (!userRole) return false;
-  
-  // System Admin, Owner, Admin, Staff → จัดการได้ทุกบูธ
-  if (['system_admin', 'owner', 'admin', 'staff'].includes(userRole)) {
-    return true;
-  }
-
-  // Booth Staff → จัดการได้เฉพาะบูธตัวเอง
-  if (userRole === 'booth_staff') {
-    return isAssignedStaff;
-  }
-
+  if (userRole === 'booth_staff_visitor') return false;
+  if (['system_admin', 'owner', 'admin', 'staff'].includes(userRole)) return true;
+  if (userRole === 'booth_staff') return isAssignedStaff;
   return false;
 }
 
-/**
- * สามารถสร้างแบบสอบถามได้
- */
-export function canCreateForm(
-  userRole: EventRole | undefined,
-  isAssignedStaff: boolean
-): boolean {
+export function canCreateForm(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
+  return canManageForms(userRole, isAssignedStaff);
+}
+
+export function canEditForm(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
+  return canManageForms(userRole, isAssignedStaff);
+}
+
+export function canDeleteForm(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
+  return canManageForms(userRole, isAssignedStaff);
+}
+
+export function canToggleFormStatus(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
+  return canManageForms(userRole, isAssignedStaff);
+}
+
+export function canViewFormResults(userRole: EventRole | undefined, isAssignedStaff: boolean): boolean {
   return canManageForms(userRole, isAssignedStaff);
 }
 
 /**
- * สามารถแก้ไขแบบสอบถามได้
- */
-export function canEditForm(
-  userRole: EventRole | undefined,
-  isAssignedStaff: boolean
-): boolean {
-  return canManageForms(userRole, isAssignedStaff);
-}
-
-/**
- * สามารถลบแบบสอบถามได้
- */
-export function canDeleteForm(
-  userRole: EventRole | undefined,
-  isAssignedStaff: boolean
-): boolean {
-  return canManageForms(userRole, isAssignedStaff);
-}
-
-/**
- * สามารถเปลี่ยนสถานะ publish/unpublish ได้
- */
-export function canToggleFormStatus(
-  userRole: EventRole | undefined,
-  isAssignedStaff: boolean
-): boolean {
-  return canManageForms(userRole, isAssignedStaff);
-}
-
-/**
- * สามารถดูผลสรุปคำตอบได้
- */
-export function canViewFormResults(
-  userRole: EventRole | undefined,
-  isAssignedStaff: boolean
-): boolean {
-  return canManageForms(userRole, isAssignedStaff);
-}
-
-/**
- * รวม permissions ทั้งหมดในออบเจ็กต์เดียว
+ * รวม permissions ทั้งหมด
  */
 export function getFormPermissions(
   userRole: EventRole | undefined,
   isAssignedStaff: boolean
 ) {
   return {
-    canView: canViewForm(userRole, isAssignedStaff),
-    canManage: canManageForms(userRole, isAssignedStaff),
-    canCreate: canCreateForm(userRole, isAssignedStaff),
-    canEdit: canEditForm(userRole, isAssignedStaff),
-    canDelete: canDeleteForm(userRole, isAssignedStaff),
+    canView:         canViewForms(userRole),
+    canManage:       canManageForms(userRole, isAssignedStaff),
+    canCreate:       canCreateForm(userRole, isAssignedStaff),
+    canEdit:         canEditForm(userRole, isAssignedStaff),
+    canDelete:       canDeleteForm(userRole, isAssignedStaff),
     canToggleStatus: canToggleFormStatus(userRole, isAssignedStaff),
-    canViewResults: canViewFormResults(userRole, isAssignedStaff),
+    canViewResults:  canViewFormResults(userRole, isAssignedStaff),
   };
 }

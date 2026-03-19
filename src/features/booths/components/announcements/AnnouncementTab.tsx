@@ -107,19 +107,19 @@ export function AnnouncementsTab({
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">ประกาศของบูธ</h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <h2 className="text-lg font-bold text-gray-900">ประกาศของบูธ</h2>
+          <p className="text-sm text-gray-400 mt-0.5">
             จัดการประกาศและโปรโมชั่นสำหรับผู้เข้าชม
           </p>
         </div>
         {canCreate && (
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3674B5] text-white rounded-lg hover:bg-[#2d5d96] transition font-medium"
+            className="flex items-center gap-2 px-4 py-2 bg-[#3674B5] text-white text-sm font-semibold rounded-xl hover:bg-[#2d5a8f] transition flex-shrink-0"
           >
             <Plus className="w-4 h-4" />
             สร้างประกาศ
@@ -136,13 +136,13 @@ export function AnnouncementsTab({
             placeholder="ค้นหาประกาศ..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-9 pr-4 py-2.5 text-[14px] border border-[#E2E8F0] rounded-xl focus:outline-none focus:border-[#3674B5] focus:ring-2 focus:ring-[#3674B5]/15 transition bg-white"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as 'all' | AnnouncementStatus)}
-          className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white w-full sm:w-[180px]"
+          className="px-4 py-2.5 text-[14px] border border-[#E2E8F0] rounded-xl focus:outline-none focus:border-[#3674B5] bg-white w-full sm:w-[180px]"
         >
           <option value="all">ทั้งหมด</option>
           <option value="publish">เผยแพร่แล้ว</option>
@@ -161,16 +161,16 @@ export function AnnouncementsTab({
           ))}
         </div>
       ) : sortedAnnouncements.length === 0 ? (
-        <div className="text-center py-16 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white shadow-sm mb-4">
-            <Megaphone className="w-10 h-10 text-blue-400" />
+        <div className="text-center py-10 bg-white rounded-2xl border border-[#E2E8F0]">
+          <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <Megaphone className="w-6 h-6 text-gray-400" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <h3 className="text-sm font-semibold text-gray-500">
             {searchQuery || statusFilter !== 'all'
               ? 'ไม่พบประกาศที่ค้นหา'
               : 'ยังไม่มีประกาศ'}
           </h3>
-          <p className="text-gray-600 mb-4">
+          <p className="text-xs text-gray-400 mb-0">
             {searchQuery || statusFilter !== 'all'
               ? 'ลองเปลี่ยนคำค้นหาหรือตัวกรองของคุณ'
               : canCreate
@@ -180,7 +180,7 @@ export function AnnouncementsTab({
           {canCreate && !searchQuery && statusFilter === 'all' && (
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#3674B5] text-white rounded-lg hover:bg-[#2d5d96] transition font-medium"
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#3674B5] text-white text-sm font-semibold rounded-xl hover:bg-[#2d5a8f] transition"
             >
               <Plus className="w-4 h-4" />
               สร้างประกาศแรก

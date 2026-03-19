@@ -86,10 +86,10 @@ export function EventCard({
     <>
       <div
         onClick={onView}
-        className="group relative bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100"
+        className="group relative bg-white rounded-2xl overflow-hidden border-[1.5px] border-[#E2E8F0] hover:border-[#3674B5] transition-colors cursor-pointer"
       >
         {/* Thumbnail / Blue Header */}
-        <div className="relative h-36 overflow-hidden">
+        <div className="relative h-28 overflow-hidden">
           {/* Status Badge */}
           <div className="absolute top-3 right-3 z-10">
             <div className={`flex items-center gap-1.5 px-3 py-1.5 ${status.color} text-white rounded-full text-xs font-semibold shadow-md`}>
@@ -133,21 +133,21 @@ export function EventCard({
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-4">
-          <h3 className="text-base font-bold text-gray-900 line-clamp-2 leading-snug group-hover:text-[#3674B5] transition-colors">
+        <div className="p-4 space-y-3">
+          <h3 className="text-sm font-bold text-gray-900 line-clamp-2 leading-snug">
             {event.Title}
           </h3>
 
           {/* Dates */}
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Calendar className="w-4 h-4 flex-shrink-0 text-[#3674B5]" />
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <Calendar className="w-3.5 h-3.5 flex-shrink-0 text-[#3674B5]" />
               <span>{formatDateTH(event.StartDate)}</span>
               <span className="text-gray-300">–</span>
               <span>{formatDateTH(event.EndDate)}</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-400">
-              <Clock className="w-4 h-4 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
               <span>{formatTimeTH(event.StartDate)} – {formatTimeTH(event.EndDate)}</span>
             </div>
           </div>
@@ -158,9 +158,9 @@ export function EventCard({
           <div className="flex items-center gap-2">
             <button
               onClick={onView}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#3674B5] text-white rounded-xl font-medium hover:bg-[#2d5d96] transition-all shadow-sm hover:shadow-md"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#EBF3FC] text-[#3674B5] rounded-[9px] text-[12px] font-semibold hover:bg-[#DBEAFE] transition"
             >
-              <Eye className="w-4 h-4" />
+              <Eye className="w-3.5 h-3.5" />
               <span>ดูรายละเอียด</span>
             </button>
 
@@ -168,21 +168,21 @@ export function EventCard({
               <>
                 <button
                   onClick={handleEdit}
-                  className="flex items-center justify-center w-11 h-11 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-colors"
+                  className="w-8 h-8 bg-[#FEF3C7] text-amber-600 rounded-[9px] flex items-center justify-center hover:bg-amber-100 transition flex-shrink-0"
                   title="แก้ไข"
                 >
-                  <Edit2 className="w-4 h-4" />
+                  <Edit2 className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={handleDeleteClick}
                   disabled={isDeleting}
-                  className="flex items-center justify-center w-11 h-11 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors disabled:opacity-50"
+                  className="w-8 h-8 bg-red-50 text-red-500 rounded-[9px] flex items-center justify-center hover:bg-red-100 transition disabled:opacity-50 flex-shrink-0"
                   title="ลบ"
                 >
                   {isDeleting ? (
                     <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3.5 h-3.5" />
                   )}
                 </button>
               </>
@@ -191,7 +191,6 @@ export function EventCard({
         </div>
 
         {/* Hover border */}
-        <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#749BC2] rounded-2xl transition-colors pointer-events-none" />
       </div>
 
       {/* Delete Confirm Modal */}
@@ -201,16 +200,16 @@ export function EventCard({
           onClick={() => setShowDeleteModal(false)}
         >
           <div
-            className="bg-white rounded-3xl w-full max-w-md shadow-2xl"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-sm flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 border-b border-gray-100">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center">
-                  <Trash2 className="w-7 h-7 text-red-600" />
+                <div className="w-11 h-11 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+                  <Trash2 className="w-5 h-5 text-red-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-xl font-bold text-gray-900">ลบกิจกรรม?</h3>
+                  <h3 className="text-lg font-bold text-gray-900">ลบกิจกรรม</h3>
                   <p className="text-sm text-gray-500 mt-1">การดำเนินการนี้ไม่สามารถย้อนกลับได้</p>
                 </div>
               </div>
@@ -224,18 +223,18 @@ export function EventCard({
                 ⚠️ กิจกรรมนี้จะถูกลบออกจากระบบอย่างถาวร
               </p>
             </div>
-            <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3 rounded-b-3xl">
+            <div className="px-6 py-[18px] border-t border-gray-100 flex gap-3">
               <button
                 onClick={() => setShowDeleteModal(false)}
                 disabled={isDeleting}
-                className="flex-1 px-5 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-white font-medium transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition disabled:opacity-50"
               >
                 ยกเลิก
               </button>
               <button
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
-                className="flex-1 px-5 py-3 bg-red-100 text-red-700 rounded-xl hover:bg-red-200 font-medium transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isDeleting ? (
                   <span className="flex items-center justify-center gap-2">

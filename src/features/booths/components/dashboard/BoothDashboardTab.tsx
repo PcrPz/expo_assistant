@@ -66,17 +66,17 @@ function StatCard({
   label: string; value: string | number; sub?: string; color: string; icon: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-      <div className="flex items-start justify-between mb-4">
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center"
+    <div className="bg-white rounded-2xl border border-[#E2E8F0] p-4">
+      <div className="flex items-start justify-between mb-3">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center"
           style={{ backgroundColor: color + '18' }}>
           {icon}
         </div>
       </div>
-      <p className="text-3xl font-black text-gray-900 tabular-nums">
+      <p className="text-2xl font-bold text-gray-900 tabular-nums">
         {typeof value === 'number' ? value.toLocaleString() : value}
       </p>
-      <p className="text-sm font-bold text-gray-700 mt-1">{label}</p>
+      <p className="text-sm font-semibold text-gray-700 mt-1">{label}</p>
       {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
     </div>
   );
@@ -88,9 +88,9 @@ function Section({
   title: string; sub?: string; children?: React.ReactNode; empty?: boolean;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="px-5 py-4 border-b border-gray-50">
-        <h3 className="font-black text-gray-900 text-base">{title}</h3>
+    <div className="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden">
+      <div className="px-6 py-[18px] border-b border-gray-50">
+        <h3 className="text-base font-bold text-gray-900">{title}</h3>
         {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
       </div>
       {empty ? (
@@ -98,7 +98,7 @@ function Section({
           <p className="text-sm text-gray-400">ยังไม่มีข้อมูล</p>
         </div>
       ) : (
-        <div className="p-5">{children}</div>
+        <div className="p-6">{children}</div>
       )}
     </div>
   );
@@ -315,7 +315,7 @@ export function BoothDashboardTab({ expoId, boothId }: BoothDashboardTabProps) {
                     <div key={i}>
                       <div className="flex justify-between mb-1">
                         <span className="text-sm font-bold text-gray-700">{g.name}</span>
-                        <span className="text-sm font-black text-gray-900">{pct}%</span>
+                        <span className="text-sm font-bold text-gray-900">{pct}%</span>
                       </div>
                       <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
                         <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: g.color }} />
@@ -349,10 +349,10 @@ export function BoothDashboardTab({ expoId, boothId }: BoothDashboardTabProps) {
 
       {/* ══ Section 3: Hourly Area Chart ═════════════════════ */}
       {hourlyDays.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden">
           <div className="px-6 pt-5 pb-4 flex items-start justify-between">
             <div>
-              <h3 className="font-black text-gray-900 text-base">ผู้เข้าชมรายชั่วโมง</h3>
+              <h3 className="text-base font-bold text-gray-900">ผู้เข้าชมรายชั่วโมง</h3>
               {/* Segmented Control */}
               <div className="flex mt-3 p-0.5 rounded-xl gap-0.5" style={{ backgroundColor: '#F1F5F9' }}>
                 {hourlyDays.map(day => {
@@ -378,7 +378,7 @@ export function BoothDashboardTab({ expoId, boothId }: BoothDashboardTabProps) {
             </div>
             {hourlyChart.length > 0 && (
               <div className="text-right">
-                <p className="text-2xl font-black tabular-nums" style={{ color: BLUE }}>
+                <p className="text-xl font-bold tabular-nums" style={{ color: BLUE }}>
                   {hourlyChart.reduce((s, p) => s + p.visitors, 0).toLocaleString()}
                 </p>
                 <p className="text-xs text-gray-400 mt-1">คนรวมวันนี้</p>
@@ -386,7 +386,7 @@ export function BoothDashboardTab({ expoId, boothId }: BoothDashboardTabProps) {
             )}
           </div>
           {/* Chart */}
-          <div className="p-5">
+          <div className="px-6 pb-6">
             {hourlyChart.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
                 <AreaChart data={hourlyChart} margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
@@ -470,7 +470,7 @@ export function BoothDashboardTab({ expoId, boothId }: BoothDashboardTabProps) {
                 return (
                   <div key={item.responseId} className="rounded-xl p-3 text-center"
                     style={{ backgroundColor: BL }}>
-                    <p className="text-3xl font-black" style={{ color: BLUE }}>
+                    <p className="text-2xl font-bold" style={{ color: BLUE }}>
                       {avg.toFixed(1)}
                     </p>
                     <p className="text-xs font-bold text-gray-700 mt-1 line-clamp-2 leading-tight">
@@ -589,7 +589,7 @@ export function BoothDashboardTab({ expoId, boothId }: BoothDashboardTabProps) {
               <div className="px-5 py-4 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="font-black text-gray-900 text-sm">{modalQuestion.title}</h3>
+                    <h3 className="text-sm font-bold text-gray-900">{modalQuestion.title}</h3>
                     <p className="text-xs text-gray-400 mt-0.5">
                       {filtered.length === allAnswers.length
                         ? `${allAnswers.length} คำตอบ`

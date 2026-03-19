@@ -66,7 +66,7 @@ export function InviteBoothStaffModal({
               </svg>
             </div>
             <div>
-              <p className="text-gray-700 font-semibold mb-2">เฉพาะเจ้าของบูถเท่านั้น</p>
+              <p className="text-gray-700 font-semibold mb-2">เฉพาะเจ้าของบูธเท่านั้น</p>
               <p className="text-sm text-gray-500">ที่สามารถเชิญสมาชิกเข้าร่วมบูธได้</p>
             </div>
             <button onClick={onClose}
