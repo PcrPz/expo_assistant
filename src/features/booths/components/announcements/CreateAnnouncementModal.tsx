@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Upload, ImageIcon, Plus, Info } from 'lucide-react';
+import { X, Plus, Info } from 'lucide-react';
 import { createBoothAnnouncement } from '../../api/announcementApi';
 
 interface CreateAnnouncementModalProps {
@@ -22,27 +22,16 @@ export function CreateAnnouncementModal({
 }: CreateAnnouncementModalProps) {
   const [title, setTitle] = useState('');
   const [detail, setDetail] = useState('');
-  const [files, setFiles] = useState<File[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      const invalidFiles = newFiles.filter((file) => !file.type.startsWith('image/'));
-      
-      if (invalidFiles.length > 0) {
-        setError('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
-        return;
-      }
-      
-      setFiles((prev) => [...prev, ...newFiles]);
-      setError(null);
-    }
-  };
-
-  const handleRemoveFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { setError('กรุณาเลือกไฟล์รูปภาพเท่านั้น'); return; }
+    setImageFile(file); setError(null);
+    e.target.value = '';
   };
 
 const handleSubmit = async (e: React.FormEvent) => {
@@ -62,7 +51,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       title: title.trim(),
       detail: detail.trim() || undefined,
       status: 'unpublish',
-      files: files.length > 0 ? files : undefined,
+      files: imageFile ? [imageFile] : undefined,
     });
 
     alert('สร้างประกาศสำเร็จ');
@@ -76,12 +65,12 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 };
 
-  const handleReset = () => {
-    setTitle('');
-    setDetail('');
-    setFiles([]);
-    setError(null);
-  };
+const handleReset = () => {
+  setTitle('');
+  setDetail('');
+  setImageFile(null);   // ✅ แก้ตรงนี้
+  setError(null);
+};
 
   const handleClose = () => {
     if (!isLoading) {
@@ -164,63 +153,34 @@ const handleSubmit = async (e: React.FormEvent) => {
               <p className="text-xs text-gray-500">{detail.length}/1,000 ตัวอักษร</p>
             </div>
 
-            <div className="space-y-3">
-              <label className="block text-sm font-bold text-gray-900">รูปภาพประกาศ</label>
-              
-              <button
-                type="button"
-                onClick={() => document.getElementById('file-upload')?.click()}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-[#BFDBFE] text-[#3674B5] text-sm font-semibold rounded-xl hover:bg-[#EBF3FC] hover:border-[#3674B5] transition disabled:opacity-50"
-              >
-                <Upload className="w-5 h-5" />
-                <span>เลือกรูปภาพ</span>
-                {files.length > 0 && <span className="text-sm">({files.length} ไฟล์)</span>}
-              </button>
-              <input
-                id="file-upload"
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFileChange}
-                className="hidden"
-                disabled={isLoading}
-              />
-
-              {files.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {files.map((file, index) => (
-                    <div
-                      key={index}
-                      className="relative group rounded-2xl overflow-hidden border-2 border-blue-200 bg-gray-50"
-                    >
-                      <div className="aspect-square">
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={file.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveFile(index)}
-                        className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-lg"
-                        disabled={isLoading}
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                        <p className="text-xs text-white truncate">{file.name}</p>
-                      </div>
-                    </div>
-                  ))}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                รูปภาพประกาศ 
+              </label>
+              {imageFile ? (
+                <div className="relative group rounded-xl overflow-hidden border-2 border-gray-200 cursor-pointer" style={{ height: '160px' }}>
+                  <img src={URL.createObjectURL(imageFile)} alt="preview" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-900 text-xs font-semibold rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      เปลี่ยน
+                      <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" disabled={isLoading} />
+                    </label>
+                    <button type="button" onClick={() => setImageFile(null)}
+                      disabled={isLoading}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition disabled:opacity-50">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                      ลบ
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <div className="border-2 border-dashed border-gray-200 rounded-2xl p-12 text-center bg-gray-50">
-                  <ImageIcon className="w-16 h-16 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500 mb-1">ยังไม่มีรูปภาพ</p>
-                  <p className="text-xs text-gray-400">คลิกปุ่มด้านบนเพื่ออัปโหลด</p>
-                </div>
+                <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#B8D0EA] rounded-xl bg-gray-50 cursor-pointer hover:border-[#3674B5] hover:bg-[#EEF4FB] transition text-center disabled:opacity-50" style={{ height: '160px' }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <span className="text-sm font-medium text-gray-500">คลิกเพื่อเลือกรูปภาพ</span>
+                  <span className="text-xs text-gray-400">PNG, JPG · สูงสุด 5MB</span>
+                  <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" disabled={isLoading} />
+                </label>
               )}
             </div>
           </div>

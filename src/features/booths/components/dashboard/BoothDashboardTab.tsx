@@ -38,6 +38,7 @@ const DAILY_COLORS = {
 interface BoothDashboardTabProps {
   expoId: string;
   boothId: string;
+  boothTitle?: string;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -128,9 +129,47 @@ function LoadingState() {
 // ══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════
-export function BoothDashboardTab({ expoId, boothId }: BoothDashboardTabProps) {
+export function BoothDashboardTab({ expoId, boothId, boothTitle = 'Dashboard' }: BoothDashboardTabProps) {
   const [data,    setData]    = useState<BoothDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState<'' | 'excel' | 'pdf'>('');
+
+  const handleExcelDownload = async () => {
+    if (downloading) return;
+    setDownloading('excel');
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+      const token = localStorage.getItem('accessToken');
+      const res = await fetch(`${API_URL}/booth-dashboard/${expoId}/${boothId}/export-excel`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Export failed');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Dashboard_${boothTitle}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Excel export error:', e);
+    } finally {
+      setDownloading('');
+    }
+  };
+
+  const handlePDFDownload = async () => {
+    if (downloading) return;
+    setDownloading('pdf');
+    try {
+      const { exportDashboardPDF } = await import('@/src/lib/export/exportDashboard');
+      await exportDashboardPDF('booth-dashboard-content', boothTitle);
+    } catch (e) {
+      console.error('PDF export error:', e);
+    } finally {
+      setDownloading('');
+    }
+  };
   const [modalQuestion, setModalQuestion] = useState<{ key: string; title: string } | null>(null);
   const [filterGender,  setFilterGender]  = useState<string>('all');
   const [filterAge,     setFilterAge]     = useState<string>('all');
@@ -252,7 +291,58 @@ export function BoothDashboardTab({ expoId, boothId }: BoothDashboardTabProps) {
 
   // ─────────────────────────────────────────────────────────
   return (
-    <div className="space-y-5">
+    <div className="space-y-5" id="booth-dashboard-content">
+
+      {/* ── Header + Download ── */}
+      <div className="flex items-center justify-between" data-no-print>
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">Dashboard</h2>
+          <p className="text-sm text-gray-400 mt-0.5">ภาพรวมและสถิติของบูธ</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExcelDownload}
+            disabled={!!downloading}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-[#3674B5] text-[#3674B5] text-sm font-semibold hover:bg-[#3674B5] hover:text-white transition disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {downloading === 'excel' ? (
+              <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle className="opacity-25" cx="12" cy="12" r="10"/>
+                <path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+              </svg>
+            ) : (
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <line x1="8" y1="3" x2="8" y2="21"/>
+                <line x1="16" y1="3" x2="16" y2="21"/>
+                <line x1="3" y1="9" x2="21" y2="9"/>
+                <line x1="3" y1="15" x2="21" y2="15"/>
+              </svg>
+            )}
+            {downloading === 'excel' ? 'กำลังสร้าง...' : 'ดาวน์โหลด Excel'}
+          </button>
+          <button
+            onClick={handlePDFDownload}
+            disabled={!!downloading}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#3674B5] text-white text-sm font-semibold hover:bg-[#2d5a8f] transition disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {downloading === 'pdf' ? (
+              <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle className="opacity-25" cx="12" cy="12" r="10"/>
+                <path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+              </svg>
+            ) : (
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="12" y1="18" x2="12" y2="12"/>
+                <polyline points="9 15 12 18 15 15"/>
+              </svg>
+            )}
+            {downloading === 'pdf' ? 'กำลังสร้าง...' : 'ดาวน์โหลด PDF'}
+          </button>
+        </div>
+      </div>
 
       {/* ══ Section 1: Stat Cards ════════════════════════════ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

@@ -20,13 +20,23 @@ export default function ProfilePage() {
     lastname: '',
     email: '',
     tel: '',
-    dob: '', // ✅ เปลี่ยนกลับเป็น dob แทน birthDay/Month/Year
+    dob: '',
     gender: '',
     career: '',
     company: '',
     detail: '',
     profile_pic: undefined as File | undefined,
   });
+
+  const [passwordData, setPasswordData] = useState({
+    password: '',
+    confirm_password: '',
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
 
   // ข้อมูลเดือนสำหรับแสดงผล
   const months = [
@@ -37,12 +47,10 @@ export default function ProfilePage() {
   // โหลดข้อมูล User เมื่อ Component mount
   useEffect(() => {
     if (user) {
-      console.log('👤 Full user object:', user); // ✅ Debug: ดู user ทั้งหมด
       
       // ✅ ดึง DOB จาก Backend (ถ้ามี)
       const dob = (user as any).DOB || (user as any).Dob || (user as any).dob || '';
       
-      console.log('📅 User DOB from backend:', dob); // Debug
 
       setFormData({
         firstname: user.Firstname || '',
@@ -57,7 +65,6 @@ export default function ProfilePage() {
         profile_pic: undefined,
       });
       
-      console.log('📝 Form data set, DOB:', dob); // ✅ Debug
     }
   }, [user]);
 
@@ -93,12 +100,6 @@ export default function ProfilePage() {
         return;
       }
 
-      console.log('🔄 Updating profile with data:', {
-        ...formData,
-        profile_pic: formData.profile_pic ? formData.profile_pic.name : 'none'
-      });
-
-      // เรียก API Update
       await updateUser({
         firstname: formData.firstname,
         lastname: formData.lastname,
@@ -116,7 +117,7 @@ export default function ProfilePage() {
       const updatedUser = await getUserDetail();
       setUser(updatedUser);
 
-      alert('บันทึกข้อมูลสำเร็จ! 🎉');
+
       setIsEditing(false);
       setPreviewImage(null);
     } catch (error: any) {
@@ -124,15 +125,57 @@ export default function ProfilePage() {
       
       // ✅ จัดการ Error แยกตาม Status Code
       if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
-        alert('Session หมดอายุ กรุณา Login ใหม่');
+  
         router.push('/login');
       } else if (error.message?.includes('400')) {
-        alert('ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง');
+  
       } else {
-        alert('เกิดข้อผิดพลาดในการบันทึก: ' + (error.message || 'Unknown error'));
+  
       }
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (!passwordData.password) {
+      setPasswordError('กรุณากรอกรหัสผ่านใหม่');
+      return;
+    }
+    if (passwordData.password.length < 6) {
+      setPasswordError('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+      return;
+    }
+    if (passwordData.password !== passwordData.confirm_password) {
+      setPasswordError('รหัสผ่านไม่ตรงกัน');
+      return;
+    }
+
+    setIsSavingPassword(true);
+    try {
+      await updateUser({
+        firstname: formData.firstname || user?.Firstname || '',
+        lastname:  formData.lastname  || user?.Lastname  || '',
+        email:     formData.email     || user?.Email     || '',
+        tel:       formData.tel       || user?.Tel       || '',
+        gender:    formData.gender    || user?.Gender    || '',
+        password:         passwordData.password,
+        confirm_password: passwordData.confirm_password,
+      });
+      setPasswordSuccess('เปลี่ยนรหัสผ่านสำเร็จ');
+      setPasswordData({ password: '', confirm_password: '' });
+    } catch (error: any) {
+      if (error.message?.includes('401')) {
+        setPasswordError('Session หมดอายุ กรุณาเข้าสู่ระบบใหม่');
+        router.push('/login');
+      } else {
+        setPasswordError('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+      }
+    } finally {
+      setIsSavingPassword(false);
     }
   };
 
@@ -471,49 +514,89 @@ export default function ProfilePage() {
 
         {/* Change Password Section */}
         <div className="mt-8 bg-white rounded-2xl shadow-xl p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            เปลี่ยนรหัสผ่าน
-          </h2>
-          
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">เปลี่ยนรหัสผ่าน</h2>
+
           <div className="space-y-4">
+            {/* Error */}
+            {passwordError && (
+              <div className="p-3.5 bg-red-50 border-l-4 border-red-500 rounded-lg">
+                <p className="text-sm text-red-600 font-medium">{passwordError}</p>
+              </div>
+            )}
+            {/* Success */}
+            {passwordSuccess && (
+              <div className="p-3.5 bg-green-50 border-l-4 border-green-500 rounded-lg">
+                <p className="text-sm text-green-600 font-medium">{passwordSuccess}</p>
+              </div>
+            )}
+
+            {/* รหัสผ่านใหม่ */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                รหัสผ่านเดิม
-              </label>
-              <input
-                type="password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A8BC2] focus:border-transparent"
-                placeholder="รหัสผ่านเดิม"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-2">รหัสผ่านใหม่</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={passwordData.password}
+                  onChange={e => {
+                    setPasswordData(p => ({ ...p, password: e.target.value }));
+                    setPasswordError('');
+                    setPasswordSuccess('');
+                  }}
+                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A8BC2] focus:border-transparent"
+                  placeholder="รหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {showPassword
+                    ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  }
+                </button>
+              </div>
             </div>
 
+            {/* ยืนยันรหัสผ่านใหม่ */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                รหัสผ่านใหม่
-              </label>
-              <input
-                type="password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A8BC2] focus:border-transparent"
-                placeholder="รหัสผ่านใหม่"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                ยืนยันรหัสผ่านใหม่
-              </label>
-              <input
-                type="password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A8BC2] focus:border-transparent"
-                placeholder="ยืนยันรหัสผ่านใหม่"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-2">ยืนยันรหัสผ่านใหม่</label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={passwordData.confirm_password}
+                  onChange={e => {
+                    setPasswordData(p => ({ ...p, confirm_password: e.target.value }));
+                    setPasswordError('');
+                    setPasswordSuccess('');
+                  }}
+                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A8BC2] focus:border-transparent"
+                  placeholder="ยืนยันรหัสผ่านใหม่"
+                />
+                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {showConfirmPassword
+                    ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  }
+                </button>
+              </div>
+              {/* match indicator */}
+              {passwordData.confirm_password && (
+                <p className={`text-xs mt-2 font-medium flex items-center gap-1 ${passwordData.password === passwordData.confirm_password ? 'text-green-600' : 'text-red-500'}`}>
+                  {passwordData.password === passwordData.confirm_password
+                    ? <><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>รหัสผ่านตรงกัน</>
+                    : <><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>รหัสผ่านไม่ตรงกัน</>
+                  }
+                </p>
+              )}
             </div>
 
             <button
-              onClick={() => alert('เปลี่ยนรหัสผ่านสำเร็จ (Coming Soon)')}
-              className="w-full px-6 py-3 bg-[#4A8BC2] text-white font-semibold rounded-lg hover:bg-[#3A7AB2] transition shadow-md"
+              onClick={handlePasswordChange}
+              disabled={isSavingPassword}
+              className="w-full px-6 py-3 bg-[#4A8BC2] text-white font-semibold rounded-lg hover:bg-[#3A7AB2] transition shadow-md disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              เปลี่ยนรหัสผ่าน
+              {isSavingPassword ? (
+                <><svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle className="opacity-25" cx="12" cy="12" r="10"/><path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>กำลังบันทึก...</>
+              ) : 'เปลี่ยนรหัสผ่าน'}
             </button>
           </div>
         </div>

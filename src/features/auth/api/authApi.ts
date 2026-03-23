@@ -119,6 +119,8 @@ export async function updateUser(data: UpdateUserRequest): Promise<void> {
   if (data.tel) formData.append('tel', data.tel);
   if (data.gender) formData.append('gender', data.gender);
   
+  if (data.password) formData.append('password', data.password);
+  if (data.confirm_password) formData.append('confirm_password', data.confirm_password);
   if (data.dob) formData.append('dob', data.dob);
   if (data.career) formData.append('career', data.career);
   if (data.company) formData.append('company', data.company);
@@ -128,14 +130,6 @@ export async function updateUser(data: UpdateUserRequest): Promise<void> {
     formData.append('profile_pic', data.profile_pic);
   }
 
-  console.log('📤 Sending data to backend:');
-  for (let [key, value] of formData.entries()) {
-    if (value instanceof File) {
-      console.log(`  ${key}: [File] ${value.name}`);
-    } else {
-      console.log(`  ${key}: ${value}`);
-    }
-  }
 
   const response = await fetchWithAuth(`${API_URL}/users/update`, {
     method: 'PUT',

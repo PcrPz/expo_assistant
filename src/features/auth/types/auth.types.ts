@@ -63,6 +63,7 @@ export interface UpdateUserRequest {
   gender: string;
   // Optional fields
   password?: string;
+  confirm_password?: string;
   dob?: string;
   career?: string;
   company?: string;

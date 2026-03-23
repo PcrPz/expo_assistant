@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Upload, ImageIcon, Plus, AlertCircle } from 'lucide-react';
+import { X, Plus, AlertCircle } from 'lucide-react';
 import { createExpoAnnouncement } from '../../api/expoAnnouncementApi';
 
 interface Props {
@@ -21,21 +21,19 @@ const MegaphoneIcon = () => (
 export function CreateExpoAnnouncementModal({ expoID, open, onClose, onSuccess }: Props) {
   const [title, setTitle] = useState('');
   const [detail, setDetail] = useState('');
-  const [files, setFiles] = useState<File[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (!e.target.files) return;
-    const newFiles = Array.from(e.target.files);
-    if (newFiles.some(f => !f.type.startsWith('image/'))) {
-      setError('กรุณาเลือกไฟล์รูปภาพเท่านั้น'); return;
-    }
-    setFiles(prev => [...prev, ...newFiles]);
-    setError(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { setError('กรุณาเลือกไฟล์รูปภาพเท่านั้น'); return; }
+    setImageFile(file); setError(null);
+    e.target.value = '';
   }
 
-  function reset() { setTitle(''); setDetail(''); setFiles([]); setError(null); }
+  function reset() { setTitle(''); setDetail(''); setImageFile(null); setError(null); }
   function handleClose() { if (!isLoading) { reset(); onClose(); } }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -47,7 +45,7 @@ export function CreateExpoAnnouncementModal({ expoID, open, onClose, onSuccess }
         title: title.trim(),
         detail: detail.trim() || undefined,
         status: 'unpublish',
-        files: files.length ? files : undefined,
+        files: imageFile ? [imageFile] : undefined,
       });
       reset(); onSuccess?.();
     } catch {
@@ -117,34 +115,29 @@ export function CreateExpoAnnouncementModal({ expoID, open, onClose, onSuccess }
               <label className="block text-sm font-semibold text-gray-700">
                 รูปภาพ <span className="text-xs font-normal text-gray-400">— ไม่บังคับ</span>
               </label>
-              <button type="button"
-                onClick={() => document.getElementById('expo-ann-create-file')?.click()}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-[#B8D0EA] text-[#3674B5] rounded-xl hover:bg-[#EEF4FB] text-sm font-semibold transition disabled:opacity-50">
-                <Upload className="w-4 h-4" />
-                เลือกรูปภาพ {files.length > 0 && `(${files.length} ไฟล์)`}
-              </button>
-              <input id="expo-ann-create-file" type="file" accept="image/*" multiple
-                className="hidden" onChange={handleFileChange} disabled={isLoading} />
-
-              {files.length > 0 ? (
-                <div className="grid grid-cols-3 gap-2">
-                  {files.map((f, i) => (
-                    <div key={i} className="relative group aspect-square rounded-xl overflow-hidden border border-gray-200">
-                      <img src={URL.createObjectURL(f)} alt={f.name} className="w-full h-full object-cover" />
-                      <button type="button"
-                        onClick={() => setFiles(prev => prev.filter((_, idx) => idx !== i))}
-                        className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
+              {imageFile ? (
+                <div className="relative group rounded-xl overflow-hidden border-2 border-gray-200 cursor-pointer" style={{ height: '160px' }}>
+                  <img src={URL.createObjectURL(imageFile)} alt="preview" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-900 text-xs font-semibold rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      เปลี่ยน
+                      <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" disabled={isLoading} />
+                    </label>
+                    <button type="button" onClick={() => setImageFile(null)} disabled={isLoading}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition disabled:opacity-50">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                      ลบ
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <div className="border-2 border-dashed border-gray-200 rounded-xl py-8 text-center bg-gray-50">
-                  <ImageIcon className="w-7 h-7 text-gray-300 mx-auto mb-2" />
-                  <p className="text-xs text-gray-400">ยังไม่มีรูปภาพ</p>
-                </div>
+                <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#B8D0EA] rounded-xl bg-gray-50 cursor-pointer hover:border-[#3674B5] hover:bg-[#EEF4FB] transition text-center" style={{ height: '160px' }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <span className="text-sm font-medium text-gray-500">คลิกเพื่อเลือกรูปภาพ</span>
+                  <span className="text-xs text-gray-400">PNG, JPG · สูงสุด 5MB</span>
+                  <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" disabled={isLoading} />
+                </label>
               )}
             </div>
           </div>

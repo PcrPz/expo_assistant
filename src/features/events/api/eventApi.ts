@@ -423,6 +423,13 @@ export async function updateEvent(id: string, request: CreateEventRequest): Prom
     if (request.zones && request.zones.length > 0) {
       formData.append('zones', JSON.stringify(request.zones));
     }
+
+    // ส่ง deleted_pics ถ้ามีรูปที่ต้องการลบ
+    if (request.deletedPics && request.deletedPics.length > 0) {
+      request.deletedPics.forEach(pic => {
+        formData.append('deleted_pics', pic);
+      });
+    }
     
     const response = await fetchWithAuth(`${API_URL}/expo/${id}/update`, {
       method: 'PUT',

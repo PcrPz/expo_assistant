@@ -240,46 +240,44 @@ export default function ZoneDetailsForm({ zones, zonesWithFiles: initialZonesWit
               <label className="block text-gray-700 font-medium mb-2">แผนผังของโซน (Optional)</label>
               
               {zoneImagePreview ? (
-                <div className="border-2 border-[#3674B5] rounded-xl p-4 bg-white">
-                  <img 
-                    src={zoneImagePreview} 
-                    alt="Zone Map Preview" 
-                    className="w-full h-48 object-contain rounded-lg"
+                <div className="relative group rounded-xl overflow-hidden border-2 border-gray-200 cursor-pointer" style={{ height: '160px' }}>
+                  <img
+                    src={zoneImagePreview}
+                    alt="Zone Map Preview"
+                    className="w-full h-full object-cover"
                   />
-                  <div className="mt-3 flex items-center justify-between">
-                    <p className="text-sm text-gray-700">
-                      📎 {newZone.file?.name}
-                    </p>
+                  <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-900 text-xs font-semibold rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      เปลี่ยน
+                      <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                    </label>
                     <button
                       type="button"
                       onClick={handleRemoveZoneImage}
-                      className="px-3 py-1 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition text-sm"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition"
                     >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                       ลบ
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-[#3674B5] transition cursor-pointer bg-white">
+                <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl bg-white cursor-pointer hover:border-[#3674B5] hover:bg-[#EEF4FB] transition text-center" style={{ height: '160px' }}>
                   <input
                     type="file"
                     accept="image/*"
                     onChange={handleImageChange}
                     className="hidden"
-                    id="zone-image"
                   />
-                  <label htmlFor="zone-image" className="cursor-pointer">
-                    <div className="flex flex-col items-center">
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" className="mb-3">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                      </svg>
-                      <p className="text-gray-600 text-sm mb-1">คลิกเพื่อเลือกรูปภาพ</p>
-                      <p className="text-xs text-gray-400">PNG, JPG, WEBP (สูงสุด 5MB)</p>
-                    </div>
-                  </label>
-                </div>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <p className="text-sm font-medium text-gray-500">คลิกเพื่อเลือกรูปภาพ</p>
+                  <p className="text-xs text-gray-400">PNG, JPG, WEBP · สูงสุด 5MB</p>
+                </label>
               )}
             </div>
           </div>

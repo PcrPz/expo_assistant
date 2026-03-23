@@ -11,6 +11,9 @@ export async function fetchWithAuth(
   const token = tokenManager.getAccessToken();
   
   if (!token) {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
     throw new Error('No access token available');
   }
 

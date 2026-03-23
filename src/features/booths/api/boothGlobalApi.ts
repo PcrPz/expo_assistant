@@ -473,7 +473,7 @@ export async function searchExpos(params: {
     
     console.log(`🔍 Searching expos: ${query.toString()}`);
     
-    const response = await fetchWithAuth(`${API_URL}/expo/search?${query}`);
+    const response = await fetchWithAuth(`${API_URL}/expo/search-unpublish?${query}`);
     
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));

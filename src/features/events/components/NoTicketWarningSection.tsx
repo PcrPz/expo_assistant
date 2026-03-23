@@ -14,24 +14,24 @@ export function NoTicketWarningSection({ onGoToTickets }: NoTicketWarningSection
   return (
     <>
       {/* Banner — 🔴 Rose */}
-      <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 shadow-sm">
-        <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 w-9 h-9 bg-rose-100 rounded-lg flex items-center justify-center">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e11d48" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <div className="bg-rose-50 border border-rose-200 rounded-xl p-5 shadow-sm">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0 w-11 h-11 bg-rose-100 rounded-xl flex items-center justify-center">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e11d48" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           </div>
           <div className="flex-1">
-            <h3 className="text-sm font-bold text-gray-900 mb-1">ยังไม่สามารถเผยแพร่งานได้</h3>
-            <p className="text-xs text-gray-500 mb-3 leading-relaxed">
+            <h3 className="text-[16px] font-bold text-gray-900 mb-1.5">ยังไม่สามารถเผยแพร่งานได้</h3>
+            <p className="text-[15px] text-gray-500 mb-4 leading-relaxed">
               งานนี้ยังไม่มีประเภทตั๋ว กรุณาสร้างตั๋วอย่างน้อย 1 ประเภทก่อนเผยแพร่งาน
               เมื่อสร้างตั๋วแล้ว ปุ่มเผยแพร่งานจะปรากฏขึ้นโดยอัตโนมัติ
             </p>
             <button
               onClick={() => setShowModal(true)}
-              className="px-4 py-2 bg-rose-100 text-rose-700 text-sm font-semibold rounded-lg hover:bg-rose-200 transition-all flex items-center gap-1.5 border border-rose-200"
+              className="px-5 py-2.5 bg-rose-100 text-rose-700 text-sm font-semibold rounded-xl hover:bg-rose-200 transition-all flex items-center gap-2 border border-rose-200"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2 9a3 3 0 1 1 0 6V19a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a3 3 0 1 1 0-6V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v4z" />

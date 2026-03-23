@@ -1,9 +1,13 @@
+'use client';
+
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Navbar } from '../../components/layout/Navbar';
 
-
 export default function HomePage() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Main Content */}
@@ -12,9 +16,9 @@ export default function HomePage() {
           {/* Logo */}
           <div className="flex justify-center">
             <div className="flex items-center gap-3">
-              <Image 
+              <Image
                 src="/images/logo_expo.png"
-                alt="ExpoAssistant Logo" 
+                alt="ExpoAssistant Logo"
                 width={64}
                 height={64}
                 className="rounded-lg shadow-md"
@@ -27,9 +31,9 @@ export default function HomePage() {
 
           {/* Illustration */}
           <div>
-            <Image 
+            <Image
               src="/images/Landing_Image.png"
-              alt="Expo Management Illustration" 
+              alt="Expo Management Illustration"
               width={500}
               height={400}
               className="mx-auto rounded-lg"
@@ -50,16 +54,18 @@ export default function HomePage() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button 
+            <Button
               size="lg"
+              onClick={() => router.push('/login')}
               className="bg-[#4A90E2] hover:bg-[#3A7BC8] text-white px-8 py-6 text-lg rounded-full min-w-[200px]"
             >
               สร้างงาน Expo
             </Button>
-            
-            <Button 
+
+            <Button
               size="lg"
               variant="outline"
+              onClick={() => router.push('/login')}
               className="border-2 border-[#4A90E2] text-[#4A90E2] hover:bg-[#4A90E2] hover:text-white px-8 py-6 text-lg rounded-full min-w-[200px]"
             >
               จัดการงานและบูธ

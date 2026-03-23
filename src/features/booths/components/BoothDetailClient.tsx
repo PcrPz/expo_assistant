@@ -554,10 +554,11 @@ export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailCli
               />
             )}
             {activeTab === 'dashboard' && (isOrganizer(userRole) || isAssignedStaff) && (
-              <BoothDashboardTab
-                expoId={eventId}
-                boothId={boothId}
-              />
+            <BoothDashboardTab
+              expoId={eventId}
+              boothId={boothId}
+              boothTitle={booth?.booth_no ?? undefined}
+            />
             )}
           </div>
         </div>

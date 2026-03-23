@@ -86,6 +86,7 @@ export interface CreateEventRequest {
   zones?: Zone[];
   thumbnail?: string;  // path เดิม
   map?: string;        // path เดิม
+  deletedPics?: string[];  // รูปที่ต้องการลบ
 }
 
 // ============================================
@@ -163,14 +164,18 @@ export function canRemoveStaff(userRole: EventRole, targetStaffRole: EventRole):
   return false;
 }
 
-export function getAvailableTabs(role: EventRole): Array<'detail' | 'staff' | 'booth' | 'dashboard' | 'applications' | 'tickets' | 'announcements' | 'checkout'> {
+export function getAvailableTabs(
+  role: EventRole,
+  status?: string
+): Array<'detail' | 'staff' | 'booth' | 'form' | 'dashboard' | 'applications' | 'tickets' | 'announcements' | 'checkout'> {
+  // Checkout แสดงเฉพาะ owner/admin/system_admin + status เป็น closed หรือ completed
+  const showCheckout = ['owner', 'admin', 'system_admin'].includes(role || '') &&
+                       ['closed', 'completed'].includes(status || '');
+ 
   if (isEventOrganizer(role)) {
-    // owner/admin/system_admin เห็น checkout ด้วย
-    if (role === 'owner' || role === 'admin' || role === 'system_admin') {
-      return ['detail', 'staff', 'booth', 'dashboard', 'applications', 'tickets', 'announcements', 'checkout'];
-    }
-    // staff ไม่เห็น checkout
-    return ['detail', 'staff', 'booth', 'dashboard', 'applications', 'tickets', 'announcements'];
+    const base = ['detail', 'staff', 'booth', 'form', 'dashboard', 'applications', 'tickets', 'announcements'] as const;
+    if (showCheckout) return [...base, 'checkout'];
+    return [...base];
   }
   if (isBoothStaff(role)) {
     return ['detail', 'booth', 'announcements'];

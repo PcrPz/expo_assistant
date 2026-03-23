@@ -44,7 +44,7 @@ export default function SuccessScreen({ eventId }: SuccessScreenProps) {
 
         {/* Success Message */}
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          สร้างงานสำเร็จ! 🎉
+          สร้างงานสำเร็จเเล้ว
         </h1>
         
         <p className="text-xl text-gray-600 mb-8">
@@ -111,7 +111,7 @@ export default function SuccessScreen({ eventId }: SuccessScreenProps) {
 
         {/* Tips */}
         <p className="mt-8 text-sm text-gray-500">
-          💡 <span className="font-medium">เคล็ดลับ:</span> คุณสามารถชำระเงินมัดจำได้จากหน้ารายละเอียดงาน
+          <span className="font-medium">!เพิ่มเติม:</span> คุณสามารถชำระเงินมัดจำได้จากหน้ารายละเอียดงาน
         </p>
       </div>
     </div>

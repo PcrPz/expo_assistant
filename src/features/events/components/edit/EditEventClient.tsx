@@ -47,6 +47,8 @@ export default function EditEventClient() {
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const [originalThumbnailPath, setOriginalThumbnailPath] = useState<string>('');
   const [originalMapPath, setOriginalMapPath] = useState<string>('');
+  const [deletedThumbnail, setDeletedThumbnail] = useState(false);
+  const [deletedMap, setDeletedMap] = useState(false);
 
   useEffect(() => {
     if (!eventId) {
@@ -98,11 +100,13 @@ export default function EditEventClient() {
       if (data.thumbnail) {
         setOriginalThumbnailPath(data.thumbnail);
         setLogoPreview(getMinioFileUrl(data.thumbnail));
+        setDeletedThumbnail(false);
       }
 
       if (data.map) {
         setOriginalMapPath(data.map);
         setBannerPreview(getMinioFileUrl(data.map));
+        setDeletedMap(false);
       }
 
       const existingZones: ZoneWithState[] = (data.zones || []).map(z => ({
@@ -213,8 +217,13 @@ export default function EditEventClient() {
         website2: formData.website2,
         logoFile: logoFile || undefined,
         bannerFile: bannerFile || undefined,
-        thumbnail: originalThumbnailPath,
-        map: originalMapPath,
+        // ถ้าลบรูปออก ไม่ส่ง path เดิม และส่ง deleted_pics แทน
+        thumbnail: (!deletedThumbnail && !logoFile) ? originalThumbnailPath : undefined,
+        map: (!deletedMap && !bannerFile) ? originalMapPath : undefined,
+        deletedPics: [
+          ...(deletedThumbnail && originalThumbnailPath ? [originalThumbnailPath] : []),
+          ...(deletedMap && originalMapPath ? [originalMapPath] : []),
+        ].filter(Boolean) as string[] || undefined,
       });
 
       if (!success) {
@@ -474,77 +483,69 @@ export default function EditEventClient() {
           >
             <div className="grid grid-cols-2 gap-4">
 
-              {/* โลโก้ */}
+              {/* โลโก้ — Hover Overlay */}
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">โลโก้งาน (Thumbnail)</p>
                 {logoPreview ? (
-                  <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50">
-                    <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
-                      <span className="text-xs font-semibold text-gray-500">
-                        {logoFile ? 'รูปใหม่' : 'รูปปัจจุบัน'}
-                      </span>
+                  <div className="relative group rounded-xl overflow-hidden border-2 border-gray-200 cursor-pointer" style={{ height: '130px' }}>
+                    <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <label className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-900 text-xs font-semibold rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        เปลี่ยน
+                        <input type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
+                      </label>
                       <button
                         type="button"
-                        onClick={() => { setLogoPreview(null); setLogoFile(null); }}
-                        className="text-xs font-semibold text-red-500 hover:text-red-600 transition"
+                        onClick={() => { setLogoPreview(null); setLogoFile(null); setDeletedThumbnail(true); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition"
                       >
-                        ลบรูป
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                        ลบ
                       </button>
                     </div>
-                    <img src={logoPreview} alt="Logo" className="w-full h-28 object-contain p-2" />
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center gap-2 border border-dashed border-gray-300 rounded-xl py-7 px-4 bg-gray-50 cursor-pointer hover:border-[#3674B5] hover:bg-[#EEF4FB] transition text-center">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5">
-                      <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
+                  <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 cursor-pointer hover:border-[#3674B5] hover:bg-[#EEF4FB] transition text-center" style={{ height: '130px' }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
                     </svg>
-                    <span className="text-xs font-semibold text-gray-400">อัพโหลดโลโก้</span>
-                    <span className="text-xs text-gray-300">PNG, JPG</span>
-                    <input type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
-                  </label>
-                )}
-                {logoPreview && (
-                  <label className="mt-2 flex items-center justify-center gap-1.5 py-2 rounded-lg border border-gray-200 bg-white text-xs font-semibold text-gray-500 cursor-pointer hover:border-[#3674B5] hover:text-[#3674B5] hover:bg-[#EEF4FB] transition">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-                    เปลี่ยนรูปใหม่
+                    <span className="text-sm font-medium text-gray-500">คลิกเพื่ออัปโหลดโลโก้</span>
+                    <span className="text-xs text-gray-400">PNG, JPG</span>
                     <input type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
                   </label>
                 )}
               </div>
 
-              {/* แผนผัง */}
+              {/* แผนผัง — Hover Overlay */}
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">แผนผังงาน (Map)</p>
                 {bannerPreview ? (
-                  <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50">
-                    <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
-                      <span className="text-xs font-semibold text-gray-500">
-                        {bannerFile ? 'แผนผังใหม่' : 'แผนผังปัจจุบัน'}
-                      </span>
+                  <div className="relative group rounded-xl overflow-hidden border-2 border-gray-200 cursor-pointer" style={{ height: '130px' }}>
+                    <img src={bannerPreview} alt="Map" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <label className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-900 text-xs font-semibold rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        เปลี่ยน
+                        <input type="file" accept="image/*" onChange={handleBannerChange} className="hidden" />
+                      </label>
                       <button
                         type="button"
-                        onClick={() => { setBannerPreview(null); setBannerFile(null); }}
-                        className="text-xs font-semibold text-red-500 hover:text-red-600 transition"
+                        onClick={() => { setBannerPreview(null); setBannerFile(null); setDeletedMap(true); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition"
                       >
-                        ลบรูป
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                        ลบ
                       </button>
                     </div>
-                    <img src={bannerPreview} alt="Map" className="w-full h-28 object-contain p-2" />
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center gap-2 border border-dashed border-gray-300 rounded-xl py-7 px-4 bg-gray-50 cursor-pointer hover:border-[#3674B5] hover:bg-[#EEF4FB] transition text-center">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+                  <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 cursor-pointer hover:border-[#3674B5] hover:bg-[#EEF4FB] transition text-center" style={{ height: '130px' }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
                     </svg>
-                    <span className="text-xs font-semibold text-gray-400">อัพโหลดแผนผัง</span>
-                    <span className="text-xs text-gray-300">PNG, JPG</span>
-                    <input type="file" accept="image/*" onChange={handleBannerChange} className="hidden" />
-                  </label>
-                )}
-                {bannerPreview && (
-                  <label className="mt-2 flex items-center justify-center gap-1.5 py-2 rounded-lg border border-gray-200 bg-white text-xs font-semibold text-gray-500 cursor-pointer hover:border-[#3674B5] hover:text-[#3674B5] hover:bg-[#EEF4FB] transition">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-                    เปลี่ยนรูปใหม่
+                    <span className="text-sm font-medium text-gray-500">คลิกเพื่ออัปโหลดแผนผัง</span>
+                    <span className="text-xs text-gray-400">PNG, JPG</span>
                     <input type="file" accept="image/*" onChange={handleBannerChange} className="hidden" />
                   </label>
                 )}
@@ -646,28 +647,53 @@ export default function EditEventClient() {
                         </Field>
                         <div>
                           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">แผนที่โซน</p>
-                          {(zone.mapPreview || zoneMapUrl) && (
-                            <div className="mb-2 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                          {(zone.mapPreview || zoneMapUrl) ? (
+                            <div className="relative group rounded-xl overflow-hidden border-2 border-gray-200 cursor-pointer" style={{ height: '120px' }}>
                               <img
                                 src={zone.mapPreview || zoneMapUrl || ''}
                                 alt={`${zone.title} Map`}
-                                className="w-full h-28 object-contain p-2"
+                                className="w-full h-full object-cover"
                               />
+                              <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <label className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-900 text-xs font-semibold rounded-lg cursor-pointer hover:bg-gray-100 transition">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                  เปลี่ยน
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) handleZoneMapChange(index, file);
+                                    }}
+                                    className="hidden"
+                                  />
+                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() => setZones(prev => prev.map((z, i) => i === index ? { ...z, mapFile: undefined, mapPreview: undefined, map: undefined } : z))}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition"
+                                >
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                  ลบ
+                                </button>
+                              </div>
                             </div>
+                          ) : (
+                            <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 cursor-pointer hover:border-[#3674B5] hover:bg-[#EEF4FB] transition text-center" style={{ height: '120px' }}>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                              <span className="text-xs font-medium text-gray-500">อัปโหลดแผนที่โซน</span>
+                              <span className="text-xs text-gray-400">PNG, JPG</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleZoneMapChange(index, file);
+                                }}
+                                className="hidden"
+                              />
+                            </label>
                           )}
-                          <label className="flex items-center justify-center gap-1.5 py-2 rounded-lg border border-dashed border-gray-300 bg-gray-50 text-xs font-semibold text-gray-400 cursor-pointer hover:border-[#3674B5] hover:text-[#3674B5] hover:bg-[#EEF4FB] transition">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-                            {(zone.mapPreview || zoneMapUrl) ? 'เปลี่ยนแผนที่' : 'อัพโหลดแผนที่'}
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleZoneMapChange(index, file);
-                              }}
-                              className="hidden"
-                            />
-                          </label>
                         </div>
                       </div>
                     )}

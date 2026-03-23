@@ -28,9 +28,10 @@ import { getTicketList } from '@/src/features/events/api/ticketApi';
 import { NoTicketWarningSection } from '@/src/features/events/components/NoTicketWarningSection';
 import { ExpoAnnouncementTab } from '@/src/features/events/components/announcements/ExpoAnnouncementTab';
 import { CheckoutTab } from '@/src/features/events/components/checkout/CheckoutTab';
+import { ExpoFormTab } from '@/src/features/events/components/forms/ExpoFormTab';
 
 // ✅ Tab Type
-type TabType = 'detail' | 'staff' | 'booth' | 'dashboard' | 'applications' | 'tickets' | 'announcements' | 'checkout';
+type TabType = 'detail' | 'staff' | 'booth' | 'form' | 'dashboard' | 'applications' | 'tickets' | 'announcements' | 'checkout';
 
 export default function EventDetailPage() {
   const params = useParams();
@@ -137,7 +138,7 @@ export default function EventDetailPage() {
     );
   }
 
-  const availableTabs = getAvailableTabs(event.role);
+  const availableTabs = getAvailableTabs(event.role, event.status);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -190,6 +191,13 @@ export default function EventDetailPage() {
             />
           )}
           
+          {activeTab === 'form' && (
+            <ExpoFormTab
+              expoId={event.expoID}
+              role={event.role}
+            />
+          )}
+
           {activeTab === 'dashboard' && (
             <DashboardTab 
               eventId={event.expoID}

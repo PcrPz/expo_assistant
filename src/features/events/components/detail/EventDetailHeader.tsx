@@ -5,7 +5,7 @@ import React from 'react';
 import { getMinioFileUrl } from '@/src/features/minio/api/minioApi';
 import type { Event, EventRole } from '../../types/event.types';
 
-type TabType = 'detail' | 'staff' | 'booth' | 'dashboard' | 'applications' | 'tickets' | 'announcements' | 'checkout';
+type TabType = 'detail' | 'staff' | 'booth' | 'form' | 'dashboard' | 'applications' | 'tickets' | 'announcements' | 'checkout';
 
 interface EventDetailHeaderProps {
   event: Event;
@@ -43,13 +43,13 @@ export function EventDetailHeader({
       const labels: Record<TabType, string> = {
         detail: 'Expo', staff: 'Staff', booth: 'All Booths',
         dashboard: 'My Booth', applications: 'Applications',
-        tickets: 'Tickets', announcements: 'Announcement', checkout: 'Checkout',
+        form: 'Form', tickets: 'Tickets', announcements: 'Announcement', checkout: 'Checkout',
       };
       return labels[tab];
     }
     const labels: Record<TabType, string> = {
       detail: 'Expo', staff: 'Staff', booth: 'Booth',
-      dashboard: 'Dashboard', applications: 'Applications',
+      dashboard: 'Dashboard', form: 'Form', applications: 'Applications',
       tickets: 'Tickets', announcements: 'Announcement', checkout: 'Checkout',
     };
     return labels[tab];
@@ -97,6 +97,14 @@ export function EventDetailHeader({
       announcements: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M3 11l19-9-9 19-2-8-8-2z" />
+        </svg>
+      ),
+      form: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
         </svg>
       ),
       checkout: (
@@ -172,8 +180,9 @@ export function EventDetailHeader({
                   {event.name}
                 </h1>
                 {event.status === 'pending' && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-50 text-orange-600 border border-orange-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 flex-shrink-0" />
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                    style={{ background: '#FFF8E1', color: '#B45309', border: '1px solid #FFBD0D' }}>
+                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#FFBD0D' }} />
                     รอชำระเงิน
                   </span>
                 )}
@@ -189,6 +198,20 @@ export function EventDetailHeader({
                     style={{ background: '#E8F4FD', color: '#2563a8', borderColor: '#93C5E8' }}>
                     <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#498AC3' }} />
                     เผยแพร่แล้ว
+                  </span>
+                )}
+                {event.status === 'closed' && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                    style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA' }}>
+                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#DC2626' }} />
+                    งานจบลงเเล้ว
+                  </span>
+                )}
+                {event.status === 'completed' && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                    style={{ background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0' }}>
+                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#16A34A' }} />
+                    เคลียเงินเสร็จสิ้น
                   </span>
                 )}
               </div>

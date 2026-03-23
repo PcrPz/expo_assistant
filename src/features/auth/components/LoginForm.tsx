@@ -36,12 +36,9 @@ export function LoginForm() {
         role  // ✅ ส่ง role: "organizer" หรือ "booth_manager"
       };
       
-      console.log('🔐 Sending login data:', loginData);
       const response = await login(loginData);
-      console.log('✅ Login successful:', response);
 
       await refreshUser();
-      const currentUser = useAuthStore.getState().user;
 
       // Redirect ตาม role
       if (role === 'booth_manager') {
@@ -52,7 +49,6 @@ export function LoginForm() {
 
       router.refresh();
     } catch (err: any) {
-      console.error('❌ Login error:', err);
       setError(err.message || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
     } finally {
       setLoading(false);
@@ -215,7 +211,7 @@ export function LoginForm() {
             >
               {loading 
                 ? 'กำลังเข้าสู่ระบบ...' 
-                : `สมัครสมาชิกในฐานะ${isOrganizer ? 'ผู้จัดงาน' : 'ผู้จัดการบูธ'}`
+                : `เข้าสู่ระบบในฐานะ${isOrganizer ? 'ผู้จัดงาน' : 'ผู้จัดการบูธ'}`
               }
             </button>
           </form>
@@ -227,7 +223,7 @@ export function LoginForm() {
               href="/register" 
               className="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition"
             >
-              เข้าสู่ระบบ
+              ลงทะเบียน
             </Link>
           </div>
         </div>

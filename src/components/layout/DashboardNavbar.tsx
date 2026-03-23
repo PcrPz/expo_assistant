@@ -15,6 +15,12 @@ interface DashboardNavbarProps {
   onToggleSidebar: () => void;
 }
 
+const ROLE_LABELS: Record<string, string> = {
+  organizer:    'ผู้จัดงาน',
+  booth_manager: 'ผู้จัดการบูธ',
+  system_admin: 'ผู้ดูแลระบบ',
+};
+
 export function DashboardNavbar({ onToggleSidebar }: DashboardNavbarProps) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const { user, logout } = useAuthStore();
@@ -73,32 +79,41 @@ export function DashboardNavbar({ onToggleSidebar }: DashboardNavbarProps) {
           <div className="relative">
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="flex items-center gap-2 hover:bg-white/10 rounded-full py-1.5 px-2 pr-3 transition-colors"
+              className="flex items-center gap-2.5 hover:bg-white/10 rounded-xl py-1.5 px-3 transition-colors"
             >
-              <div className="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center overflow-hidden border-2 border-white">
+              {/* Avatar */}
+              <div className="w-9 h-9 rounded-full bg-yellow-400 flex items-center justify-center overflow-hidden border-2 border-white flex-shrink-0">
                 {profilePicUrl ? (
                   <img
                     src={profilePicUrl}
                     alt={user?.Firstname || 'User'}
                     className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />
                 ) : null}
-                <span className={`text-white font-bold text-lg ${profilePicUrl ? 'hidden' : ''}`}>
+                <span className={`text-white font-bold text-base ${profilePicUrl ? 'hidden' : ''}`}>
                   {user?.Firstname?.[0]?.toUpperCase() || 'U'}
                 </span>
               </div>
 
-              <svg 
-                width="18" 
-                height="18" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white" 
+              {/* ชื่อ + Role */}
+              <div className="hidden md:flex flex-col items-start leading-tight">
+                <span className="text-white font-semibold text-sm">
+                  {user?.Firstname} {user?.Lastname}
+                </span>
+                <span className="text-white/70 text-xs">
+                  {ROLE_LABELS[user?.Role || ''] || user?.Role || ''}
+                </span>
+              </div>
+
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
                 strokeWidth="2.5"
-                className={`transition-transform ${showProfileMenu ? 'rotate-180' : ''}`}
+                className={`transition-transform flex-shrink-0 ${showProfileMenu ? 'rotate-180' : ''}`}
               >
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
@@ -140,6 +155,9 @@ export function DashboardNavbar({ onToggleSidebar }: DashboardNavbarProps) {
                           <p className="text-white font-semibold text-base truncate">
                             {user.Firstname} {user.Lastname}
                           </p>
+                          <p className="text-white/70 text-xs mt-0.5">
+                            {ROLE_LABELS[user.Role || ''] || user.Role || ''}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -154,7 +172,7 @@ export function DashboardNavbar({ onToggleSidebar }: DashboardNavbarProps) {
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
-                        <span className="font-medium">Edit Profile</span>
+                        <span className="font-medium">แก้ไขโปรไฟล์</span>
                       </Link>
 
                       <button
@@ -166,7 +184,7 @@ export function DashboardNavbar({ onToggleSidebar }: DashboardNavbarProps) {
                           <polyline points="16 17 21 12 16 7"></polyline>
                           <line x1="21" y1="12" x2="9" y2="12"></line>
                         </svg>
-                        <span className="font-medium">Sign Out</span>
+                        <span className="font-medium">ออกจากระบบ</span>
                       </button>
                     </div>
                   </div>

@@ -250,14 +250,15 @@ export default function HomePage() {
                   )}
 
                   <div className="space-y-1.5 text-sm text-gray-600">
-                    <div className="flex gap-2">
-                      <span className="font-medium min-w-[48px]">วันที่</span>
-                      <span>: {new Date(event.startDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <span className="font-medium min-w-[48px]">เวลา</span>
-                      <span>: {event.time || '-'}</span>
-                    </div>
+                  <div className="flex gap-2">
+                    <span className="font-medium min-w-[48px]">วันที่</span>
+                    <span>: {
+                      event.startDate && event.endDate && event.startDate !== event.endDate
+                        ? `${new Date(event.startDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })} - ${new Date(event.endDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                        : new Date(event.startDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })
+                    }</span>
+                  </div>
+
                     <div className="flex gap-2">
                       <span className="font-medium min-w-[48px]">สถานที่</span>
                       <span className="line-clamp-1">: {event.location}</span>
