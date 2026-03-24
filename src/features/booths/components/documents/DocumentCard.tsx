@@ -1,5 +1,6 @@
 // src/features/booths/components/documents/DocumentCard.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { Download, Edit2, Trash2 } from 'lucide-react';
@@ -34,7 +35,7 @@ export function DocumentCard({
       setIsDownloading(true);
       await downloadDocument(expoId, document.DocID, `${document.Title}.pdf`);
     } catch {
-      alert('ไม่สามารถดาวน์โหลดเอกสารได้');
+      toast.error('ไม่สามารถดาวน์โหลดเอกสารได้');
     } finally {
       setIsDownloading(false);
     }
@@ -49,10 +50,10 @@ export function DocumentCard({
     try {
       setIsDeleting(true);
       await deleteDocuments(expoId, boothId, [document.DocID]);
-      alert('ลบเอกสารสำเร็จ');
+      toast.success('ลบเอกสารสำเร็จ');
       onRefresh();
     } catch (error: any) {
-      alert(error.message || 'ไม่สามารถลบเอกสารได้');
+      toast.error(error.message || 'ไม่สามารถลบเอกสารได้');
     } finally {
       setIsDeleting(false);
       setShowDeleteModal(false);

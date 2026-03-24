@@ -1,5 +1,6 @@
 // src/features/booths/components/announcements/AnnouncementDetailModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { X, Edit2, Send, Trash2, Calendar, ImageIcon, AlertCircle } from 'lucide-react';
 import { 
@@ -44,11 +45,11 @@ export function AnnouncementDetailModal({
     try {
       setIsPublishing(true);
       await publishBoothAnnouncement(expoId, boothId, announcement);
-      alert('เผยแพร่ประกาศสำเร็จ');
+      toast.success('เผยแพร่ประกาศสำเร็จ');
       setShowPublishConfirm(false);
       onRefresh();
     } catch (error) {
-      alert('ไม่สามารถเผยแพร่ประกาศได้');
+      toast.error('ไม่สามารถเผยแพร่ประกาศได้');
     } finally {
       setIsPublishing(false);
     }
@@ -58,11 +59,11 @@ export function AnnouncementDetailModal({
     try {
       setIsDeleting(true);
       await deleteBoothAnnouncement(expoId, boothId, announcement.NotiID);
-      alert('ลบประกาศสำเร็จ');
+      toast.success('ลบประกาศสำเร็จ');
       onClose();
       onRefresh();
     } catch (error: any) {
-      alert(error.message || 'ไม่สามารถลบประกาศได้');
+      toast.error(error.message || 'ไม่สามารถลบประกาศได้');
     } finally {
       setIsDeleting(false);
       setShowDeleteModal(false);

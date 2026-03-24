@@ -1,5 +1,6 @@
 // src/features/booths/components/events/EventCard.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { Edit2, Trash2, Eye, Calendar, Clock } from 'lucide-react';
@@ -72,10 +73,10 @@ export function EventCard({
     try {
       setIsDeleting(true);
       await deleteBoothEvent(expoID, boothID, event.EventID);
-      alert('ลบกิจกรรมสำเร็จ');
+      toast.success('ลบกิจกรรมสำเร็จ');
       onRefresh();
     } catch (error: any) {
-      alert(error.message || 'ไม่สามารถลบกิจกรรมได้');
+      toast.error(error.message || 'ไม่สามารถลบกิจกรรมได้');
     } finally {
       setIsDeleting(false);
       setShowDeleteModal(false);

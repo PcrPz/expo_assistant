@@ -1,5 +1,6 @@
 // src/features/booths/components/forms/EditFormModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { X, Plus, Edit2 } from 'lucide-react';
@@ -42,14 +43,14 @@ export function EditFormModal({ expoId, boothId, existingQuestions, onClose, onS
 
   const handleSubmit = async () => {
     const hasEmpty = questions.some(q => !q.question_text.trim());
-    if (hasEmpty) { alert('กรุณากรอกคำถามให้ครบทุกข้อ'); return; }
+    if (hasEmpty) { toast.warning('กรุณากรอกคำถามให้ครบทุกข้อ'); return; }
     try {
       setIsSubmitting(true);
       await updateBoothForm(expoId, boothId, { expo_id: expoId, booth_id: boothId, questions });
-      alert('แก้ไขแบบสอบถามสำเร็จ (กลับเป็นฉบับร่าง)');
+      toast.success('แก้ไขแบบสอบถามสำเร็จ (กลับเป็นฉบับร่าง)');
       onSuccess();
     } catch (error: any) {
-      alert(error.message || 'ไม่สามารถแก้ไขแบบสอบถามได้');
+      toast.error(error.message || 'ไม่สามารถแก้ไขแบบสอบถามได้');
     } finally { setIsSubmitting(false); }
   };
 

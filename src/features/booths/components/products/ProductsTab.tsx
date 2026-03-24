@@ -1,5 +1,6 @@
 // src/features/booths/components/products/ProductsTab.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect, useMemo } from 'react';
 import { Package, Plus, RefreshCw } from 'lucide-react';
@@ -58,11 +59,11 @@ export function ProductsTab({ boothId, expoId, userRole, isAssignedStaff }: Prod
     try {
       setIsDeleting(true);
       await deleteProduct(expoId, boothId, deletingProduct.ProductID);
-      alert('ลบสินค้าสำเร็จ');
+      toast.success('ลบสินค้าสำเร็จ');
       loadProducts();
       setDeletingProduct(null);
     } catch (error: any) {
-      alert(error.message || 'ไม่สามารถลบสินค้าได้');
+      toast.error(error.message || 'ไม่สามารถลบสินค้าได้');
     } finally {
       setIsDeleting(false);
     }

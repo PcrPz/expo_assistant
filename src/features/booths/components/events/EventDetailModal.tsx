@@ -1,5 +1,6 @@
 // src/features/booths/components/events/EventDetailModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { X, Calendar, Clock, Building2, Mail, Phone, Globe, Edit2, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -48,11 +49,11 @@ export function EventDetailModal({
     try {
       setIsDeleting(true);
       await deleteBoothEvent(expoID, boothID, event.EventID);
-      alert('ลบกิจกรรมสำเร็จ');
+      toast.success('ลบกิจกรรมสำเร็จ');
       onRefresh();
       onClose();
     } catch (error: any) {
-      alert(error.message || 'ไม่สามารถลบกิจกรรมได้');
+      toast.error(error.message || 'ไม่สามารถลบกิจกรรมได้');
     } finally {
       setIsDeleting(false);
       setShowDeleteModal(false);

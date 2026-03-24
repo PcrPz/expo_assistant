@@ -1,5 +1,6 @@
 // src/features/queues/components/queue/CreateQueueModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { X, Users } from 'lucide-react';
@@ -40,11 +41,11 @@ export function CreateQueueModal({
         title: title.trim(),
         status,
       });
-      alert('สร้างคิวสำเร็จ');
+      toast.success('สร้างคิวสำเร็จ');
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'เกิดข้อผิดพลาด');
-      alert('สร้างคิวไม่สำเร็จ');
+      toast.success('สร้างคิวไม่สำเร็จ');
     } finally {
       setIsSubmitting(false);
     }

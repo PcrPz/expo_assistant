@@ -1,5 +1,6 @@
 // src/features/staff/components/InviteStaffModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import type { EventRole } from '@/src/features/events/types/event.types';
@@ -33,14 +34,14 @@ export function InviteStaffModal({
     userRole === 'admin';
 
   const handleInviteByEmail = () => {
-    if (!email.trim()) { alert('กรุณากรอกอีเมล'); return; }
+    if (!email.trim()) { toast.warning('กรุณากรอกอีเมล'); return; }
     onInviteByEmail(email, emailRole);
   };
 
   const handleCreateCode = () => { onCreateInviteCode(codeRole); };
 
   const handleCopyCode = () => {
-    if (inviteCode) { navigator.clipboard.writeText(inviteCode); alert('คัดลอกโค้ดแล้ว'); }
+    if (inviteCode) { navigator.clipboard.writeText(inviteCode); toast.success('คัดลอกโค้ดแล้ว'); }
   };
 
   // ── No Permission ──────────────────────────────────────────

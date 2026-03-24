@@ -1,5 +1,7 @@
 // src/features/events/components/forms/ExpoFormTab.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
+import { ConfirmModal } from '@/src/components/ui/ConfirmModal';
 
 import { useState, useEffect } from 'react';
 import { FileText, Plus, RefreshCw, Send, CheckCircle2, Clock, Eye, Edit2, BarChart3, Trash2, AlertCircle } from 'lucide-react';
@@ -29,6 +31,7 @@ export function ExpoFormTab({ expoId, role }: ExpoFormTabProps) {
   const [showPreview, setShowPreview]     = useState(false);
   const [showResults, setShowResults]     = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
 
   const manage = canManage(role);
   const isPublished = form?.status === 'publish';
@@ -45,31 +48,32 @@ export function ExpoFormTab({ expoId, role }: ExpoFormTabProps) {
   const handleToggleStatus = async () => {
     if (!form) return;
     if (isPublished) {
-      alert('ไม่สามารถยกเลิกการเผยแพร่ได้\nหากต้องการเปลี่ยนแปลง กรุณาลบและสร้างแบบสอบถามใหม่');
+      toast.warning('ไม่สามารถยกเลิกการเผยแพร่ได้', { description: 'หากต้องการเปลี่ยนแปลง กรุณาลบและสร้างแบบสอบถามใหม่' });
       return;
     }
-    const confirmed = window.confirm(
-      'คุณแน่ใจหรือไม่ว่าต้องการเผยแพร่แบบสอบถาม?\n\n' +
-      '⚠️ หมายเหตุ:\n' +
-      '- เมื่อเผยแพร่แล้ว ผู้เข้าร่วมงานจะตอบแบบสอบถามได้ทันที\n' +
-      '- คุณจะไม่สามารถแก้ไขหรือยกเลิกการเผยแพร่ได้\n' +
-      '- หากต้องการเปลี่ยนแปลง ต้องลบและสร้างใหม่'
-    );
-    if (!confirmed) return;
+    setShowPublishConfirm(true);
+  };
+
+  const handleConfirmPublish = async () => {
+    setShowPublishConfirm(false);
     try {
       await updateExpoFormStatus(expoId, 'publish');
-      alert('✓ เผยแพร่แบบสอบถามสำเร็จ!');
+      toast.success('เผยแพร่แบบสอบถามสำเร็จ', { description: 'ผู้เข้าร่วมงานสามารถตอบได้แล้ว' });
       loadForm();
-    } catch (err: any) { alert(err.message || 'เกิดข้อผิดพลาด'); }
+    } catch (err: any) {
+      toast.error(err.message || 'เกิดข้อผิดพลาด');
+    }
   };
 
   const handleDelete = async () => {
     try {
       await deleteExpoForm(expoId);
-      alert('ลบแบบสอบถามสำเร็จ');
+      toast.success('ลบแบบสอบถามสำเร็จ');
       setShowDeleteConfirm(false);
       loadForm();
-    } catch (err: any) { alert(err.message || 'ไม่สามารถลบแบบสอบถามได้'); }
+    } catch (err: any) {
+      toast.error(err.message || 'ไม่สามารถลบแบบสอบถามได้');
+    }
   };
 
   if (isLoading) {
@@ -223,6 +227,22 @@ export function ExpoFormTab({ expoId, role }: ExpoFormTabProps) {
         <ExpoFormResultsModal expoId={expoId} onClose={() => setShowResults(false)} />
       )}
 
+      {/* Publish Confirm */}
+      <ConfirmModal
+        open={showPublishConfirm}
+        onClose={() => setShowPublishConfirm(false)}
+        onConfirm={handleConfirmPublish}
+        title="เผยแพร่แบบสอบถาม"
+        description="คุณแน่ใจหรือไม่ว่าต้องการเผยแพร่?"
+        notes={[
+          'เมื่อเผยแพร่แล้ว ผู้เข้าร่วมงานจะตอบแบบสอบถามได้ทันที',
+          'คุณจะไม่สามารถแก้ไขหรือยกเลิกการเผยแพร่ได้',
+          'หากต้องการเปลี่ยนแปลง ต้องลบและสร้างใหม่',
+        ]}
+        confirmLabel="เผยแพร่เลย"
+        confirmColor="#3674B5"
+      />
+
       {/* Delete Confirm */}
       {showDeleteConfirm && (
         <>
@@ -241,7 +261,9 @@ export function ExpoFormTab({ expoId, role }: ExpoFormTabProps) {
                 </div>
                 <button onClick={() => setShowDeleteConfirm(false)}
                   className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
                 </button>
               </div>
               <div className="px-6 py-5 space-y-4">

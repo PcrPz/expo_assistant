@@ -1,5 +1,6 @@
 // src/features/booths/components/events/EventsTab.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useEffect, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
@@ -47,7 +48,7 @@ export function EventsTab({
       const data = await getBoothEvents(expoID, boothID);
       setEvents(data);
     } catch (error) {
-      alert('ไม่สามารถโหลดกิจกรรมได้');
+      toast.error('ไม่สามารถโหลดกิจกรรมได้');
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +60,7 @@ export function EventsTab({
       setSelectedEvent(detail);
       setIsDetailModalOpen(true);
     } catch (error) {
-      alert('ไม่สามารถโหลดรายละเอียดกิจกรรมได้');
+      toast.error('ไม่สามารถโหลดรายละเอียดกิจกรรมได้');
     }
   };
 
@@ -69,7 +70,7 @@ export function EventsTab({
       setSelectedEvent(detail);
       setIsEditModalOpen(true);
     } catch (error) {
-      alert('ไม่สามารถโหลดข้อมูลสำหรับแก้ไขได้');
+      toast.error('ไม่สามารถโหลดข้อมูลสำหรับแก้ไขได้');
     }
   };
 

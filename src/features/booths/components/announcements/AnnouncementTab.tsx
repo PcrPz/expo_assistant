@@ -1,5 +1,6 @@
 // src/features/booths/components/announcements/AnnouncementsTab.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useEffect, useState } from 'react';
 import { Plus, Search, Megaphone } from 'lucide-react';
@@ -46,7 +47,7 @@ export function AnnouncementsTab({
       const data = await getBoothAnnouncements(expoID, boothID);
       setAnnouncements(data);
     } catch (error) {
-      alert('ไม่สามารถโหลดประกาศได้');
+      toast.error('ไม่สามารถโหลดประกาศได้');
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +59,7 @@ export function AnnouncementsTab({
       setSelectedAnnouncement(detail);
       setIsDetailModalOpen(true);
     } catch (error) {
-      alert('ไม่สามารถโหลดรายละเอียดประกาศได้');
+      toast.error('ไม่สามารถโหลดรายละเอียดประกาศได้');
     }
   };
 
@@ -68,7 +69,7 @@ export function AnnouncementsTab({
       setSelectedAnnouncement(detail);
       setIsEditModalOpen(true);
     } catch (error) {
-      alert('ไม่สามารถโหลดข้อมูลสำหรับแก้ไขได้');
+      toast.error('ไม่สามารถโหลดข้อมูลสำหรับแก้ไขได้');
     }
   };
 

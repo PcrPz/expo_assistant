@@ -1,5 +1,6 @@
 // src/features/queues/components/queue/QueueSettingsModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect } from 'react';
 import { X, Settings } from 'lucide-react';
@@ -47,11 +48,11 @@ export function QueueSettingsModal({
         title: title.trim(),
         status,
       });
-      alert('อัปเดตคิวสำเร็จ');
+      toast.success('อัปเดตคิวสำเร็จ');
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'เกิดข้อผิดพลาด');
-      alert('อัปเดตคิวไม่สำเร็จ');
+      toast.success('อัปเดตคิวไม่สำเร็จ');
     } finally {
       setIsSubmitting(false);
     }

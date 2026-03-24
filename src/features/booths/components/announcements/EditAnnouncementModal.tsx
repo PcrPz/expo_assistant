@@ -1,5 +1,6 @@
 // src/features/booths/components/announcements/EditAnnouncementModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect } from 'react';
 import { X, Trash2, RotateCcw, Megaphone } from 'lucide-react';
@@ -81,12 +82,12 @@ export function EditAnnouncementModal({
         files: newImageFile ? [newImageFile] : undefined,
       });
 
-      alert('แก้ไขประกาศสำเร็จ');
+      toast.success('แก้ไขประกาศสำเร็จ');
       onClose();
       onSuccess?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');
-      alert('แก้ไขประกาศไม่สำเร็จ');
+      toast.success('แก้ไขประกาศไม่สำเร็จ');
     } finally {
       setIsLoading(false);
     }

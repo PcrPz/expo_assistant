@@ -1,5 +1,6 @@
 // src/features/booths/components/booth-global/MyBoothDashboard.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -57,7 +58,7 @@ export function MyBoothDashboard() {
     const result = await joinBoothByCode(joinCode.trim());
     setJoining(false);
     if (result.success) { setShowJoin(false); setJoinCode(''); await loadBooth(); }
-    else { alert(result.message); }
+    else { toast.error(result.message); }
   };
 
   if (loading) return (

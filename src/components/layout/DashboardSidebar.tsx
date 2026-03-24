@@ -1,5 +1,6 @@
 // src/components/layout/DashboardSidebar.tsx
 'use client';
+import { ConfirmModal } from '@/src/components/ui/ConfirmModal';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -102,10 +103,10 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
   const boothName      = 'ABC Tech Booth';
   const eventsJoined: { id: string; name: string }[] = [];
 
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const go = (path: string) => { router.push(path); onClose(); };
-  const handleLogout = () => {
-    if (confirm('ออกจากระบบหรือไม่?')) window.location.href = '/login';
-  };
+  const handleLogout = () => setShowLogoutConfirm(true);
+  const handleConfirmLogout = () => { window.location.href = '/login'; };
 
   return (
     <>
@@ -229,6 +230,15 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
       </aside>
 
       {joinExpoModal && <JoinExpoModal onClose={() => setJoinExpoModal(false)} />}
+      <ConfirmModal
+        open={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleConfirmLogout}
+        title="ออกจากระบบ"
+        description="คุณต้องการออกจากระบบหรือไม่?"
+        confirmLabel="ออกจากระบบ"
+        confirmColor="#DC2626"
+      />
     </>
   );
 }

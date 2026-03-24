@@ -1,4 +1,5 @@
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -492,7 +493,7 @@ export function ExploreEventsPage() {
                 <ExpoCard key={expo.id} expo={expo}
                   onApply={(e) => {
                     if (!boothGroupId) {
-                      alert('กรุณาสร้างหรือเข้าร่วมบูธก่อน');
+                      toast.warning('กรุณาสร้างหรือเข้าร่วมบูธก่อน');
                       return;
                     }
                     setApplyTarget(e);

@@ -1,5 +1,6 @@
 // src/features/events/components/create/BasicInfoForm.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect } from 'react';
 import type { CreateEventRequest } from '../../types/event.types';
@@ -50,12 +51,12 @@ export default function BasicInfoForm({ formData, onChange, onNext }: BasicInfoF
     if (file) {
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
       if (!validTypes.includes(file.type)) {
-        alert('กรุณาเลือกไฟล์ภาพ (JPG, PNG, WEBP) หรือ PDF เท่านั้น');
+        toast.warning('กรุณาเลือกไฟล์ภาพ (JPG, PNG, WEBP) หรือ PDF เท่านั้น');
         return;
       }
       
       if (file.size > 5 * 1024 * 1024) {
-        alert('ไฟล์มีขนาดใหญ่เกิน 5MB');
+        toast.warning('ไฟล์มีขนาดใหญ่เกิน 5MB');
         return;
       }
       

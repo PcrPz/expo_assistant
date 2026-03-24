@@ -1,5 +1,6 @@
 // src/features/booths/components/booth-global/CreateBoothForm.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -79,12 +80,12 @@ export function CreateBoothForm() {
     if (!file) return;
     
     if (file.size > 5 * 1024 * 1024) {
-      alert('ไฟล์รูปภาพต้องมีขนาดไม่เกิน 5MB');
+      toast.warning('ไฟล์รูปภาพต้องมีขนาดไม่เกิน 5MB');
       return;
     }
     
     if (!file.type.startsWith('image/')) {
-      alert('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
+      toast.warning('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
       return;
     }
     
@@ -130,7 +131,7 @@ export function CreateBoothForm() {
       
     } catch (error: any) {
       console.error('Failed to create booth:', error);
-      alert(error.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+      toast.error(error.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
     } finally {
       setLoading(false);
     }

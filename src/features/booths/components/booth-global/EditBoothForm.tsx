@@ -1,5 +1,6 @@
 // src/features/booths/components/booth-global/EditBoothForm.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -78,14 +79,14 @@ export function EditBoothForm() {
       const { booth, role } = await getMyBoothGlobal();
       
       if (!booth) {
-        alert('ไม่พบข้อมูลบูธ');
+        toast.warning('ไม่พบข้อมูลบูธ');
         router.push('/booths/my-booth');
         return;
       }
       
       // Check permission
       if (role !== 'booth_group_owner') {
-        alert('คุณไม่มีสิทธิ์แก้ไขบูธนี้');
+        toast.error('คุณไม่มีสิทธิ์แก้ไขบูธนี้');
         router.push('/booths/my-booth');
         return;
       }
@@ -108,7 +109,7 @@ export function EditBoothForm() {
       
     } catch (error) {
       console.error('Failed to load booth data:', error);
-      alert('ไม่สามารถโหลดข้อมูลบูธได้');
+      toast.error('ไม่สามารถโหลดข้อมูลบูธได้');
       router.push('/booths/my-booth');
     } finally {
       setLoading(false);
@@ -130,12 +131,12 @@ export function EditBoothForm() {
     if (!file) return;
     
     if (file.size > 5 * 1024 * 1024) {
-      alert('ไฟล์รูปภาพต้องมีขนาดไม่เกิน 5MB');
+      toast.warning('ไฟล์รูปภาพต้องมีขนาดไม่เกิน 5MB');
       return;
     }
     
     if (!file.type.startsWith('image/')) {
-      alert('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
+      toast.warning('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
       return;
     }
     
@@ -175,12 +176,12 @@ export function EditBoothForm() {
         profile_pic: profilePic || undefined,
       });
       
-      alert('บันทึกข้อมูลสำเร็จ');
+      toast.success('บันทึกข้อมูลสำเร็จ');
       router.push('/booths/my-booth');
       
     } catch (error: any) {
       console.error('Failed to update booth:', error);
-      alert(error.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+      toast.error(error.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
     } finally {
       setSaving(false);
     }

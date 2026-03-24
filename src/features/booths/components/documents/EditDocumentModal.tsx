@@ -1,5 +1,6 @@
 // src/features/booths/components/documents/EditDocumentModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
@@ -41,17 +42,17 @@ export function EditDocumentModal({ document, expoId, boothId, onClose, onSucces
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) { alert('กรุณาระบุชื่อเอกสาร'); return; }
+    if (!title.trim()) { toast.warning('กรุณาระบุชื่อเอกสาร'); return; }
     if (file && file.size > MAX_FILE_SIZE) { setFileError('ไฟล์เกินขนาดที่อนุญาต (20 MB)'); return; }
     try {
       setIsSubmitting(true);
       await updateDocument(expoId, boothId, {
         doc_id: document.DocID, title: title.trim(), status, file: file || undefined,
       });
-      alert('แก้ไขเอกสารสำเร็จ');
+      toast.success('แก้ไขเอกสารสำเร็จ');
       onSuccess();
     } catch (error: any) {
-      alert(error.message || 'ไม่สามารถแก้ไขเอกสารได้');
+      toast.error(error.message || 'ไม่สามารถแก้ไขเอกสารได้');
     } finally { setIsSubmitting(false); }
   };
 

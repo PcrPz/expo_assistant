@@ -1,5 +1,6 @@
 // src/features/booths/components/announcements/AnnouncementCard.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { Megaphone, Edit2, Trash2, Eye, Calendar } from 'lucide-react';
@@ -42,10 +43,10 @@ export function AnnouncementCard({
     try {
       setIsDeleting(true);
       await deleteBoothAnnouncement(expoId, boothId, announcement.NotiID);
-      alert('ลบประกาศสำเร็จ');
+      toast.success('ลบประกาศสำเร็จ');
       onRefresh();
     } catch (error: any) {
-      alert(error.message || 'ไม่สามารถลบประกาศได้');
+      toast.error(error.message || 'ไม่สามารถลบประกาศได้');
     } finally {
       setIsDeleting(false);
       setShowDeleteModal(false);

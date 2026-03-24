@@ -1,5 +1,6 @@
 // src/features/events/components/tickets/TicketsTab.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, Pencil, Trash2 } from 'lucide-react';
@@ -46,7 +47,7 @@ export function TicketsTab({ expoID, canManage, onTicketsChange }: TicketsTabPro
       loadTickets();
       onTicketsChange?.();
     } catch {
-      alert('ไม่สามารถลบตั๋วได้');
+      toast.error('ไม่สามารถลบตั๋วได้');
     } finally {
       setIsDeleting(false);
     }

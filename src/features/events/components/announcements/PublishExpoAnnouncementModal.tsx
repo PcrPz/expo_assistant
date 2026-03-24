@@ -1,5 +1,6 @@
 // src/features/events/components/announcements/PublishExpoAnnouncementModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { X, Send } from 'lucide-react';
@@ -21,7 +22,7 @@ export function PublishExpoAnnouncementModal({ expoID, announcement, onClose, on
     try {
       await publishExpoAnnouncement(expoID, announcement.NotiID);
       onSuccess();
-    } catch { alert('เผยแพร่ไม่สำเร็จ กรุณาลองใหม่'); }
+    } catch { toast.success('เผยแพร่ไม่สำเร็จ กรุณาลองใหม่'); }
     finally { setIsPublishing(false); }
   }
 

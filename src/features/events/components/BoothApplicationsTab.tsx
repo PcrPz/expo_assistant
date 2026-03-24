@@ -1,5 +1,6 @@
 // src/features/events/components/organizer/BoothApplicationsTab.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect } from 'react';
 import { getMinioFileUrl } from '@/src/features/minio/api/minioApi';
@@ -704,7 +705,7 @@ export function BoothApplicationsTab({ eventId }: BoothApplicationsTabProps) {
       setConfirmState(null);
       await loadForms();
     } catch (err: any) {
-      alert(err.message || 'เกิดข้อผิดพลาด');
+      toast.error(err.message || 'เกิดข้อผิดพลาด');
     } finally { setResponding(false); }
   };
 

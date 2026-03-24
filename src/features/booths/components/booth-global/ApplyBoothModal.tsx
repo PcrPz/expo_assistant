@@ -1,5 +1,6 @@
 // src/features/booths/components/booth-global/ApplyBoothModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 
@@ -80,7 +81,7 @@ export function ApplyBoothModal({ event, onClose, onSuccess }: ApplyBoothModalPr
         onClose();
       }
     } catch (error) {
-      alert('เกิดข้อผิดพลาด กรุณาลองอีกครั้ง');
+      toast.error('เกิดข้อผิดพลาด กรุณาลองอีกครั้ง');
     } finally {
       setLoading(false);
     }

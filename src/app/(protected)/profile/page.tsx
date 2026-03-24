@@ -1,5 +1,6 @@
 // src/app/(protected)/profile/page.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -95,7 +96,7 @@ export default function ProfilePage() {
       // ✅ เช็ค Token ก่อน
       const token = localStorage.getItem('accessToken');
       if (!token) {
-        alert('กรุณา Login ใหม่');
+        toast.error('กรุณา Login ใหม่');
         router.push('/login');
         return;
       }
@@ -116,6 +117,8 @@ export default function ProfilePage() {
       // โหลดข้อมูล User ใหม่
       const updatedUser = await getUserDetail();
       setUser(updatedUser);
+            toast.success('บันทึกข้อมูลสำเร็จ');
+            setIsEditing(false);
 
 
       setIsEditing(false);

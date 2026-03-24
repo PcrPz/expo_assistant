@@ -1,5 +1,6 @@
 // src/features/events/components/edit/EditEventClient.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -52,7 +53,7 @@ export default function EditEventClient() {
 
   useEffect(() => {
     if (!eventId) {
-      alert('ไม่พบรหัสงาน');
+      toast.warning('ไม่พบรหัสงาน');
       router.push('/home');
       return;
     }
@@ -65,7 +66,7 @@ export default function EditEventClient() {
       const data = await getEventById(eventId);
 
       if (!data) {
-        alert('ไม่พบข้อมูลงาน');
+        toast.warning('ไม่พบข้อมูลงาน');
         router.push('/home');
         return;
       }
@@ -118,7 +119,7 @@ export default function EditEventClient() {
 
     } catch (error) {
       console.error('Failed to load event:', error);
-      alert('ไม่สามารถโหลดข้อมูลได้');
+      toast.error('ไม่สามารถโหลดข้อมูลได้');
     } finally {
       setLoading(false);
     }
@@ -194,7 +195,7 @@ export default function EditEventClient() {
 
     if (!formData.name || !formData.category || !formData.startDate ||
       !formData.endDate || !formData.location) {
-      alert('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน');
+      toast.warning('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน');
       return;
     }
 
@@ -227,7 +228,7 @@ export default function EditEventClient() {
       });
 
       if (!success) {
-        alert('ไม่สามารถบันทึกข้อมูลงานได้');
+        toast.error('ไม่สามารถบันทึกข้อมูลงานได้');
         return;
       }
 
@@ -251,12 +252,12 @@ export default function EditEventClient() {
         }
       }
 
-      alert('บันทึกข้อมูลสำเร็จ');
+      toast.success('บันทึกข้อมูลสำเร็จ');
       router.push(`/events/${eventId}`);
 
     } catch (error) {
       console.error('Update failed:', error);
-      alert('เกิดข้อผิดพลาดในการบันทึก');
+      toast.error('เกิดข้อผิดพลาดในการบันทึก');
     } finally {
       setSaving(false);
     }

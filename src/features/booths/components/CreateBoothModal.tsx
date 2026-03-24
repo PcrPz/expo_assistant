@@ -1,5 +1,6 @@
 // src/features/booths/components/CreateBoothModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect } from 'react';
 import { getZonesByExpoId } from '@/src/features/zones/api/zoneApi';
@@ -151,7 +152,7 @@ export function CreateBoothModal({ expoId, onClose, onSuccess }: CreateBoothModa
       onClose();
     } catch (error) {
       console.error('Failed to create booth:', error);
-      alert('เกิดข้อผิดพลาดในการสร้างบูธ');
+      toast.error('เกิดข้อผิดพลาดในการสร้างบูธ');
     } finally {
       setIsLoading(false);
     }

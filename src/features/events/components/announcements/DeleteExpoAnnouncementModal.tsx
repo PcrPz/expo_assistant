@@ -1,5 +1,6 @@
 // src/features/events/components/announcements/DeleteExpoAnnouncementModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { X, Trash2 } from 'lucide-react';
@@ -21,7 +22,7 @@ export function DeleteExpoAnnouncementModal({ expoID, announcement, onClose, onS
     try {
       await deleteExpoAnnouncement(expoID, announcement.NotiID);
       onSuccess();
-    } catch { alert('ลบไม่สำเร็จ กรุณาลองใหม่'); }
+    } catch { toast.success('ลบไม่สำเร็จ กรุณาลองใหม่'); }
     finally { setIsDeleting(false); }
   }
 

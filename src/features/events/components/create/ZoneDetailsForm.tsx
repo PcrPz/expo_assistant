@@ -1,5 +1,6 @@
 // src/features/events/components/create/ZoneDetailsForm.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useMemo, useEffect } from 'react';
 import type { Zone } from '../../types/event.types';
@@ -101,12 +102,12 @@ export default function ZoneDetailsForm({ zones, zonesWithFiles: initialZonesWit
     if (file) {
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
       if (!validTypes.includes(file.type)) {
-        alert('กรุณาเลือกไฟล์ภาพเท่านั้น (JPG, PNG, WEBP)');
+        toast.warning('กรุณาเลือกไฟล์ภาพเท่านั้น (JPG, PNG, WEBP)');
         return;
       }
       
       if (file.size > 5 * 1024 * 1024) {
-        alert('ไฟล์มีขนาดใหญ่เกิน 5MB');
+        toast.warning('ไฟล์มีขนาดใหญ่เกิน 5MB');
         return;
       }
       

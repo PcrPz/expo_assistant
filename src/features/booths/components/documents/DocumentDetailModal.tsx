@@ -1,5 +1,6 @@
 // src/features/booths/components/documents/DocumentDetailModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { X, Download, Edit2, FileText, Calendar, Eye } from 'lucide-react';
 import { downloadDocument } from '../../api/documentApi';
@@ -30,7 +31,7 @@ export function DocumentDetailModal({
       setIsDownloading(true);
       await downloadDocument(expoId, document.DocID, `${document.Title}.pdf`);
     } catch (error) {
-      alert('ไม่สามารถดาวน์โหลดเอกสารได้');
+      toast.error('ไม่สามารถดาวน์โหลดเอกสารได้');
     } finally {
       setIsDownloading(false);
     }

@@ -1,5 +1,6 @@
 // src/features/booths/components/events/CreateEventModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { X, Upload, ImageIcon, Plus, Info } from 'lucide-react';
@@ -86,7 +87,7 @@ export function CreateEventModal({
         thumbnail_file: thumbnailFile || undefined,
         files: pics.length > 0 ? pics : undefined,
       });
-      alert('สร้างกิจกรรมสำเร็จ');
+      toast.success('สร้างกิจกรรมสำเร็จ');
       handleReset();
       onSuccess?.();
     } catch (err) {

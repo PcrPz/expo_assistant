@@ -1,5 +1,6 @@
 // src/features/booths/components/queue/QueueListItem.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { Settings, Trash2 } from 'lucide-react';
@@ -41,10 +42,10 @@ export function QueueListItem({
     try {
       setIsDeleting(true);
       await deleteQueue(expoId, boothId, queue.QueueID);
-      alert('ลบคิวสำเร็จ');
+      toast.success('ลบคิวสำเร็จ');
       onRefresh();
     } catch (error: any) {
-      alert(error.message || 'ไม่สามารถลบคิวได้');
+      toast.error(error.message || 'ไม่สามารถลบคิวได้');
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);

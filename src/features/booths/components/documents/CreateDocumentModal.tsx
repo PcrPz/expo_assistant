@@ -1,5 +1,6 @@
 // src/features/booths/components/documents/CreateDocumentModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
@@ -45,10 +46,10 @@ export function CreateDocumentModal({ expoId, boothId, onClose, onSuccess }: Cre
     try {
       setIsSubmitting(true);
       await createDocument(expoId, boothId, { booth_id: boothId, title: title || undefined, status, file });
-      alert('เพิ่มเอกสารสำเร็จ');
+      toast.success('เพิ่มเอกสารสำเร็จ');
       onSuccess();
     } catch (error: any) {
-      alert(error.message || 'ไม่สามารถเพิ่มเอกสารได้');
+      toast.error(error.message || 'ไม่สามารถเพิ่มเอกสารได้');
     } finally { setIsSubmitting(false); }
   };
 

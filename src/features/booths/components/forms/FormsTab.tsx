@@ -1,5 +1,7 @@
 // src/features/booths/components/forms/FormsTab.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
+import { ConfirmModal } from '@/src/components/ui/ConfirmModal';
 
 import { useState, useEffect } from 'react';
 import { FileText, Plus, RefreshCw, Trash2 } from 'lucide-react';
@@ -21,12 +23,7 @@ interface FormsTabProps {
   isAssignedStaff: boolean;
 }
 
-export function FormsTab({
-  boothId,
-  expoId,
-  userRole,
-  isAssignedStaff,
-}: FormsTabProps) {
+export function FormsTab({ boothId, expoId, userRole, isAssignedStaff }: FormsTabProps) {
   const [form, setForm] = useState<GetFormResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -34,12 +31,11 @@ export function FormsTab({
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showResultsModal, setShowResultsModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
 
   const canManage = canManageForms(userRole, isAssignedStaff);
 
-  useEffect(() => {
-    loadForm();
-  }, [boothId, expoId]);
+  useEffect(() => { loadForm(); }, [boothId, expoId]);
 
   const loadForm = async () => {
     try {
@@ -55,41 +51,32 @@ export function FormsTab({
 
   const handleToggleStatus = async () => {
     if (!form) return;
-    
-    // ✅ ถ้าเผยแพร่แล้ว ห้าม unpublish
     if (form.status === 'publish') {
-      alert('ไม่สามารถยกเลิกการเผยแพร่ได้\nหากต้องการเปลี่ยนแปลง กรุณาลบและสร้างแบบสอบถามใหม่');
+      toast.warning('ไม่สามารถยกเลิกการเผยแพร่ได้', { description: 'หากต้องการเปลี่ยนแปลง กรุณาลบและสร้างแบบสอบถามใหม่' });
       return;
     }
-    
-    // Confirm ก่อนเผยแพร่
-    const confirmed = window.confirm(
-      'คุณแน่ใจหรือไม่ว่าต้องการเผยแพร่แบบสอบถาม?\n\n' +
-      '⚠️ หมายเหตุ:\n' +
-      '- เมื่อเผยแพร่แล้ว ผู้เข้าชมจะสามารถตอบแบบสอบถามได้ทันที\n' +
-      '- คุณจะไม่สามารถแก้ไขหรือยกเลิกการเผยแพร่ได้\n' +
-      '- หากต้องการเปลี่ยนแปลง ต้องลบและสร้างใหม่'
-    );
-    
-    if (!confirmed) return;
-    
+    setShowPublishConfirm(true);
+  };
+
+  const handleConfirmPublish = async () => {
+    setShowPublishConfirm(false);
     try {
       await updateFormStatus(expoId, boothId, 'publish');
-      alert('✓ เผยแพร่แบบสอบถามสำเร็จ!\nผู้เข้าชมสามารถตอบแบบสอบถามได้แล้ว');
+      toast.success('เผยแพร่แบบสอบถามสำเร็จ', { description: 'ผู้เข้าชมสามารถตอบแบบสอบถามได้แล้ว' });
       loadForm();
     } catch (error: any) {
-      alert(error.message || 'เกิดข้อผิดพลาด');
+      toast.error(error.message || 'เกิดข้อผิดพลาด');
     }
   };
 
   const handleDelete = async () => {
     try {
       await deleteBoothForm(expoId, boothId);
-      alert('ลบแบบสอบถามสำเร็จ');
+      toast.success('ลบแบบสอบถามสำเร็จ');
       setShowDeleteConfirm(false);
       loadForm();
     } catch (error: any) {
-      alert(error.message || 'ไม่สามารถลบแบบสอบถามได้');
+      toast.error(error.message || 'ไม่สามารถลบแบบสอบถามได้');
     }
   };
 
@@ -107,9 +94,7 @@ export function FormsTab({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-bold text-gray-900">แบบสอบถาม</h3>
-          <p className="text-sm text-gray-400 mt-0.5">
-            รับ feedback จากผู้เข้าชมงาน
-          </p>
+          <p className="text-sm text-gray-400 mt-0.5">รับ feedback จากผู้เข้าชมงาน</p>
         </div>
       </div>
 
@@ -118,21 +103,14 @@ export function FormsTab({
         <div className="bg-white rounded-2xl border border-[#E2E8F0] p-10">
           <div className="text-center">
             <FileText className="h-6 w-6 text-gray-400" />
-            <h3 className="text-sm font-semibold text-gray-500">
-              ยังไม่มีแบบสอบถาม
-            </h3>
+            <h3 className="text-sm font-semibold text-gray-500">ยังไม่มีแบบสอบถาม</h3>
             <p className="text-sm text-gray-500 mt-2">
-              {canManage
-                ? 'สร้างแบบสอบถามเพื่อรับ feedback จากผู้เข้าชม'
-                : 'ยังไม่มีแบบสอบถามในบูธนี้'}
+              {canManage ? 'สร้างแบบสอบถามเพื่อรับ feedback จากผู้เข้าชม' : 'ยังไม่มีแบบสอบถามในบูธนี้'}
             </p>
             {canManage && (
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="mt-4 mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#3674B5] text-white text-sm font-semibold rounded-xl hover:bg-[#2d5a8f] transition"
-              >
-                <Plus className="h-4 w-4" />
-                สร้างแบบสอบถาม
+              <button onClick={() => setShowCreateModal(true)}
+                className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#3674B5] text-white text-sm font-semibold rounded-xl hover:bg-[#2d5a8f] transition">
+                <Plus className="h-4 w-4" />สร้างแบบสอบถาม
               </button>
             )}
           </div>
@@ -157,44 +135,37 @@ export function FormsTab({
 
       {/* Modals */}
       {showCreateModal && (
-        <CreateFormModal
-          expoId={expoId}
-          boothId={boothId}
+        <CreateFormModal expoId={expoId} boothId={boothId}
           onClose={() => setShowCreateModal(false)}
-          onSuccess={() => {
-            setShowCreateModal(false);
-            loadForm();
-          }}
-        />
+          onSuccess={() => { setShowCreateModal(false); loadForm(); }} />
       )}
-
       {showEditModal && form && (
-        <EditFormModal
-          expoId={expoId}
-          boothId={boothId}
-          existingQuestions={form.questions}
+        <EditFormModal expoId={expoId} boothId={boothId} existingQuestions={form.questions}
           onClose={() => setShowEditModal(false)}
-          onSuccess={() => {
-            setShowEditModal(false);
-            loadForm();
-          }}
-        />
+          onSuccess={() => { setShowEditModal(false); loadForm(); }} />
       )}
-
       {showPreviewModal && form && (
-        <FormPreviewModal
-          questions={form.questions}
-          onClose={() => setShowPreviewModal(false)}
-        />
+        <FormPreviewModal questions={form.questions} onClose={() => setShowPreviewModal(false)} />
+      )}
+      {showResultsModal && (
+        <FormResultsModal expoId={expoId} boothId={boothId} onClose={() => setShowResultsModal(false)} />
       )}
 
-      {showResultsModal && (
-        <FormResultsModal
-          expoId={expoId}
-          boothId={boothId}
-          onClose={() => setShowResultsModal(false)}
-        />
-      )}
+      {/* Publish Confirm */}
+      <ConfirmModal
+        open={showPublishConfirm}
+        onClose={() => setShowPublishConfirm(false)}
+        onConfirm={handleConfirmPublish}
+        title="เผยแพร่แบบสอบถาม"
+        description="คุณแน่ใจหรือไม่ว่าต้องการเผยแพร่?"
+        notes={[
+          'เมื่อเผยแพร่แล้ว ผู้เข้าชมจะสามารถตอบแบบสอบถามได้ทันที',
+          'คุณจะไม่สามารถแก้ไขหรือยกเลิกการเผยแพร่ได้',
+          'หากต้องการเปลี่ยนแปลง ต้องลบและสร้างใหม่',
+        ]}
+        confirmLabel="เผยแพร่เลย"
+        confirmColor="#3674B5"
+      />
 
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
@@ -227,8 +198,7 @@ export function FormsTab({
                 <ul className="space-y-1.5">
                   {['แบบสอบถามและคำตอบทั้งหมดจะถูกลบถาวร', 'ผู้เข้าชมจะไม่สามารถตอบแบบสอบถามได้อีก'].map(item => (
                     <li key={item} className="flex items-center gap-2 text-sm text-red-600">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
-                      {item}
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />{item}
                     </li>
                   ))}
                 </ul>

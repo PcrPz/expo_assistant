@@ -1,5 +1,6 @@
 // src/features/booths/components/events/EditEventModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect } from 'react';
 import { X, Upload, ImageIcon, Edit2 } from 'lucide-react';
@@ -117,7 +118,7 @@ export function EditEventModal({
         thumbnail_file: thumbnailFile || undefined,
         files: newPics.length > 0 ? newPics : undefined,
       });
-      alert('แก้ไขกิจกรรมสำเร็จ');
+      toast.success('แก้ไขกิจกรรมสำเร็จ');
       onSuccess?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');

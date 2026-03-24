@@ -1,5 +1,6 @@
 // src/features/booths/components/products/EditProductModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { Image as ImageIcon, RotateCcw, Trash2 } from 'lucide-react';
@@ -36,10 +37,10 @@ export function EditProductModal({ product, expoId, boothId, onClose, onSuccess 
     const file = e.target.files?.[0];
     if (!file) return;
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      alert('กรุณาเลือกไฟล์ JPEG, PNG หรือ WebP เท่านั้น'); e.target.value = ''; return;
+      toast.warning('กรุณาเลือกไฟล์ JPEG, PNG หรือ WebP เท่านั้น'); e.target.value = ''; return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert('ขนาดไฟล์ต้องไม่เกิน 5MB'); e.target.value = ''; return;
+      toast.warning('ขนาดไฟล์ต้องไม่เกิน 5MB'); e.target.value = ''; return;
     }
     setNewThumbnailFile(file);
   };
@@ -48,11 +49,11 @@ export function EditProductModal({ product, expoId, boothId, onClose, onSuccess 
     const files = Array.from(e.target.files || []);
     const total = existingPics.length - deletedPics.length + newDetailFiles.length + files.length;
     if (total > MAX_DETAIL_IMAGES) {
-      alert(`สามารถมีรูปรายละเอียดได้สูงสุด ${MAX_DETAIL_IMAGES} รูป`); e.target.value = ''; return;
+      toast.warning(`สามารถมีรูปรายละเอียดได้สูงสุด ${MAX_DETAIL_IMAGES} รูป`); e.target.value = ''; return;
     }
     const validFiles = files.filter(f => {
-      if (!['image/jpeg', 'image/png', 'image/webp'].includes(f.type)) { alert(`${f.name}: รองรับเฉพาะ JPEG, PNG, WebP`); return false; }
-      if (f.size > 5 * 1024 * 1024) { alert(`${f.name}: ขนาดไฟล์ต้องไม่เกิน 5MB`); return false; }
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(f.type)) { toast.warning(`${f.name}: รองรับเฉพาะ JPEG, PNG, WebP`); return false; }
+      if (f.size > 5 * 1024 * 1024) { toast.warning(`${f.name}: ขนาดไฟล์ต้องไม่เกิน 5MB`); return false; }
       return true;
     });
     setNewDetailFiles([...newDetailFiles, ...validFiles]);
@@ -61,9 +62,9 @@ export function EditProductModal({ product, expoId, boothId, onClose, onSuccess 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) { alert('กรุณาระบุชื่อสินค้า'); return; }
+    if (!title.trim()) { toast.warning('กรุณาระบุชื่อสินค้า'); return; }
     const priceNum = price ? parseFloat(price) : undefined;
-    if (price && (isNaN(priceNum!) || priceNum! < 0)) { alert('กรุณาระบุราคาที่ถูกต้อง'); return; }
+    if (price && (isNaN(priceNum!) || priceNum! < 0)) { toast.warning('กรุณาระบุราคาที่ถูกต้อง'); return; }
     try {
       setIsSubmitting(true);
       await updateProduct(expoId, {
@@ -74,10 +75,10 @@ export function EditProductModal({ product, expoId, boothId, onClose, onSuccess 
         files: newDetailFiles.length > 0 ? newDetailFiles : undefined,
         deleted_pics: deletedPics.length > 0 ? deletedPics : undefined,
       });
-      alert('แก้ไขสินค้าสำเร็จ');
+      toast.success('แก้ไขสินค้าสำเร็จ');
       onSuccess();
     } catch (error: any) {
-      alert(error.message || 'ไม่สามารถแก้ไขสินค้าได้');
+      toast.error(error.message || 'ไม่สามารถแก้ไขสินค้าได้');
     } finally { setIsSubmitting(false); }
   };
 

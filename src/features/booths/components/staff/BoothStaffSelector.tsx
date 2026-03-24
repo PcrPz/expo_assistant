@@ -1,5 +1,6 @@
 // src/features/booths/components/staff/BoothStaffSelector.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect } from 'react';
 import { fetchWithAuth } from '@/src/lib/api/fetchWithAuth';
@@ -102,7 +103,7 @@ export function BoothStaffSelector({ expoId, boothId, onUpdate }: BoothStaffSele
       onUpdate();
     } catch (error) {
       console.error('Failed to update staff:', error);
-      alert('เกิดข้อผิดพลาดในการอัพเดทพนักงาน');
+      toast.error('เกิดข้อผิดพลาดในการอัพเดทพนักงาน');
     }
   };
 

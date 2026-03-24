@@ -1,4 +1,5 @@
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { deleteBooth } from '../api/boothApi';
@@ -21,11 +22,11 @@ export function DeleteBoothModal({ expoId, boothId, boothNo, onClose, onSuccess 
       if (success) {
         onSuccess();
       } else {
-        alert('เกิดข้อผิดพลาดในการลบบูธ');
+        toast.error('เกิดข้อผิดพลาดในการลบบูธ');
       }
     } catch (error) {
       console.error('Failed to delete booth:', error);
-      alert('เกิดข้อผิดพลาดในการลบบูธ');
+      toast.error('เกิดข้อผิดพลาดในการลบบูธ');
     } finally {
       setIsLoading(false);
     }

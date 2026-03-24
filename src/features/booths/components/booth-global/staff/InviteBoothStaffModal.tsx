@@ -1,5 +1,6 @@
 // src/features/booths/components/booth-global/staff/InviteBoothStaffModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 
@@ -28,7 +29,7 @@ export function InviteBoothStaffModal({
 
   const handleInviteByEmail = () => {
     if (!email.trim()) {
-      alert('กรุณากรอกอีเมล');
+      toast.warning('กรุณากรอกอีเมล');
       return;
     }
     onInviteByEmail(email);
@@ -37,7 +38,7 @@ export function InviteBoothStaffModal({
   const handleCopyCode = () => {
     if (inviteCode) {
       navigator.clipboard.writeText(inviteCode);
-      alert('📋 คัดลอกโค้ดแล้ว!');
+      toast.success('📋 คัดลอกโค้ดแล้ว!');
     }
   };
 

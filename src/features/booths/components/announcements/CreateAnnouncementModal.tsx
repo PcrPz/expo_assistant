@@ -1,5 +1,6 @@
 // src/features/booths/components/announcements/CreateAnnouncementModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { X, Plus, Info } from 'lucide-react';
@@ -54,12 +55,12 @@ const handleSubmit = async (e: React.FormEvent) => {
       files: imageFile ? [imageFile] : undefined,
     });
 
-    alert('สร้างประกาศสำเร็จ');
+    toast.success('สร้างประกาศสำเร็จ');
     handleReset();
     onSuccess?.();
   } catch (err) {
     setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');
-    alert('สร้างประกาศไม่สำเร็จ');
+    toast.success('สร้างประกาศไม่สำเร็จ');
   } finally {
     setIsLoading(false);
   }

@@ -1,5 +1,6 @@
 // src/features/booths/components/forms/CreateFormModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { X, Plus, FileText } from 'lucide-react';
@@ -43,14 +44,14 @@ export function CreateFormModal({ expoId, boothId, onClose, onSuccess }: CreateF
 
   const handleSubmit = async () => {
     const hasEmpty = questions.some(q => !q.question_text.trim());
-    if (hasEmpty) { alert('กรุณากรอกคำถามให้ครบทุกข้อ'); return; }
+    if (hasEmpty) { toast.warning('กรุณากรอกคำถามให้ครบทุกข้อ'); return; }
     try {
       setIsSubmitting(true);
       await createBoothForm(expoId, boothId, { expo_id: expoId, booth_id: boothId, questions });
-      alert('สร้างแบบสอบถามสำเร็จ (สถานะ: ฉบับร่าง)\nคุณสามารถเผยแพร่แบบสอบถามได้ภายหลัง');
+      toast.success('สร้างแบบสอบถามสำเร็จ (สถานะ: ฉบับร่าง)\nคุณสามารถเผยแพร่แบบสอบถามได้ภายหลัง');
       onSuccess();
     } catch (error: any) {
-      alert(error.message || 'ไม่สามารถสร้างแบบสอบถามได้');
+      toast.error(error.message || 'ไม่สามารถสร้างแบบสอบถามได้');
     } finally { setIsSubmitting(false); }
   };
 

@@ -1,5 +1,6 @@
 // src/features/events/components/forms/ExpoCreateFormModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { X, Plus, FileText } from 'lucide-react';
@@ -42,16 +43,16 @@ export function ExpoCreateFormModal({ expoId, onClose, onSuccess }: ExpoCreateFo
 
   const handleSubmit = async () => {
     if (questions.some(q => !q.question_text.trim())) {
-      alert('กรุณากรอกคำถามให้ครบทุกข้อ');
+      toast.warning('กรุณากรอกคำถามให้ครบทุกข้อ');
       return;
     }
     try {
       setIsSubmitting(true);
       await createExpoForm(expoId, { expo_id: expoId, questions });
-      alert('สร้างแบบสอบถามสำเร็จ (สถานะ: ฉบับร่าง)\nสามารถเผยแพร่ได้ภายหลัง');
+      toast.success('สร้างแบบสอบถามสำเร็จ (สถานะ: ฉบับร่าง)\nสามารถเผยแพร่ได้ภายหลัง');
       onSuccess();
     } catch (err: any) {
-      alert(err.message || 'ไม่สามารถสร้างแบบสอบถามได้');
+      toast.error(err.message || 'ไม่สามารถสร้างแบบสอบถามได้');
     } finally {
       setIsSubmitting(false);
     }

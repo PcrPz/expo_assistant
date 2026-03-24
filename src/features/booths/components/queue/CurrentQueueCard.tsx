@@ -1,5 +1,6 @@
 // src/features/queues/components/queue/CurrentQueueCard.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { Users, ArrowRight, CheckCircle, SkipForward, AlertCircle } from 'lucide-react';
@@ -54,10 +55,10 @@ export function CurrentQueueCard({
       });
       
       const actionText = action === 'completed' ? 'ทำเสร็จ' : 'ข้าม';
-      alert(`${actionText}คิวสำเร็จ`);
+      toast.success(`${actionText}คิวสำเร็จ`);
       onRefresh();
     } catch (error: any) {
-      alert(error.message || 'ไม่สามารถดำเนินการได้');
+      toast.error(error.message || 'ไม่สามารถดำเนินการได้');
     } finally {
       setIsProcessing(false);
       setShowConfirmModal(null);

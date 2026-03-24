@@ -1,5 +1,6 @@
 // src/features/staff/components/StaffTab.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { useStaff } from '../hooks/useStaff';
@@ -44,8 +45,8 @@ export function StaffTab({ expoId, userRole, currentUserId }: StaffTabProps) {
   // ── handlers (unchanged logic) ────────────────────────────────
   const handleInviteByEmail = (email: string, role: string) => {
     inviteStaff({ email, role }, {
-      onSuccess: () => { setShowInviteModal(false); alert('เชิญ Staff สำเร็จ'); },
-      onError:   () => { alert('ไม่สามารถเชิญ Staff ได้'); },
+      onSuccess: () => { setShowInviteModal(false); toast.success('เชิญ Staff สำเร็จ'); },
+      onError:   () => { toast.error('ไม่สามารถเชิญ Staff ได้'); },
     });
   };
 
@@ -53,8 +54,8 @@ export function StaffTab({ expoId, userRole, currentUserId }: StaffTabProps) {
 
   const handleChangeRole = (userId: string, newRole: string) => {
     changeRole({ user_id: userId, role: newRole }, {
-      onSuccess: () => { setEditingStaff(null); alert('เปลี่ยนบทบาทสำเร็จ'); },
-      onError:   () => { alert('ไม่สามารถเปลี่ยนบทบาทได้'); },
+      onSuccess: () => { setEditingStaff(null); toast.success('เปลี่ยนบทบาทสำเร็จ'); },
+      onError:   () => { toast.error('ไม่สามารถเปลี่ยนบทบาทได้'); },
     });
   };
 
@@ -62,8 +63,8 @@ export function StaffTab({ expoId, userRole, currentUserId }: StaffTabProps) {
     if (!deletingStaff) return;
     setIsDeleting(true);
     removeStaff(deletingStaff.id, {
-      onSuccess: () => { setDeletingStaff(null); setIsDeleting(false); alert('ลบ Staff สำเร็จ'); },
-      onError:   () => { setIsDeleting(false); alert('ไม่สามารถลบ Staff ได้'); },
+      onSuccess: () => { setDeletingStaff(null); setIsDeleting(false); toast.success('ลบ Staff สำเร็จ'); },
+      onError:   () => { setIsDeleting(false); toast.error('ไม่สามารถลบ Staff ได้'); },
     });
   };
 

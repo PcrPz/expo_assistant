@@ -1,5 +1,6 @@
 // src/features/booths/components/products/ProductDetailModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect } from 'react';
 import { Package } from 'lucide-react';
@@ -33,7 +34,7 @@ export function ProductDetailModal({
       setProduct(data);
       setActiveIdx(0);
     } catch {
-      alert('ไม่สามารถโหลดข้อมูลสินค้าได้');
+      toast.error('ไม่สามารถโหลดข้อมูลสินค้าได้');
     } finally {
       setIsLoading(false);
     }

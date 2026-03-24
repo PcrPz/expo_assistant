@@ -1,5 +1,6 @@
 // src/features/events/components/forms/ExpoEditFormModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { X, Plus, Edit2 } from 'lucide-react';
@@ -41,16 +42,16 @@ export function ExpoEditFormModal({ expoId, existingQuestions, onClose, onSucces
 
   const handleSubmit = async () => {
     if (questions.some(q => !q.question_text.trim())) {
-      alert('กรุณากรอกคำถามให้ครบทุกข้อ');
+      toast.warning('กรุณากรอกคำถามให้ครบทุกข้อ');
       return;
     }
     try {
       setIsSubmitting(true);
       await updateExpoForm(expoId, { expo_id: expoId, questions });
-      alert('แก้ไขแบบสอบถามสำเร็จ (กลับเป็นฉบับร่าง)');
+      toast.success('แก้ไขแบบสอบถามสำเร็จ (กลับเป็นฉบับร่าง)');
       onSuccess();
     } catch (err: any) {
-      alert(err.message || 'ไม่สามารถแก้ไขแบบสอบถามได้');
+      toast.error(err.message || 'ไม่สามารถแก้ไขแบบสอบถามได้');
     } finally {
       setIsSubmitting(false);
     }

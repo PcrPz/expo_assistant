@@ -1,3 +1,4 @@
+import { toast } from '@/src/lib/toast';
 // src/features/booths/utils/form-helpers.ts
 
 import type { Question, QuestionType } from '../types/form.types';
@@ -115,7 +116,7 @@ export function getRatingBgColor(rating: number): string {
 export function exportToCSV(data: any[], filename: string): void {
   // TODO: Implement CSV export
   console.log('Export to CSV:', filename, data);
-  alert('ฟีเจอร์ Export CSV กำลังพัฒนา');
+  toast.info('ฟีเจอร์ Export CSV กำลังพัฒนา');
 }
 
 /**

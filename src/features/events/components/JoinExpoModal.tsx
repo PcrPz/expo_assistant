@@ -1,5 +1,6 @@
 // src/features/events/components/JoinExpoModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -34,7 +35,7 @@ export function JoinExpoModal({ onClose }: JoinExpoModalProps) {
         
         // แสดง success message
         setTimeout(() => {
-          alert('✅ เข้าร่วมงานสำเร็จ! กำลังพาคุณไปยังงาน... 🎉');
+          toast.success('✅ เข้าร่วมงานสำเร็จ! กำลังพาคุณไปยังงาน... 🎉');
         }, 100);
         
         // Navigate หลัง alert (ให้เห็น message ก่อน)
@@ -48,12 +49,12 @@ export function JoinExpoModal({ onClose }: JoinExpoModalProps) {
         
         // Optional: แสดง alert สำหรับ error ด้วย
         setTimeout(() => {
-          alert(`❌ ${result.message}`);
+          toast.error(`❌ ${result.message}`);
         }, 100);
       }
     } catch (err) {
       setError('เกิดข้อผิดพลาดที่ไม่คาดคิด');
-      alert('❌ เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง');
+      toast.error('❌ เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง');
     } finally {
       setIsSubmitting(false);
     }

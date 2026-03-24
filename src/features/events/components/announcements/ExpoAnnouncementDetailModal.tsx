@@ -1,5 +1,6 @@
 // src/features/events/components/announcements/ExpoAnnouncementDetailModal.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState } from 'react';
 import { X, Edit2, Send, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -43,7 +44,7 @@ export function ExpoAnnouncementDetailModal({
     try {
       await publishExpoAnnouncement(expoID, announcement.NotiID);
       onRefresh();
-    } catch { alert('เผยแพร่ไม่สำเร็จ'); }
+    } catch { toast.success('เผยแพร่ไม่สำเร็จ'); }
     finally { setIsPublishing(false); }
   }
 

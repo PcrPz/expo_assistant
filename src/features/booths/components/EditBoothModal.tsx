@@ -1,4 +1,5 @@
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect } from 'react';
 import { updateBooth, updateBoothWithThumbnail } from '../api/boothApi';
@@ -138,7 +139,7 @@ export function EditBoothModal({ expoId, booth, userRole, onClose, onSuccess }: 
       onSuccess();
     } catch (error) {
       console.error('Failed to update booth:', error);
-      alert('เกิดข้อผิดพลาดในการแก้ไขบูธ');
+      toast.error('เกิดข้อผิดพลาดในการแก้ไขบูธ');
     } finally { setIsLoading(false); }
   };
 

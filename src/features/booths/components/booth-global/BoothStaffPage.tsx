@@ -1,5 +1,6 @@
 // src/features/booths/components/booth-global/BoothStaffPage.tsx
 'use client';
+import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -50,7 +51,7 @@ export function BoothStaffPage() {
       const { booth, role: userRole } = await getMyBoothGlobal();
       
       if (!booth) {
-        alert('ไม่พบข้อมูลบูธ');
+        toast.warning('ไม่พบข้อมูลบูธ');
         router.push('/booths/my-booth');
         return;
       }
@@ -100,7 +101,7 @@ export function BoothStaffPage() {
       
     } catch (error) {
       console.error('Failed to load staff:', error);
-      alert('ไม่สามารถโหลดข้อมูลทีมงานได้');
+      toast.error('ไม่สามารถโหลดข้อมูลทีมงานได้');
     } finally {
       setLoading(false);
     }
@@ -110,12 +111,12 @@ export function BoothStaffPage() {
   
   const handleInviteByEmail = async () => {
     if (!inviteEmail.trim()) {
-      alert('กรุณากรอกอีเมล');
+      toast.warning('กรุณากรอกอีเมล');
       return;
     }
     
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteEmail)) {
-      alert('รูปแบบอีเมลไม่ถูกต้อง');
+      toast.warning('รูปแบบอีเมลไม่ถูกต้อง');
       return;
     }
     
@@ -123,14 +124,14 @@ export function BoothStaffPage() {
       setInviting(true);
       await inviteBoothStaff(boothId, inviteEmail);
       
-      alert('ส่งคำเชิญสำเร็จ!');
+      toast.success('ส่งคำเชิญสำเร็จ!');
       setShowInviteModal(false);
       setInviteEmail('');
       await loadData();
       
     } catch (error: any) {
       console.error('Failed to invite:', error);
-      alert(error.message || 'ไม่สามารถส่งคำเชิญได้');
+      toast.error(error.message || 'ไม่สามารถส่งคำเชิญได้');
     } finally {
       setInviting(false);
     }
@@ -152,12 +153,12 @@ export function BoothStaffPage() {
       if (code) {
         setInviteCode(code);
       } else {
-        alert('ไม่สามารถสร้างรหัสเชิญได้');
+        toast.error('ไม่สามารถสร้างรหัสเชิญได้');
       }
       
     } catch (error) {
       console.error('Failed to create code:', error);
-      alert('ไม่สามารถสร้างรหัสเชิญได้');
+      toast.error('ไม่สามารถสร้างรหัสเชิญได้');
     } finally {
       setCreatingCode(false);
     }
@@ -167,7 +168,7 @@ export function BoothStaffPage() {
   
   const handleCopyCode = () => {
     navigator.clipboard.writeText(inviteCode);
-    alert('คัดลอกรหัสเรียบร้อย!');
+    toast.success('คัดลอกรหัสเรียบร้อย!');
   };
 
   // ─── Remove Staff ─────────────────────────────────────────────
@@ -179,14 +180,14 @@ export function BoothStaffPage() {
       setDeleting(true);
       await removeBoothStaff(boothId, deletingStaff.userId);
       
-      alert('ลบทีมงานสำเร็จ');
+      toast.success('ลบทีมงานสำเร็จ');
       setShowDeleteModal(false);
       setDeletingStaff(null);
       await loadData();
       
     } catch (error: any) {
       console.error('Failed to remove staff:', error);
-      alert(error.message || 'ไม่สามารถลบทีมงานได้');
+      toast.error(error.message || 'ไม่สามารถลบทีมงานได้');
     } finally {
       setDeleting(false);
     }
