@@ -38,6 +38,7 @@ export default function EventDetailPage() {
   const router = useRouter();
   const eventId = params.eventId as string;
   const searchParams = useSearchParams();
+  const fromExplore = searchParams.get('from') === 'explore';
   
   const [event, setEvent] = useState<Event | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
@@ -148,6 +149,7 @@ export default function EventDetailPage() {
         activeTab={activeTab}
         availableTabs={availableTabs}
         onTabChange={setActiveTab}
+        backUrl={fromExplore ? '/booths/explore-events' : undefined}
       />
 
       <div className="max-w-screen-2xl mx-auto px-8 py-6 space-y-6">

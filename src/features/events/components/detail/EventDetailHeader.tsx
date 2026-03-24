@@ -2,6 +2,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { getMinioFileUrl } from '@/src/features/minio/api/minioApi';
 import type { Event, EventRole } from '../../types/event.types';
 
@@ -13,6 +14,7 @@ interface EventDetailHeaderProps {
   activeTab: TabType;
   availableTabs: TabType[];
   onTabChange: (tab: TabType) => void;
+  backUrl?: string; // ถ้ามี → แสดงปุ่มกลับ
 }
 
 export function EventDetailHeader({
@@ -21,7 +23,9 @@ export function EventDetailHeader({
   activeTab,
   availableTabs,
   onTabChange,
+  backUrl,
 }: EventDetailHeaderProps) {
+  const router = useRouter();
   const logoUrl = getMinioFileUrl(event.thumbnail || event.logo);
   const defaultLogo = 'https://via.placeholder.com/80x80/5B9BD5/FFFFFF?text=Logo';
 
@@ -122,6 +126,7 @@ export function EventDetailHeader({
   const LOGO_PULL = LOGO / 2;
 
   return (
+    <>
     <div className="sticky top-14 z-10 shadow-sm">
 
       {/* Cover Banner */}
@@ -138,6 +143,30 @@ export function EventDetailHeader({
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Ccircle cx='20' cy='20' r='2'/%3E%3C/g%3E%3C/svg%3E")`,
           }}
         />
+
+        {/* ── ปุ่มกลับ — บน banner ชิดซ้าย ── */}
+        {backUrl && (
+          <div className="absolute top-3 left-0 right-0">
+            <div className="max-w-screen-2xl mx-auto px-8">
+              <button
+                onClick={() => router.push(backUrl)}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-sm font-bold transition"
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.15)',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  color: 'white',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.25)')}
+                onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)')}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+                </svg>
+                กลับค้นหางาน Expo
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* White zone */}
@@ -264,5 +293,6 @@ export function EventDetailHeader({
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -29,15 +29,21 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
 function transformBoothInExpo(b: any): BoothInExpo {
   return {
-    expoID:    b.ExpoID    || b.expo_id    || b.ID    || b.id    || '',
-    expoTitle: b.ExpoTitle || b.expo_title || b.Title || b.title || '',
-    boothID:   b.BoothID   || b.booth_id   || b.BoothID || '',
-    boothNo:   b.BoothNo   || b.booth_no   || b.No     || '',
+    expoID:    b.ExpoID    || b.expo_id    || '',
+    expoTitle: b.ExpoTitle || b.expo_title || '',
+    expoThumbnail: b.ExpoThumbnail || b.expo_thumbnail || null,   // ⭐ เพิ่ม
+
+    boothID:   b.BoothID   || b.booth_id   || '',
+    boothNo:   b.BoothNo   || b.booth_no   || '',
     type:      b.Type      || b.type       || '',
     title:     b.Title     || b.title      || '',
-    hall:      b.Hall      || b.hall,
-    thumbnail: b.Thumbnail || b.thumbnail,
-    zoneName:  b.ZoneName  || b.zone_name,
+    hall:      b.Hall      || b.hall       || '',
+    zoneName:  b.ZoneName  || b.zone_name  || '',
+
+    price:     b.Price     || b.price      || 0,    // ⭐ เพิ่ม
+    status:    b.Status    || b.status     || '',   // ⭐ เพิ่ม
+
+    thumbnail: b.Thumbnail || b.thumbnail  || '',
   };
 }
 
@@ -452,38 +458,38 @@ function transformExpo(data: any): ExpoSearchResult {
 
 // ============================================
 // 13. Search Expos (Booth Manager ค้นหางาน)
-// GET /expo/search-unpublish?search=&category=&page=1&page_size=10
+// GET /expo/:boothGroupID/search-unpublish?search=&category=&page=1&page_size=10
 // ============================================
 
 export async function searchExpos(params: {
+  boothGroupId: string;
   search?: string;
   category?: string;
   page?: number;
   pageSize?: number;
 }): Promise<ExpoSearchResponse> {
   try {
-    const { search = '', category = '', page = 1, pageSize = 10 } = params;
-    
+    const { boothGroupId, search = '', category = '', page = 1, pageSize = 10 } = params;
+
     const query = new URLSearchParams({
       search,
       category,
       page: String(page),
       page_size: String(pageSize),
     });
-    
-    console.log(`🔍 Searching expos: ${query.toString()}`);
-    
-    const response = await fetchWithAuth(`${API_URL}/expo/search-unpublish?${query}`);
-    
+
+    console.log(`🔍 [searchExpos] boothGroupId=${boothGroupId} query=${query.toString()}`);
+
+    const response = await fetchWithAuth(`${API_URL}/expo/${boothGroupId}/search-unpublish?${query}`);
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new Error(error.error || 'Failed to search expos');
     }
-    
+
     const data = await response.json();
-    console.log('✅ Expo search result:', data);
-    
-    // Response: { Expos: [...], Total, Page, PageSize, TotalPages }
+    console.log('✅ [searchExpos] raw response:', JSON.stringify(data, null, 2));
+
     return {
       expos: Array.isArray(data.Expos) ? data.Expos.map(transformExpo) : [],
       total: data.Total || data.total || 0,
@@ -492,35 +498,35 @@ export async function searchExpos(params: {
       totalPages: data.TotalPages || data.total_pages || 1,
     };
   } catch (error: any) {
-    console.error('❌ Failed to search expos:', error);
+    console.error('❌ [searchExpos] error:', error);
     throw error;
   }
 }
 
 // ============================================
 // 14. Get Available Booths in Expo
-// GET /booth/:expoID/available-booths
+// GET /booth/:expoID/:boothGroupID/available-booths
 // ============================================
 
-export async function getAvailableBooths(expoId: string): Promise<AvailableBooth[]> {
+export async function getAvailableBooths(expoId: string, boothGroupId: string): Promise<AvailableBooth[]> {
   try {
-    console.log(`🔍 Getting available booths for expo: ${expoId}`);
-    
-    const response = await fetchWithAuth(`${API_URL}/booth/${expoId}/available-booths`);
-    
+    console.log(`🔍 [getAvailableBooths] expoId=${expoId} boothGroupId=${boothGroupId}`);
+
+    const response = await fetchWithAuth(`${API_URL}/booth/${expoId}/${boothGroupId}/available-booths`);
+
     if (response.status === 404) return [];
-    
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new Error(error.error || 'Failed to get available booths');
     }
-    
+
     const data = await response.json();
-    console.log('✅ Available booths:', data);
-    
+    console.log('✅ [getAvailableBooths] raw response:', JSON.stringify(data, null, 2));
+
     return Array.isArray(data) ? data.map(transformAvailableBooth) : [];
   } catch (error: any) {
-    console.error('❌ Failed to get available booths:', error);
+    console.error('❌ [getAvailableBooths] error:', error);
     throw error;
   }
 }
@@ -778,43 +784,32 @@ function transformJoinFormByExpo(data: any): JoinFormByExpo {
 // ============================================
 
 export async function searchBoothGroups(params: {
+  expoId: string;
   search?: string;
   category?: string;
   page?: number;
   pageSize?: number;
 }): Promise<BoothGroupSearchResponse> {
   try {
-    const { search = '', category = '', page = 1, pageSize = 9 } = params;
-    
-    const query = new URLSearchParams({
-      search,
-      category,
-      page: String(page),
-      page_size: String(pageSize),
-    });
-    
-    console.log(`🔍 Searching booth groups: ${query.toString()}`);
-    
-    const response = await fetchWithAuth(`${API_URL}/booth-group/search?${query}`);
-    
+    const { expoId, search = '', category = '', page = 1, pageSize = 9 } = params;
+    const query = new URLSearchParams({ search, category, page: String(page), page_size: String(pageSize) });
+    console.log(`🔍 [searchBoothGroups] expoId=${expoId} query=${query.toString()}`);
+    const response = await fetchWithAuth(`${API_URL}/booth-group/${expoId}/search?${query}`);
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new Error(error.error || 'Failed to search booth groups');
     }
-    
     const data = await response.json();
-    console.log('✅ BoothGroup search result:', data);
-    
-    // Response: { BoothGroups: [...], Total, Page, PageSize, TotalPages }
+    console.log('✅ [searchBoothGroups] raw response:', JSON.stringify(data, null, 2));
     return {
       boothGroups: Array.isArray(data.BoothGroups) ? data.BoothGroups.map(transformBoothGroupSearchItem) : [],
-      total: data.Total || data.total || 0,
-      page: data.Page || data.page || 1,
-      pageSize: data.PageSize || data.page_size || 9,
+      total:      data.Total      || data.total      || 0,
+      page:       data.Page       || data.page       || 1,
+      pageSize:   data.PageSize   || data.page_size  || 9,
       totalPages: data.TotalPages || data.total_pages || 1,
     };
   } catch (error: any) {
-    console.error('❌ Failed to search booth groups:', error);
+    console.error('❌ [searchBoothGroups] error:', error);
     throw error;
   }
 }
@@ -895,6 +890,24 @@ export async function getJoinFormsByExpo(
     return Array.isArray(data) ? data.map(transformJoinFormByExpo) : [];
   } catch (error: any) {
     console.error('❌ Failed to get join forms by expo:', error);
+    throw error;
+  }
+}
+
+export async function getBoothUnavailability(expoId: string): Promise<AvailableBooth[]> {
+  try {
+    console.log(`🔍 [getBoothUnavailability] expoId=${expoId}`);
+    const response = await fetchWithAuth(`${API_URL}/booth/${expoId}/unavailable-booths`);
+    if (response.status === 404) return [];
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.error || 'Failed to get booth unavailability');
+    }
+    const data = await response.json();
+    console.log('✅ [getBoothUnavailability] raw response:', JSON.stringify(data, null, 2));
+    return Array.isArray(data) ? data.map(transformAvailableBooth) : [];
+  } catch (error: any) {
+    console.error('❌ [getBoothUnavailability] error:', error);
     throw error;
   }
 }

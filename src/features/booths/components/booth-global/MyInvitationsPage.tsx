@@ -56,12 +56,12 @@ function InvitationCard({ form, onRespond, onPay, onCancel, actionLoading, cance
           {/* Row 1: expo name + status badges */}
           <div className="flex items-start justify-between gap-3 mb-1.5">
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">คำเชิญจากผู้จัดงาน</p>
+              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">คำเชิญจากผู้จัดงาน</p>
               <div className="flex items-center gap-1.5">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0">
                   <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
                 </svg>
-                <h3 className="font-black text-gray-900 text-sm leading-tight line-clamp-1 group-hover:text-[#3674B5] transition-colors">
+                <h3 className="font-black text-gray-900 text-[15px] leading-tight line-clamp-1 group-hover:text-[#3674B5] transition-colors">
                   {form.expoTitle}
                 </h3>
               </div>
@@ -88,22 +88,13 @@ function InvitationCard({ form, onRespond, onPay, onCancel, actionLoading, cance
 
           {/* Row 2: booth info chips */}
           <div className="flex items-center gap-2 flex-wrap mb-2">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold"
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold"
               style={{ backgroundColor: BL, color: BLUE }}>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/>
               </svg>
               บูธ {form.boothNo}
             </div>
-            {form.boothGroupTitle && (
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-gray-500 bg-gray-50 border border-gray-100">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-                {form.boothGroupTitle}
-              </div>
-            )}
           </div>
 
           {/* Row 3: detail message */}
@@ -130,7 +121,7 @@ function InvitationCard({ form, onRespond, onPay, onCancel, actionLoading, cance
                   </>}
                 </button>
                 <button onClick={() => onRespond(form, true)} disabled={isLoading}
-                  className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-xl text-xs font-semibold text-white hover:opacity-90 transition shadow-sm disabled:opacity-40"
+                  className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition shadow-sm disabled:opacity-40"
                   style={{ background: `linear-gradient(135deg,${BLUE},${BLUE2})` }}>
                   {isLoading
                     ? <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><circle className="opacity-25" cx="12" cy="12" r="10"/><path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
@@ -143,9 +134,9 @@ function InvitationCard({ form, onRespond, onPay, onCancel, actionLoading, cance
             {/* Accepted: ชำระเงิน */}
             {isAccepted && (
               <button onClick={() => onPay(form)}
-                className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-xl text-xs font-semibold text-white hover:opacity-90 transition shadow-sm"
+                className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition shadow-sm"
                 style={{ background: `linear-gradient(135deg,${BLUE},${BLUE2})` }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 ชำระเงิน
               </button>
             )}
@@ -153,10 +144,10 @@ function InvitationCard({ form, onRespond, onPay, onCancel, actionLoading, cance
             {/* Completed: จัดการบูธ */}
             {isCompleted && (
               <button onClick={() => router.push(`/events/${form.expoId}`)}
-                className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-xl text-xs font-semibold text-white hover:opacity-90 transition"
+                className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl text-sm font-semibold text-white hover:opacity-90 transition"
                 style={{ background: `linear-gradient(135deg,${BLUE},${BLUE2})` }}>
                 จัดการบูธ
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
               </button>
             )}
 

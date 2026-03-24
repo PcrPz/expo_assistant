@@ -2,15 +2,18 @@
 
 // ─── Booth In Expo (from API response) ───────────────────────
 export interface BoothInExpo {
-  expoID: string;
-  expoTitle: string;
-  boothID: string;
-  boothNo: string;
-  type: string;
-  title: string;
-  hall?: string;
-  thumbnail?: string;
-  zoneName?: string;
+  expoID: string
+  expoTitle: string
+  expoThumbnail?: string | null   // ⭐ เพิ่ม
+  boothID: string
+  boothNo: string
+  type: string
+  title: string
+  hall?: string
+  zoneName?: string
+  price?: string | number        // ⭐ เพิ่ม
+  status?: string                // ⭐ เพิ่ม
+  thumbnail?: string
 }
 
 // ─── Booth Global ─────────────────────────────────────────────

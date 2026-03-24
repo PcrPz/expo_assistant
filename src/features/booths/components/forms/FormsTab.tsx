@@ -102,7 +102,9 @@ export function FormsTab({ boothId, expoId, userRole, isAssignedStaff }: FormsTa
       {!form && (
         <div className="bg-white rounded-2xl border border-[#E2E8F0] p-10">
           <div className="text-center">
-            <FileText className="h-6 w-6 text-gray-400" />
+            <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+<FileText className="h-6 w-6 text-gray-400" />
+          </div>
             <h3 className="text-sm font-semibold text-gray-500">ยังไม่มีแบบสอบถาม</h3>
             <p className="text-sm text-gray-500 mt-2">
               {canManage ? 'สร้างแบบสอบถามเพื่อรับ feedback จากผู้เข้าชม' : 'ยังไม่มีแบบสอบถามในบูธนี้'}
