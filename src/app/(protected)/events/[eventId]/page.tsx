@@ -25,7 +25,8 @@ import { BoothApplicationsTab } from '@/src/features/events/components/BoothAppl
 import { DashboardTab } from '@/src/features/events/components/detail/DashboardTab';
 import { TicketsTab } from '@/src/features/events/components/tickets/TicketsTab';
 import { getTicketList } from '@/src/features/events/api/ticketApi';
-import { NoTicketWarningSection } from '@/src/features/events/components/NoTicketWarningSection';
+import { getBoothsByExpoId } from '@/src/features/booths/api/boothApi';
+import { PublishReadinessSection } from '@/src/features/events/components/PublishReadinessSection';
 import { ExpoAnnouncementTab } from '@/src/features/events/components/announcements/ExpoAnnouncementTab';
 import { CheckoutTab } from '@/src/features/events/components/checkout/CheckoutTab';
 import { ExpoFormTab } from '@/src/features/events/components/forms/ExpoFormTab';
@@ -39,7 +40,7 @@ export default function EventDetailPage() {
   const eventId = params.eventId as string;
   const searchParams = useSearchParams();
   const fromExplore = searchParams.get('from') === 'explore';
-  
+  const [hasBooths, setHasBooths] = useState(false);
   const [event, setEvent] = useState<Event | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('detail');
@@ -49,47 +50,50 @@ export default function EventDetailPage() {
     loadEvent();
   }, [eventId]);
 
-  const loadEvent = async () => {
+const loadEvent = async () => {
     try {
       setIsLoading(true);
-      
+      // 1. ดึงข้อมูล Event หลัก (ต้องรออันนี้ก่อน)
       const foundEvent = await getEventWithRole(eventId);
-      
+
       if (!foundEvent) {
-        console.error('❌ Event not found');
         router.push('/home');
         return;
       }
-      
-      console.log('✅ Event loaded with role:', foundEvent.role);
+
       setEvent(foundEvent);
 
-      // ✅ รับ tab จาก query param (เช่น navigate จาก noti)
+      // 2. จัดการเรื่อง Tab (ห้ามใส่ return; เด็ดขาด)
       const tabParam = searchParams.get('tab') as TabType | null;
-      if (tabParam) { setActiveTab(tabParam); return; }
-
-      // ✅ เช็คว่ามีตั๋วหรือยัง (เฉพาะ organizer)
-      if (isEventOrganizer(foundEvent.role)) {
-        try {
-          const tickets = await getTicketList(foundEvent.expoID);
-          setHasTickets(tickets.length > 0);
-        } catch {
-          setHasTickets(false);
+      if (tabParam) {
+        setActiveTab(tabParam);
+      } else {
+        // Default tab logic
+        if (isEventOrganizer(foundEvent.role)) {
+          setActiveTab('detail');
+        } else if (isBoothStaff(foundEvent.role)) {
+          setActiveTab('detail');
+        } else if (isBoothStaffVisitor(foundEvent.role)) {
+          setActiveTab('detail');
         }
       }
-      
-      // Set default tab based on role
+
+      // 3. เช็คความพร้อม (รันแบบ Background ไม่ต้องรอให้หน้าเว็บหมุนค้าง)
       if (isEventOrganizer(foundEvent.role)) {
-        setActiveTab('detail');
-      } else if (isBoothStaff(foundEvent.role)) {
-        setActiveTab('detail');
-      } else if (isBoothStaffVisitor(foundEvent.role)) {
-        setActiveTab('detail'); // ดูได้แค่ detail
+        // เช็คตั๋ว
+        getTicketList(foundEvent.expoID)
+          .then((tickets) => setHasTickets(tickets.length > 0))
+          .catch(() => setHasTickets(false));
+
+        // เช็คบูธ
+        getBoothsByExpoId(foundEvent.expoID)
+          .then((booths) => setHasBooths(booths.length > 0))
+          .catch(() => setHasBooths(false));
       }
-      
+
     } catch (error) {
       console.error('Failed to load event:', error);
-      router.push('/home');
+      // router.push('/home'); // เปิดไว้ถ้าอยากให้เด้งกลับหน้าโฮมเวลาพัง
     } finally {
       setIsLoading(false);
     }
@@ -109,6 +113,16 @@ export default function EventDetailPage() {
       setHasTickets(tickets.length > 0);
     } catch {
       setHasTickets(false);
+    }
+  };
+
+  const refreshBooths = async () => {
+    if (!event) return;
+    try {
+      const booths = await getBoothsByExpoId(event.expoID);
+      setHasBooths(booths.length > 0);
+    } catch {
+      setHasBooths(false);
     }
   };
 
@@ -152,7 +166,7 @@ export default function EventDetailPage() {
         backUrl={fromExplore ? '/booths/explore-events' : undefined}
       />
 
-      <div className="max-w-screen-2xl mx-auto px-8 py-6 space-y-6">
+      <div className="max-w-screen-xl mx-auto px-8 py-6 space-y-6">
         {/* ✅ Payment Deposit Section - แสดงเฉพาะ Owner + Pending */}
         {isEventOrganizer(event.role) && event.status === 'pending' && (
           <PaymentDepositSection 
@@ -163,14 +177,19 @@ export default function EventDetailPage() {
 
         {/* ✅ Publish Event Section - แสดงเฉพาะ Owner/Admin + Unpublish */}
         {(event.role === 'owner' || event.role === 'admin') && event.status === 'unpublish' && (
-          hasTickets ? (
-            <PublishEventSection 
-              eventId={event.expoID}
-              onPublishSuccess={handlePaymentSuccess}
-            />
-          ) : (
-            <NoTicketWarningSection onGoToTickets={() => setActiveTab('tickets')} />
-          )
+        (hasTickets && hasBooths) ? (
+          <PublishEventSection
+            eventId={event.expoID}
+            onPublishSuccess={loadEvent}
+          />
+        ) : (
+          <PublishReadinessSection
+            hasTickets={hasTickets}
+            hasBooths={hasBooths}
+            onGoToTickets={() => setActiveTab('tickets')}
+            onGoToBooth={() => setActiveTab('booth')}
+          />
+        )
         )}
 
         {/* Tab Content */}
@@ -190,6 +209,7 @@ export default function EventDetailPage() {
             <BoothTab 
               expoId={event.expoID}
               role={event.role}
+              onBoothChange={refreshBooths}
             />
           )}
           

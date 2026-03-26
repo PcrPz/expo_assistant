@@ -43,6 +43,7 @@ export function useNotification() {
   const openPanel = useCallback(async () => {
     setIsOpen(true);
     await loadNotis();
+    setHasUnread(false);
   }, [loadNotis]);
 
   // ─── Close panel ─────────────────────────────────────────

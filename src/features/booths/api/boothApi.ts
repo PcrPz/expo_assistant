@@ -12,7 +12,7 @@ function transformBooth(rawBooth: any): Booth {
     booth_id: rawBooth.BoothID || rawBooth.booth_id || '',
     expo_id: rawBooth.ExpoID || rawBooth.expo_id || '',
     booth_no: rawBooth.BoothNo || rawBooth.booth_no || '',
-    type: (rawBooth.Type || rawBooth.type || 'small_booth') as BoothType,
+    type: (rawBooth.Type || rawBooth.type || 'booth') as BoothType,
     price: String(rawBooth.Price ?? rawBooth.price ?? '0'),             // ← เพิ่ม
     status: (rawBooth.Status || rawBooth.status || 'available') as import('../types/booth.types').BoothStatus, // ← เพิ่ม
     title: rawBooth.Title || rawBooth.title || null,

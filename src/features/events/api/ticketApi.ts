@@ -1,7 +1,12 @@
 // src/features/events/api/ticketApi.ts
 
 import { fetchWithAuth } from '@/src/lib/api/fetchWithAuth';
-import type { Ticket, CreateTicketRequest, UpdateTicketRequest } from '../types/ticket.types';
+import type {
+  Ticket,
+  CreateTicketRequest,
+  UpdateTicketRequest,
+  UpdateTicketStatusRequest,
+} from '../types/ticket.types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
@@ -35,6 +40,19 @@ export async function updateTicket(expoID: string, body: UpdateTicketRequest): P
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error('Failed to update ticket');
+}
+
+export async function updateTicketStatus(
+  expoID: string,
+  ticketID: string,
+  body: UpdateTicketStatusRequest
+): Promise<void> {
+  const res = await fetchWithAuth(`${API_URL}/ticket/${expoID}/status/${ticketID}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error('Failed to update ticket status');
 }
 
 export async function deleteTicket(expoID: string, ticketID: string): Promise<void> {

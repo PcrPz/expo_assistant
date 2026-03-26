@@ -1,9 +1,11 @@
 // src/features/events/components/organizer/InviteBoothGroupMedal.tsx
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { getAvailableBooths, getBoothUnavailability, inviteBoothGroupToExpo } from '@/src/features/booths/api/boothGlobalApi';
 import type { AvailableBooth } from '@/src/features/booths/types/boothGlobal.types';
+import { getMinioFileUrl } from '@/src/features/minio/api/minioApi';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 
 // ─── Constants ────────────────────────────────────────────────
 const BLUE  = '#3674B5';
@@ -18,8 +20,7 @@ interface InviteBoothGroupModalProps {
 }
 
 const BOOTH_TYPE_LABEL: Record<string, string> = {
-  small_booth: 'บูธเล็ก',
-  big_booth:   'บูธใหญ่',
+  booth: 'บูธ',
   stage:       'เวที',
 };
 
@@ -51,6 +52,51 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+function MapPreview({ mapUrl }: { mapUrl: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [initScale, setInitScale] = useState<number | null>(null);
+
+  const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    const container = containerRef.current;
+    if (!container) return;
+    const scaleX = container.clientWidth / img.naturalWidth;
+    const scaleY = 170 / img.naturalHeight;
+    setInitScale(Math.min(scaleX, scaleY) * 1.2);
+  };
+
+  return (
+    <div ref={containerRef} className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50" style={{ height: '170px' }}>
+      {initScale === null ? (
+        // โหลดรูปเพื่อวัดขนาดก่อน ยังไม่แสดง TransformWrapper
+        <img
+          src={getMinioFileUrl(mapUrl) ?? undefined}
+          alt=""
+          onLoad={handleLoad}
+          style={{ visibility: 'hidden', position: 'absolute' }}
+        />
+      ) : (
+        <TransformWrapper key={initScale} initialScale={initScale} minScale={0.1} maxScale={4} centerOnInit>
+          {({ zoomIn, zoomOut }) => (
+            <div className="relative w-full h-full">
+              <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
+                <img
+                  src={getMinioFileUrl(mapUrl) ?? undefined}
+                  alt="แผนผังงาน"
+                  style={{ display: 'block' }}
+                />
+              </TransformComponent>
+              <div className="absolute bottom-2 right-2 flex flex-col gap-1">
+                <button onClick={() => zoomIn()} className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-700 font-bold shadow-sm hover:bg-gray-50 text-base">+</button>
+                <button onClick={() => zoomOut()} className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-700 font-bold shadow-sm hover:bg-gray-50 text-base">−</button>
+              </div>
+            </div>
+          )}
+        </TransformWrapper>
+      )}
+    </div>
+  );
+}
 // ══════════════════════════════════════════════════════════════
 // Main Modal
 // ══════════════════════════════════════════════════════════════
@@ -61,7 +107,9 @@ export function InviteBoothGroupModal({
   onClose,
   onSuccess,
 }: InviteBoothGroupModalProps) {
-  const [booths,          setBooths]          = useState<AvailableBooth[]>([]);
+  const [booths,            setBooths]            = useState<AvailableBooth[]>([]);
+  const [mapUrl,            setMapUrl]            = useState<string | null>(null);
+  const [showMapFullscreen, setShowMapFullscreen] = useState(false);
   const [loading,         setLoading]         = useState(true);
   const [selectedBoothId, setSelectedBoothId] = useState('');
   const [detail,          setDetail]          = useState('');
@@ -77,8 +125,9 @@ export function InviteBoothGroupModal({
     setLoading(true);
     try {
       // API ใหม่ — ดึงทุกบูธ, filter status เอง
-      const all = await getBoothUnavailability(expoId);
-      setBooths(all);
+      const { expo_map, booths } = await getBoothUnavailability(expoId);
+      setMapUrl(expo_map);
+      setBooths(booths);
     } catch (err) {
       console.error('Failed to load booths:', err);
     } finally {
@@ -191,7 +240,7 @@ export function InviteBoothGroupModal({
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-[15px] font-black text-gray-900">เชิญเข้าร่วมงาน</h3>
+            <h3 className="text-[15px] font-black text-gray-900">เชิญเข้าร่วมออกบูธ</h3>
             <p className="text-[12px] text-gray-400 mt-0.5 truncate">
               {boothGroup.Title} · {boothGroup.Company}
             </p>
@@ -205,10 +254,26 @@ export function InviteBoothGroupModal({
             </svg>
           </button>
         </div>
-
+        {/* ── แผนผังงาน ──────────────────────────────── */}
+        {mapUrl && (
+          <div className="px-5 pt-4 flex-shrink-0">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[14px] font-bold text-gray-700">แผนผังงาน</p>
+              <button
+                onClick={() => setShowMapFullscreen(true)}
+                className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2">
+                  <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                </svg>
+              </button>
+            </div>
+            <MapPreview mapUrl={mapUrl} />
+          </div>
+        )}
         {/* ── Section label ──────────────────────────────── */}
         <div className="flex items-center justify-between px-5 pt-4 pb-2 flex-shrink-0">
-          <p className="text-[13px] font-bold text-gray-700">เลือกบูธ</p>
+          <p className="text-[14px] font-bold text-gray-700">เลือกบูธ</p>
           {!loading && (
             <div className="flex gap-1.5 flex-wrap justify-end">
               {countAvailable > 0 && (
@@ -352,8 +417,8 @@ export function InviteBoothGroupModal({
 
         {/* ── Textarea + error ───────────────────────────── */}
         <div className="px-5 pt-3 pb-4 flex-shrink-0 border-t border-gray-100">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[13px] font-bold text-gray-700">ข้อความถึงบูธ</p>
+          <div className="flex items-center justify-between mb-2 pb-1">
+            <p className="text-[14px] font-bold text-gray-700">ข้อความถึงบูธ</p>
             <span className="text-[11px] text-gray-400">(ไม่บังคับ)</span>
           </div>
           <textarea
@@ -407,6 +472,49 @@ export function InviteBoothGroupModal({
           </button>
         </div>
       </div>
+      {/* Fullscreen modal */}
+      {showMapFullscreen && mapUrl && (
+        <div
+          className="fixed inset-0 bg-black/80 z-[60] flex flex-col items-center justify-center p-4"
+          onClick={() => setShowMapFullscreen(false)}
+        >
+          <div className="w-full max-w-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-white text-sm font-bold">แผนผังงาน</p>
+              <button
+                onClick={() => setShowMapFullscreen(false)}
+                className="w-8 h-8 rounded-lg bg-white/15 hover:bg-white/25 flex items-center justify-center transition"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div className="rounded-xl overflow-hidden bg-black" style={{ height: '70vh' }}>
+              <TransformWrapper>
+                {({ zoomIn, zoomOut, resetTransform }) => (
+                  <div className="relative w-full h-full">
+                    <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
+                      <img
+                        src={getMinioFileUrl(mapUrl) ?? undefined}
+                        alt="แผนผังงาน"
+                        className="w-full h-full object-contain"
+                      />
+                    </TransformComponent>
+                    <div className="absolute bottom-3 right-3 flex flex-col gap-1.5">
+                      <button onClick={() => zoomIn()} className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center text-white font-bold text-base hover:bg-white/25">+</button>
+                      <button onClick={() => zoomOut()} className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center text-white font-bold text-base hover:bg-white/25">−</button>
+                      <button onClick={() => resetTransform()} className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center text-white hover:bg-white/25">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </TransformWrapper>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -163,7 +163,7 @@ function PDPAModal({
               <ul className="space-y-2">
                 {[
                   'ชื่อ-นามสกุล อีเมล เบอร์โทรศัพท์ — ใช้สำหรับการยืนยันตัวตนและการติดต่อสื่อสาร',
-                  'วันเกิด — ใช้คำนวณช่วงอายุ (เช่น 18-25 ปี) เพื่อแสดงเป็นสถิติ Demographics ใน Dashboard ของงานและบูธ',
+                  'วันเกิด — ใช้คำนวณช่วงอายุ (เช่น 13-19 ปี) เพื่อแสดงเป็นสถิติ Demographics ใน Dashboard ของงานและบูธ',
                   'เพศ — ใช้แสดงสัดส่วนเพศผู้เข้าชมในสถิติ Dashboard ของงานและบูธ',
                   'ข้อมูลการใช้งานระบบ เช่น การสร้างงาน การจัดการบูธ — ใช้ปรับปรุงประสบการณ์การใช้งาน',
                   'รูปโปรไฟล์และไฟล์ที่อัปโหลด — ใช้แสดงในระบบตามที่ผู้ใช้กำหนด',
@@ -367,18 +367,18 @@ export function RegisterForm() {
                 type="button"
                 onClick={handleToggle}
                 className="relative w-full h-14 rounded-full p-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-200"
-                style={{ backgroundColor: isOrganizer ? '#3674B5' : '#749BC2' }}
+                style={{ backgroundColor: '#EEF4FB' }}
               >
                 <div
-                  className="absolute top-1 h-12 w-[48%] bg-white rounded-full shadow-lg transition-all duration-300 ease-in-out"
+                  className="absolute top-1 h-12 w-[48%] bg-[#3674B5] rounded-full shadow-md transition-all duration-300 ease-in-out"
                   style={{ left: isOrganizer ? '4px' : 'calc(52% - 4px)' }}
                 />
                 <div className="relative flex h-full">
                   <div className="w-1/2 flex items-center justify-center z-10">
-                    <span className={`font-semibold transition-colors duration-300 ${isOrganizer ? 'text-[#3674B5]' : 'text-white'}`}>ผู้จัดงาน</span>
+                    <span className={`font-semibold transition-colors duration-300 ${isOrganizer ? 'text-white' : 'text-[#9CA3AF]'}`}>ผู้จัดงาน</span>
                   </div>
                   <div className="w-1/2 flex items-center justify-center z-10">
-                    <span className={`font-semibold transition-colors duration-300 ${!isOrganizer ? 'text-[#749BC2]' : 'text-white'}`}>ผู้จัดการบูธ</span>
+                    <span className={`font-semibold transition-colors duration-300 ${!isOrganizer ? 'text-white' : 'text-[#9CA3AF]'}`}>ผู้จัดการบูธ</span>
                   </div>
                 </div>
               </button>

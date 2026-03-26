@@ -5,12 +5,16 @@ export interface Ticket {
   Title: string;
   Detail: string;
   Price: string;
+  Amount: number | null;
+  Remaining: number | null;
+  Status: 'publish' | 'unpublish';
 }
 
 export interface CreateTicketRequest {
   title: string;
   detail: string;
   price: number;
+  amount: number | null;
 }
 
 export interface UpdateTicketRequest {
@@ -18,4 +22,9 @@ export interface UpdateTicketRequest {
   title: string;
   detail: string;
   price: number;
+  amount: number | null;
+}
+
+export interface UpdateTicketStatusRequest {
+  status: 'publish' | 'unpublish';
 }

@@ -31,8 +31,7 @@ const StageIcon = () => (
 );
 
 const BOOTH_TYPES = [
-  { value: 'small_booth' as BoothType, label: 'บูธขนาดเล็ก', desc: 'เหมาะสำหรับธุรกิจขนาดเล็ก', Icon: SmallBoothIcon, color: '#3674B5', bg: '#EBF3FC' },
-  { value: 'big_booth'   as BoothType, label: 'บูธขนาดใหญ่', desc: 'เหมาะสำหรับธุรกิจขนาดกลาง-ใหญ่', Icon: BigBoothIcon, color: '#498AC3', bg: '#EBF3FC' },
+  { value: 'booth' as BoothType, label: 'บูธ', desc: 'เหมาะสำหรับธุรกิจขนาดเล็ก', Icon: SmallBoothIcon, color: '#3674B5', bg: '#EBF3FC' },
   { value: 'stage'       as BoothType, label: 'เวที',          desc: 'พื้นที่สำหรับกิจกรรมและการแสดง', Icon: StageIcon, color: '#749BC2', bg: '#EBF3FC' },
 ];
 
@@ -66,7 +65,7 @@ export function EditBoothModal({ expoId, booth, userRole, onClose, onSuccess }: 
     zone_id: string; email: string; tel: string; website1: string; website2: string;
   }>({
     booth_no: booth.booth_no || '',
-    type: (['small_booth', 'big_booth', 'stage'] as BoothType[]).includes(booth.type) ? booth.type : 'small_booth',
+    type: (['booth', 'stage'] as BoothType[]).includes(booth.type) ? booth.type : 'booth',
     price: String(booth.price ?? '0'),
     status: booth.status || 'available',
     title: booth.title || '',
@@ -250,7 +249,7 @@ export function EditBoothModal({ expoId, booth, userRole, onClose, onSuccess }: 
                 ประเภทบูธ <span className="text-red-500">*</span>
                 {isBoothStaff && <span className="ml-2 text-[11px] font-normal text-gray-400 inline-flex items-center gap-1"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>เฉพาะผู้จัดงานเท่านั้น</span>}
               </label>
-              <div className={`grid grid-cols-3 gap-2.5 ${isBoothStaff ? 'opacity-50 pointer-events-none' : ''}`}>
+              <div className={`grid grid-cols-2 gap-2.5 ${isBoothStaff ? 'opacity-50 pointer-events-none' : ''}`}>
                 {BOOTH_TYPES.map((type) => {
                   const isSelected = formData.type === type.value;
                   return (

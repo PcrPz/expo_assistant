@@ -5,6 +5,7 @@ import { toast } from '@/src/lib/toast';
 import { useState } from 'react';
 import { Download, Edit2, Trash2 } from 'lucide-react';
 import { downloadDocument, deleteDocuments } from '../../api/documentApi';
+import { getMinioFileUrl } from '@/src/features/minio/api/minioApi';
 import type { BoothDocument } from '../../types/document.types';
 
 interface DocumentCardProps {
@@ -16,34 +17,43 @@ interface DocumentCardProps {
   expoId: string;
 }
 
-export function DocumentCard({
-  document,
-  boothId,
-  canManage,
-  onEdit,
-  onRefresh,
-  expoId,
-}: DocumentCardProps) {
+// ── Extension icon + color ─────────────────────────────────────
+function ExtBadge({ ext }: { ext: string }) {
+  const e = (ext || '').toLowerCase();
+  const cfg: Record<string, { label: string; bg: string; text: string }> = {
+    pdf:  { label: 'PDF',  bg: '#FEE2E2', text: '#DC2626' },
+    jpg:  { label: 'JPG',  bg: '#DBEAFE', text: '#2563EB' },
+    jpeg: { label: 'JPG',  bg: '#DBEAFE', text: '#2563EB' },
+    png:  { label: 'PNG',  bg: '#DCFCE7', text: '#16A34A' },
+  };
+  const c = cfg[e] ?? { label: e.toUpperCase() || 'FILE', bg: '#F3F4F6', text: '#6B7280' };
+  return (
+    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold flex-shrink-0"
+      style={{ background: c.bg, color: c.text }}>
+      {c.label}
+    </span>
+  );
+}
+
+export function DocumentCard({ document, boothId, canManage, onEdit, onRefresh, expoId }: DocumentCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  // ── Logic unchanged ──────────────────────────────────────────
+  const thumbnailUrl = document.Thumbnail ? getMinioFileUrl(document.Thumbnail) : null;
+  const isPublished = document.Status === 'publish';
+  const isPrivate = document.AccessLevel === 'private';
+
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       setIsDownloading(true);
-      await downloadDocument(expoId, document.DocID, `${document.Title}.pdf`);
+      await downloadDocument(expoId, document.DocID, `${document.Title}.${document.DocExtension || 'pdf'}`);
     } catch {
       toast.error('ไม่สามารถดาวน์โหลดเอกสารได้');
     } finally {
       setIsDownloading(false);
     }
-  };
-
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowDeleteModal(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -60,46 +70,62 @@ export function DocumentCard({
     }
   };
 
-  const isPublished = document.Status === 'publish';
-
   return (
     <>
-      {/* ── Card — Option C: left accent strip ─────────────────── */}
-      <div className="bg-white rounded-[14px] border-[1.5px] border-[#E2E8F0] overflow-hidden flex hover:border-[#3674B5] transition-colors">
+      <div className="bg-white rounded-[14px] border-[1.5px] border-[#E2E8F0] overflow-hidden hover:border-[#3674B5] hover:shadow-sm transition-all flex flex-col">
 
-        {/* Accent strip — น้ำเงินถ้า publish, เทาถ้าไม่ */}
-        <div
-          className="w-1 flex-shrink-0"
-          style={{ background: isPublished ? '#3674B5' : '#D1D5DB' }}
-        />
+        {/* ── Thumbnail ─────────────────────────────────────────── */}
+        <div className="relative h-[120px] bg-[#F8FAFC] flex items-center justify-center overflow-hidden flex-shrink-0">
+          {thumbnailUrl ? (
+            <img src={thumbnailUrl} alt={document.Title}
+              className="w-full h-full object-cover"
+              onError={e => { e.currentTarget.style.display = 'none'; }}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-2">
+              <div className="w-12 h-12 rounded-xl bg-[#EBF3FC] flex items-center justify-center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3674B5" strokeWidth="1.8" strokeLinecap="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+              <span className="text-[11px] text-gray-400">ไม่มีรูปปก</span>
+            </div>
+          )}
 
-        {/* Card content */}
-        <div className="flex-1 px-4 py-3.5 min-w-0">
-          {/* Top row: name + status badge */}
-          <div className="flex items-start justify-between gap-2 mb-1">
-            <p className="text-[14px] font-bold text-gray-900 truncate leading-snug">
-              {document.Title}
+          {/* badges overlay */}
+          <div className="absolute top-2 left-2 flex gap-1">
+            <ExtBadge ext={document.DocExtension} />
+            {isPrivate && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-gray-800/80 text-white">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                ส่วนตัว
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* ── Card content ──────────────────────────────────────── */}
+        <div className="flex-1 px-4 py-3 flex flex-col gap-2 min-w-0">
+          {/* Title + status */}
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-[13px] font-bold text-gray-900 truncate leading-snug flex-1">
+              {document.Title}{document.DocExtension ? `.${document.DocExtension.toLowerCase()}` : ''}
             </p>
-            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold flex-shrink-0 ${
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold flex-shrink-0 ${
               isPublished ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'
             }`}>
-              <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                isPublished ? 'bg-green-500' : 'bg-gray-400'
-              }`} />
+              <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isPublished ? 'bg-green-500' : 'bg-gray-400'}`} />
               {isPublished ? 'เผยแพร่แล้ว' : 'ยังไม่เผยแพร่'}
             </span>
           </div>
 
-          {/* Sub label */}
-          <p className="text-[11px] text-gray-400 mb-3">PDF / เอกสาร</p>
-
           {/* Actions */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleDownload}
-              disabled={isDownloading}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#EBF3FC] text-[#3674B5] rounded-[9px] text-[12px] font-semibold hover:bg-[#DBEAFE] transition disabled:opacity-50"
-            >
+          <div className="flex items-center gap-2 mt-auto">
+            <button onClick={handleDownload} disabled={isDownloading}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#EBF3FC] text-[#3674B5] rounded-[9px] text-[12px] font-semibold hover:bg-[#DBEAFE] transition disabled:opacity-50">
               {isDownloading ? (
                 <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle className="opacity-25" cx="12" cy="12" r="10"/>
@@ -117,19 +143,12 @@ export function DocumentCard({
 
             {canManage && (
               <>
-                <button
-                  onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                  className="w-8 h-8 rounded-[9px] flex items-center justify-center bg-[#FEF3C7] text-amber-600 hover:bg-amber-100 transition flex-shrink-0"
-                  title="แก้ไข"
-                >
+                <button onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                  className="w-8 h-8 rounded-[9px] flex items-center justify-center bg-[#FEF3C7] text-amber-600 hover:bg-amber-100 transition flex-shrink-0">
                   <Edit2 className="h-3.5 w-3.5" />
                 </button>
-                <button
-                  onClick={handleDeleteClick}
-                  disabled={isDeleting}
-                  className="w-8 h-8 rounded-[9px] flex items-center justify-center bg-red-50 text-red-500 hover:bg-red-100 transition disabled:opacity-50 flex-shrink-0"
-                  title="ลบ"
-                >
+                <button onClick={(e) => { e.stopPropagation(); setShowDeleteModal(true); }} disabled={isDeleting}
+                  className="w-8 h-8 rounded-[9px] flex items-center justify-center bg-red-50 text-red-500 hover:bg-red-100 transition disabled:opacity-50 flex-shrink-0">
                   {isDeleting ? (
                     <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle className="opacity-25" cx="12" cy="12" r="10"/>
@@ -151,12 +170,10 @@ export function DocumentCard({
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={() => setShowDeleteModal(false)} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm flex flex-col" onClick={e => e.stopPropagation()}>
-
-              {/* Header */}
               <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round">
                       <polyline points="3 6 5 6 21 6"/>
                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                       <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
@@ -174,8 +191,6 @@ export function DocumentCard({
                   </svg>
                 </button>
               </div>
-
-              {/* Body */}
               <div className="px-6 py-5 space-y-4">
                 <div className="bg-gray-50 rounded-xl px-4 py-3 text-center">
                   <p className="text-xs text-gray-400">ลบเอกสาร</p>
@@ -184,14 +199,11 @@ export function DocumentCard({
                 <ul className="space-y-1.5">
                   {['เอกสารจะถูกลบออกจากระบบอย่างถาวร', 'ผู้เข้าชมจะไม่สามารถดาวน์โหลดได้อีก'].map(item => (
                     <li key={item} className="flex items-center gap-2 text-sm text-red-600">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
-                      {item}
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />{item}
                     </li>
                   ))}
                 </ul>
               </div>
-
-              {/* Footer */}
               <div className="px-6 py-[18px] border-t border-gray-100 flex gap-3">
                 <button onClick={() => setShowDeleteModal(false)} disabled={isDeleting}
                   className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition disabled:opacity-50">

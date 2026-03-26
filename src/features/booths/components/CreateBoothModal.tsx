@@ -20,13 +20,6 @@ const SmallBoothIcon = () => (
   </svg>
 );
 
-const BigBoothIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-  </svg>
-);
-
 const StageIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <polygon points="12 2 2 7 12 12 22 7 12 2"/>
@@ -51,19 +44,11 @@ const UnavailableIcon = () => (
 
 const BOOTH_TYPES = [
   {
-    value: 'small_booth',
-    label: 'บูธขนาดเล็ก',
+    value: 'booth',
+    label: 'บูธ',
     desc: 'เหมาะสำหรับธุรกิจขนาดเล็ก',
     Icon: SmallBoothIcon,
     color: '#3674B5',
-    bg: '#EBF3FC',
-  },
-  {
-    value: 'big_booth',
-    label: 'บูธขนาดใหญ่',
-    desc: 'เหมาะสำหรับธุรกิจขนาดกลาง-ใหญ่',
-    Icon: BigBoothIcon,
-    color: '#498AC3',
     bg: '#EBF3FC',
   },
   {
@@ -232,7 +217,7 @@ export function CreateBoothModal({ expoId, onClose, onSuccess }: CreateBoothModa
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                 ประเภทบูธ <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-2 gap-2.5">
                 {BOOTH_TYPES.map((type) => {
                   const isSelected = formData.type === type.value;
                   return (

@@ -18,8 +18,8 @@ interface ApplyBoothModalProps {
 
 const BOOTH_TYPES = [
   { 
-    value: 'small_booth' as const, 
-    label: 'บูธขนาดเล็ก',
+    value: 'booth' as const, 
+    label: 'บูธ',
     price: '15,000',
     size: '3x3 เมตร',
     desc: 'เหมาะสำหรับธุรกิจขนาดเล็ก',
@@ -27,20 +27,6 @@ const BOOTH_TYPES = [
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3674B5" strokeWidth="1.5">
         <rect x="3" y="3" width="18" height="18" rx="2"/>
         <line x1="9" y1="3" x2="9" y2="21"/>
-      </svg>
-    )
-  },
-  { 
-    value: 'big_booth' as const, 
-    label: 'บูธขนาดใหญ่',
-    price: '35,000',
-    size: '6x6 เมตร',
-    desc: 'เหมาะสำหรับธุรกิจขนาดกลาง',
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3674B5" strokeWidth="1.5">
-        <rect x="2" y="2" width="20" height="20" rx="2"/>
-        <line x1="2" y1="12" x2="22" y2="12"/>
-        <line x1="12" y1="2" x2="12" y2="22"/>
       </svg>
     )
   },

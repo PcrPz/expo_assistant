@@ -4,7 +4,7 @@
 // BASE TYPES
 // ============================================================================
 
-export type BoothType = "small_booth" | "big_booth" | "stage";
+export type BoothType = "booth" | "stage";
 
 // ✅ Booth Status (ใหม่)
 export type BoothStatus = "available" | "unavailable" | "pending" | "reserved";
@@ -82,20 +82,17 @@ export interface AssignStaffRequest {
 // ============================================================================
 
 export const BOOTH_TYPES = [
-  { value: 'small_booth' as BoothType, label: 'บูธขนาดเล็ก', icon: '🏪' },
-  { value: 'big_booth' as BoothType, label: 'บูธขนาดใหญ่', icon: '🏬' },
+  { value: 'booth' as BoothType, label: 'บูธ', icon: '🏪' },
   { value: 'stage' as BoothType, label: 'เวที', icon: '🎭' },
 ];
 
 export const BOOTH_TYPE_LABELS: Record<BoothType, string> = {
-  small_booth: "บูธขนาดเล็ก",
-  big_booth: "บูธขนาดใหญ่",
+  booth: "บูธ",
   stage: "เวที",
 };
 
 export const BOOTH_TYPE_COLORS: Record<BoothType, string> = {
-  small_booth: "bg-blue-100 text-blue-700",
-  big_booth: "bg-purple-100 text-purple-700",
+  booth: "bg-blue-100 text-blue-700",
   stage: "bg-orange-100 text-orange-700",
 };
 

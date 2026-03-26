@@ -240,7 +240,7 @@ function DetailModal({ form, onClose, onRespond, isRequest }: {
                     <div className="flex items-center gap-2 flex-shrink-0 ml-3">
                       {b.type && (
                         <span className="text-[10px] px-2 py-0.5 bg-white border border-gray-200 rounded-md text-gray-500 font-medium">
-                          {b.type === 'small_booth' ? 'บูธเล็ก' : b.type === 'big_booth' ? 'บูธใหญ่' : b.type === 'stage' ? 'เวที' : b.type}
+                          {b.type === 'booth' ? 'บูธ' : b.type === 'stage' ? 'เวที' : b.type}
                         </span>
                       )}
                       <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${lightClass} ${textClass}`}>{b.boothNo}</span>

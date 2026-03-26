@@ -22,16 +22,23 @@ const BLUE          = '#3674B5';
 const BLUE2         = '#498AC3';
 const BL            = '#EBF3FC';
 // เพศ — ใช้โทนฟ้าเหมือน Event Dashboard
-const GENDER_COLORS: Record<string, string> = { female: '#A78BCA', male: '#3674B5', other: '#94A3B8' };
-const GENDER_TH:    Record<string, string>  = { female: 'หญิง', male: 'ชาย', other: 'อื่นๆ' };
+const GENDER_COLORS: Record<string, string> = { female: '#F9A8D4', male: '#93C5FD', other: '#CBD5E1' };
+const GENDER_TH:    Record<string, string>  = { female: 'หญิง', male: 'ชาย', other: 'ไม่ระบุ' };
 // Rating — gradient ฟ้าเข้มไปอ่อน
-const RATING_COLORS = ['#CBD5E1', '#93B4D4', '#5B9BD6', '#3674B5', '#2C5F99'];
+const RATING_COLORS = ['#FCA5A5', '#FCD34D', '#86EFAC', '#6EE7B7', '#93C5FD'];
 // Daily chart — 4 เส้น โทนฟ้าทั้งหมด เข้ม/อ่อน/กลาง/จาง
 const DAILY_COLORS = {
-  attendance: '#2E6FA3',   // ฟ้าเข้ม  — เข้าชมบูธ
-  queue:      '#498AC3',   // ฟ้ากลาง  — คิว
-  download:   '#82B4E0',   // ฟ้าอ่อน  — โหลดเอกสาร
-  locate:     '#A8CDEB',   // ฟ้าซีด   — BLE
+  attendance: '#93C5FD',
+  queue:      '#86EFAC',
+  download:   '#FDE68A',
+  locate:     '#C4B5FD',
+};
+
+const STAT_COLORS = {
+  total:      '#3674B5',
+  attendance: '#2E6FA3',
+  queue:      '#498AC3',
+  download:   '#82B4E0',
 };
 
 // ─── Props ────────────────────────────────────────────────────
@@ -95,8 +102,16 @@ function Section({
         {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
       </div>
       {empty ? (
-        <div className="flex items-center justify-center py-10">
-          <p className="text-sm text-gray-400">ยังไม่มีข้อมูล</p>
+        <div className="flex flex-col items-center justify-center gap-2.5 py-10">
+          <div className="w-11 h-11 rounded-xl bg-gray-50 flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" strokeWidth="1.5" strokeLinecap="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+            </svg>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-gray-500">ยังไม่มีข้อมูล</p>
+            <p className="text-xs text-gray-400 mt-0.5">ข้อมูลจะแสดงเมื่อมีผู้เข้าชม</p>
+          </div>
         </div>
       ) : (
         <div className="p-6">{children}</div>
@@ -353,17 +368,17 @@ export function BoothDashboardTab({ expoId, boothId, boothTitle = 'Dashboard' }:
             </svg>
           }
         />
-        <StatCard label="เข้าชมบูธ" value={totalAttendance} color={DAILY_COLORS.attendance}
+        <StatCard label="เข้าชมบูธ" value={totalAttendance} color={STAT_COLORS.attendance}
           icon={
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={DAILY_COLORS.attendance} strokeWidth="2" strokeLinecap="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={STAT_COLORS.attendance} strokeWidth="2" strokeLinecap="round">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
               <polyline points="9 22 9 12 15 12 15 22"/>
             </svg>
           }
         />
-        <StatCard label="ต่อคิว" value={totalQueue} color={DAILY_COLORS.queue}
+        <StatCard label="ต่อคิว" value={totalQueue} color={STAT_COLORS.queue}
           icon={
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={DAILY_COLORS.queue} strokeWidth="2" strokeLinecap="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={STAT_COLORS.queue} strokeWidth="2" strokeLinecap="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
               <circle cx="9" cy="7" r="4"/>
               <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
@@ -371,9 +386,9 @@ export function BoothDashboardTab({ expoId, boothId, boothTitle = 'Dashboard' }:
             </svg>
           }
         />
-        <StatCard label="โหลดเอกสาร" value={totalDownload} color={DAILY_COLORS.download}
+        <StatCard label="โหลดเอกสาร" value={totalDownload} color={STAT_COLORS.download}
           icon={
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={DAILY_COLORS.download} strokeWidth="2" strokeLinecap="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={STAT_COLORS.download} strokeWidth="2" strokeLinecap="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
               <line x1="12" y1="15" x2="12" y2="3"/>
@@ -430,7 +445,7 @@ export function BoothDashboardTab({ expoId, boothId, boothTitle = 'Dashboard' }:
                 <YAxis type="category" dataKey="ageRange" tick={{ fontSize: 12, fill: '#6B7280' }}
                   axisLine={false} tickLine={false} width={44} />
                 <Tooltip content={<ChartTooltip />} />
-                <Bar dataKey="visitors" name="คน" fill={BLUE2} radius={[0, 4, 4, 0]} maxBarSize={18} />
+                <Bar dataKey="visitors" name="คน" fill="#93C5FD" radius={[0, 4, 4, 0]} maxBarSize={18} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -479,24 +494,13 @@ export function BoothDashboardTab({ expoId, boothId, boothTitle = 'Dashboard' }:
           <div className="px-6 pb-6">
             {hourlyChart.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={hourlyChart} margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="boothHourGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor={BLUE} stopOpacity={0.18} />
-                      <stop offset="95%" stopColor={BLUE} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
-                  <XAxis dataKey="hour" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false}
-                    tickLine={false} padding={{ left: 20, right: 20 }} />
-                  <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} width={36} />
-                  <Tooltip content={<ChartTooltip />} />
-                  <Area type="monotone" dataKey="visitors" name="คน"
-                    stroke={BLUE} strokeWidth={2.5}
-                    fill="url(#boothHourGrad)"
-                    dot={{ r: 4, fill: BLUE, strokeWidth: 0 }}
-                    activeDot={{ r: 6, fill: BLUE, stroke: 'white', strokeWidth: 2 }} />
-                </AreaChart>
+              <BarChart data={hourlyChart} margin={{ top: 4, right: 16, left: 8, bottom: 0 }} barCategoryGap="30%">
+                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+                <XAxis dataKey="hour" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} width={36} />
+                <Tooltip content={<ChartTooltip />} />
+                <Bar dataKey="visitors" name="คน" fill="#93C5FD" radius={[4, 4, 0, 0]} maxBarSize={32} />
+              </BarChart>
               </ResponsiveContainer>
             ) : (
               <div className="flex items-center justify-center py-10">
@@ -513,17 +517,17 @@ export function BoothDashboardTab({ expoId, boothId, boothTitle = 'Dashboard' }:
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={dailyChart} margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-              <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} padding={{ left: 30, right: 30 }} />
               <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} width={36} />
               <Tooltip content={<ChartTooltip />} />
               <Legend wrapperStyle={{ fontSize: 13 }} />
-              <Line type="monotone" dataKey="attendance" name="เข้าชม"
+              <Line type="linear"dataKey="attendance" name="เข้าชม"
                 stroke={DAILY_COLORS.attendance} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-              <Line type="monotone" dataKey="queue" name="คิว"
+              <Line type="linear" dataKey="queue" name="คิว"
                 stroke={DAILY_COLORS.queue}      strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-              <Line type="monotone" dataKey="download" name="โหลดเอกสาร"
+              <Line type="linear" dataKey="download" name="โหลดเอกสาร"
                 stroke={DAILY_COLORS.download}   strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-              <Line type="monotone" dataKey="locate" name="BLE"
+              <Line type="linear" dataKey="locate" name="BLE"
                 stroke={DAILY_COLORS.locate}     strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} strokeDasharray="4 2" />
             </LineChart>
           </ResponsiveContainer>
@@ -567,7 +571,7 @@ export function BoothDashboardTab({ expoId, boothId, boothTitle = 'Dashboard' }:
                       {item.title}
                     </p>
                     <div className="h-1.5 bg-white rounded-full mt-2 overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: BLUE }} />
+                      <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: '#93C5FD' }} />
                     </div>
                     <p className="text-xs text-gray-500 mt-1">{count.toLocaleString()} คำตอบ</p>
                   </div>

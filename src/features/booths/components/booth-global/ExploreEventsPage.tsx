@@ -1,6 +1,6 @@
 'use client';
 import { toast } from '@/src/lib/toast';
-
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { getCategoriesForFilter, getCategoryLabel } from '@/src/features/events/constants/categories';
@@ -24,9 +24,8 @@ const BL    = '#EBF3FC';
 const CATEGORIES = getCategoriesForFilter();
 
 const BOOTH_TYPE_LABELS: Record<string, string> = {
-  small_booth: 'บูธขนาดเล็ก',
-  big_booth:   'บูธขนาดใหญ่',
-  stage:       'เวที',
+  booth: 'บูธ', 
+  stage: 'เวที'
 };
 
 // ─── Helpers ──────────────────────────────────────────────────
@@ -47,16 +46,21 @@ interface JoinModalProps {
 }
 
 function JoinRequestModal({ expo, boothGroupId, onClose, onSuccess }: JoinModalProps) {
-  const [booths,       setBooths]       = useState<AvailableBooth[]>([]);
+  const [booths,        setBooths]        = useState<AvailableBooth[]>([]);
+  const [mapUrl,        setMapUrl]        = useState<string | null>(null);
   const [loadingBooths, setLoadingBooths] = useState(true);
   const [selectedBooth, setSelectedBooth] = useState<AvailableBooth | null>(null);
+  const [showMapFullscreen, setShowMapFullscreen] = useState(false);
   const [detail,       setDetail]       = useState('');
   const [submitting,   setSubmitting]   = useState(false);
   const [error,        setError]        = useState('');
 
   useEffect(() => {
     getAvailableBooths(expo.id, boothGroupId)
-      .then(data => setBooths(data))
+      .then(({ expo_map, booths }) => {
+        setMapUrl(expo_map);
+        setBooths(booths);
+      })
       .catch(() => setError('โหลดข้อมูลบูธไม่สำเร็จ'))
       .finally(() => setLoadingBooths(false));
   }, []);
@@ -104,9 +108,70 @@ function JoinRequestModal({ expo, boothGroupId, onClose, onSuccess }: JoinModalP
             </svg>
           </button>
         </div>
+      {/* ── แผนผังงาน ──────────────────────────────── */}
+      {mapUrl && (
+        <div className="px-5 pt-4 flex-shrink-0">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[14px] font-bold text-gray-700">แผนผังงาน</p>
+            <button
+              onClick={() => setShowMapFullscreen(true)}
+              className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2">
+                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+              </svg>
+            </button>
+          </div>
+          <MapPreview mapUrl={mapUrl} />
+        </div>
+      )}
+    {/* Fullscreen modal */}
+    {showMapFullscreen && (
+      <div
+        className="fixed inset-0 bg-black/80 z-[60] flex flex-col items-center justify-center p-4"
+        onClick={() => setShowMapFullscreen(false)}
+      >
+        <div className="w-full max-w-2xl" onClick={e => e.stopPropagation()}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-white text-sm font-bold">แผนผังงาน — {expo.title}</p>
+            <button
+              onClick={() => setShowMapFullscreen(false)}
+              className="w-8 h-8 rounded-lg bg-white/15 hover:bg-white/25 flex items-center justify-center transition"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <div className="rounded-xl overflow-hidden bg-black" style={{ height: '70vh' }}>
+            <TransformWrapper>
+              {({ zoomIn, zoomOut, resetTransform }) => (
+                <div className="relative w-full h-full">
+                  <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
+                    <img
+                      src={getMinioFileUrl(mapUrl) ?? undefined}
+                      alt="แผนผังงาน"
+                      className="w-full h-full object-contain"
+                    />
+                  </TransformComponent>
+                  <div className="absolute bottom-3 right-3 flex flex-col gap-1.5">
+                    <button onClick={() => zoomIn()} className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center text-white font-bold text-base hover:bg-white/25">+</button>
+                    <button onClick={() => zoomOut()} className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center text-white font-bold text-base hover:bg-white/25">−</button>
+                    <button onClick={() => resetTransform()} className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center text-white hover:bg-white/25">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </TransformWrapper>
+          </div>
+        </div>
+      </div>
+    )}
 
-        {/* ── Section label ──────────────────────────────── */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-2 flex-shrink-0">
+
+      {/* ── Section label ──────────────────────────────── */}
+      <div className="flex items-center justify-between px-5 pt-4 pb-2 flex-shrink-0">
           <p className="text-[13px] font-bold text-gray-700">เลือกบูธ</p>
           {!loadingBooths && availableBooths.length > 0 && (
             <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -284,7 +349,51 @@ function SuccessModal({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
+function MapPreview({ mapUrl }: { mapUrl: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [initScale, setInitScale] = useState<number | null>(null);
 
+  const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    const container = containerRef.current;
+    if (!container) return;
+    const scaleX = container.clientWidth / img.naturalWidth;
+    const scaleY = 170 / img.naturalHeight;
+    setInitScale(Math.min(scaleX, scaleY) * 1.5);
+  };
+
+  return (
+    <div ref={containerRef} className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50" style={{ height: '170px' }}>
+      {initScale === null ? (
+        // โหลดรูปเพื่อวัดขนาดก่อน ยังไม่แสดง TransformWrapper
+        <img
+          src={getMinioFileUrl(mapUrl) ?? undefined}
+          alt=""
+          onLoad={handleLoad}
+          style={{ visibility: 'hidden', position: 'absolute' }}
+        />
+      ) : (
+        <TransformWrapper key={initScale} initialScale={initScale} minScale={0.1} maxScale={4} centerOnInit>
+          {({ zoomIn, zoomOut }) => (
+            <div className="relative w-full h-full">
+              <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
+                <img
+                  src={getMinioFileUrl(mapUrl) ?? undefined}
+                  alt="แผนผังงาน"
+                  style={{ display: 'block' }}
+                />
+              </TransformComponent>
+              <div className="absolute bottom-2 right-2 flex flex-col gap-1">
+                <button onClick={() => zoomIn()} className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-700 font-bold shadow-sm hover:bg-gray-50 text-base">+</button>
+                <button onClick={() => zoomOut()} className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-700 font-bold shadow-sm hover:bg-gray-50 text-base">−</button>
+              </div>
+            </div>
+          )}
+        </TransformWrapper>
+      )}
+    </div>
+  );
+}
 // ══════════════════════════════════════════════════════════════
 // ExpoCard — Style C (thumbnail + date overlay)
 // ══════════════════════════════════════════════════════════════

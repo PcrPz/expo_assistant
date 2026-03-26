@@ -87,6 +87,10 @@ export interface JoinForm {
 }
 
 // ─── Available Booth ──────────────────────────────────────────
+export interface AvailableBoothsResponse {
+  expo_map: string | null;
+  booths: AvailableBooth[];
+}
 
 export type AvailableBoothStatus = 'available' | 'unavailable' | 'pending' | 'reserved';
 

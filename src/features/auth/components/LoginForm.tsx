@@ -84,12 +84,12 @@ export function LoginForm() {
                 onClick={handleToggle}
                 className="relative w-80 h-16 rounded-full p-1 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-200"
                 style={{
-                  backgroundColor: isOrganizer ? '#3674B5' : '#749BC2',
+                  backgroundColor: '#EEF4FB',
                 }}
               >
                 {/* Sliding Circle - ✅ Fixed width with gap */}
                 <div
-                  className="absolute top-1 h-14 rounded-full shadow-lg transition-all duration-300 ease-in-out bg-white"
+                  className="absolute top-1 h-14 rounded-full shadow-md transition-all duration-300 ease-in-out bg-[#3674B5]"
                   style={{
                     width: 'calc(50% - 8px)',
                     left: isOrganizer ? '4px' : 'calc(50% + 4px)',
@@ -101,7 +101,7 @@ export function LoginForm() {
                   <div className="w-1/2 flex items-center justify-center px-2">
                     <span
                       className={`font-semibold text-sm transition-colors duration-300 z-10 ${
-                        isOrganizer ? 'text-[#3674B5]' : 'text-white'
+                        isOrganizer ? 'text-white' : 'text-[#9CA3AF]'
                       }`}
                     >
                       ผู้จัดงาน
@@ -110,7 +110,7 @@ export function LoginForm() {
                   <div className="w-1/2 flex items-center justify-center px-2">
                     <span
                       className={`font-semibold text-sm transition-colors duration-300 z-10 ${
-                        !isOrganizer ? 'text-[#749BC2]' : 'text-white'
+                        !isOrganizer ? 'text-white' : 'text-[#9CA3AF]'
                       }`}
                     >
                       ผู้จัดการบูธ

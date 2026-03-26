@@ -45,16 +45,16 @@ export function EventDetailHeader({
   const getTabLabel = (tab: TabType): string => {
     if (role === 'booth_staff') {
       const labels: Record<TabType, string> = {
-        detail: 'Expo', staff: 'Staff', booth: 'All Booths',
-        dashboard: 'My Booth', applications: 'Applications',
-        form: 'Form', tickets: 'Tickets', announcements: 'Announcement', checkout: 'Checkout',
+      detail: 'ภาพรวม', staff: 'ทีมงาน', booth: 'บูธทั้งหมด',
+      dashboard: 'บูธของฉัน', applications: 'คำขอ',
+      form: 'แบบสอบถาม', tickets: 'ตั๋ว', announcements: 'ประกาศ', checkout: 'ชำระเงิน',
       };
       return labels[tab];
     }
     const labels: Record<TabType, string> = {
-      detail: 'Expo', staff: 'Staff', booth: 'Booth',
-      dashboard: 'Dashboard', form: 'Form', applications: 'Applications',
-      tickets: 'Tickets', announcements: 'Announcement', checkout: 'Checkout',
+    detail: 'ภาพรวม', staff: 'ทีมงาน', booth: 'บูธ',
+    dashboard: 'Dashboard', form: 'แบบสอบถาม', applications: 'คำขอ',
+    tickets: 'ตั๋ว', announcements: 'ประกาศ', checkout: 'ชำระเงิน',
     };
     return labels[tab];
   };
@@ -147,7 +147,8 @@ export function EventDetailHeader({
         {/* ── ปุ่มกลับ — บน banner ชิดซ้าย ── */}
         {backUrl && (
           <div className="absolute top-3 left-0 right-0">
-            <div className="max-w-screen-2xl mx-auto px-8">
+            <div className="max-w-screen-xl mx-auto px-8">
+
               <button
                 onClick={() => router.push(backUrl)}
                 className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-sm font-bold transition"
@@ -171,12 +172,12 @@ export function EventDetailHeader({
 
       {/* White zone */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-screen-2xl mx-auto px-8">
+        <div className="max-w-screen-xl mx-auto px-8">
 
           {/* Identity row */}
           <div
             className="flex items-center gap-5"
-            style={{ paddingTop: '8px', paddingBottom: '12px' }}
+            style={{ paddingTop: '8px', paddingBottom: '16px' }}
           >
             {/* Logo */}
             <div
@@ -257,7 +258,7 @@ export function EventDetailHeader({
                 key={tab}
                 onClick={() => onTabChange(tab)}
                 className={`
-                  flex items-center gap-2 px-6 py-3.5 text-[15px] font-medium transition-all border-b-2 whitespace-nowrap
+                  flex items-center justify-center gap-2 min-w-[100px] px-4 py-3.5 text-[15px] font-medium transition-all border-b-2 whitespace-nowrap
                   ${activeTab === tab
                     ? 'text-[#3674B5] border-[#3674B5] bg-blue-50'
                     : 'text-gray-500 border-transparent hover:text-gray-800 hover:bg-gray-50'

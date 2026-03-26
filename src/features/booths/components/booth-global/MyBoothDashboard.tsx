@@ -26,9 +26,8 @@ function getImageUrl(path?: string): string | null {
 }
 
 const BOOTH_TYPE: Record<string, string> = {
-  small_booth: 'บูธเล็ก',
-  big_booth:   'บูธใหญ่',
-  stage:       'เวที',
+  booth: 'บูธ',
+  stage: 'เวที',
 };
 
 // ─── Role config ──────────────────────────────────────────────

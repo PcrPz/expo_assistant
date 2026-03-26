@@ -508,13 +508,16 @@ export async function searchExpos(params: {
 // GET /booth/:expoID/:boothGroupID/available-booths
 // ============================================
 
-export async function getAvailableBooths(expoId: string, boothGroupId: string): Promise<AvailableBooth[]> {
+export async function getAvailableBooths(
+  expoId: string,
+  boothGroupId: string
+): Promise<{ expo_map: string | null; booths: AvailableBooth[] }> {
   try {
     console.log(`🔍 [getAvailableBooths] expoId=${expoId} boothGroupId=${boothGroupId}`);
 
     const response = await fetchWithAuth(`${API_URL}/booth/${expoId}/${boothGroupId}/available-booths`);
 
-    if (response.status === 404) return [];
+    if (response.status === 404) return { expo_map: null, booths: [] };
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -524,7 +527,10 @@ export async function getAvailableBooths(expoId: string, boothGroupId: string): 
     const data = await response.json();
     console.log('✅ [getAvailableBooths] raw response:', JSON.stringify(data, null, 2));
 
-    return Array.isArray(data) ? data.map(transformAvailableBooth) : [];
+    return {
+      expo_map: data.expo_map ?? null,
+      booths: Array.isArray(data.booths) ? data.booths.map(transformAvailableBooth) : [],
+    };
   } catch (error: any) {
     console.error('❌ [getAvailableBooths] error:', error);
     throw error;
@@ -894,18 +900,28 @@ export async function getJoinFormsByExpo(
   }
 }
 
-export async function getBoothUnavailability(expoId: string): Promise<AvailableBooth[]> {
+export async function getBoothUnavailability(
+  expoId: string
+): Promise<{ expo_map: string | null; booths: AvailableBooth[] }> {
   try {
     console.log(`🔍 [getBoothUnavailability] expoId=${expoId}`);
+
     const response = await fetchWithAuth(`${API_URL}/booth/${expoId}/unavailable-booths`);
-    if (response.status === 404) return [];
+
+    if (response.status === 404) return { expo_map: null, booths: [] };
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new Error(error.error || 'Failed to get booth unavailability');
     }
+
     const data = await response.json();
     console.log('✅ [getBoothUnavailability] raw response:', JSON.stringify(data, null, 2));
-    return Array.isArray(data) ? data.map(transformAvailableBooth) : [];
+
+    return {
+      expo_map: data.expo_map ?? null,
+      booths: Array.isArray(data.booths) ? data.booths.map(transformAvailableBooth) : [],
+    };
   } catch (error: any) {
     console.error('❌ [getBoothUnavailability] error:', error);
     throw error;

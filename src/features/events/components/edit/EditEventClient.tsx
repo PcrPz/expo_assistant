@@ -1,7 +1,7 @@
 // src/features/events/components/edit/EditEventClient.tsx
 'use client';
 import { toast } from '@/src/lib/toast';
-
+import { getCategoriesForFilter } from '@/src/features/events/constants/categories';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { getEventById, updateEvent } from '@/src/features/events/api/eventApi';
@@ -241,7 +241,7 @@ export default function EditEventClient() {
             title: zone.title,
             description: zone.description || undefined,
             mapFile: zone.mapFile,
-            map: zone.originalMapPath,
+            map: zone.map !== undefined ? zone.originalMapPath : undefined,
           });
         } else if (zone.state === 'new') {
           await createZone(eventId, {
@@ -348,13 +348,17 @@ export default function EditEventClient() {
 
               {/* หมวดหมู่ */}
               <Field label="หมวดหมู่งาน" required>
-                <input
-                  className={inputCls}
-                  placeholder="หมวดหมู่งาน"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  required
-                />
+              <select
+                className={inputCls}
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                required
+              >
+                <option value="">-- เลือกหมวดหมู่ --</option>
+                {getCategoriesForFilter().filter(c => c.value !== '').map(c => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
+              </select>
               </Field>
 
               {/* วันที่ */}

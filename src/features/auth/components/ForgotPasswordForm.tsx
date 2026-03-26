@@ -152,8 +152,8 @@ export function ForgotPasswordForm() {
     <div className="min-h-screen flex">
 
       {/* ── Left ── */}
-      <div className="w-full lg:w-[55%] flex items-center justify-center px-8 lg:px-16 xl:px-24 py-10 bg-white">
-        <div className="w-full max-w-sm">
+      <div className="w-full lg:w-[55%] flex items-center justify-center px-8 lg:px-10 xl:px-14 py-10 bg-white">
+        <div className="w-full max-w-lg">
 
           {/* Back */}
           <button

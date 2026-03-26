@@ -16,7 +16,7 @@ import type {
 import { tokenManager } from '@/src/lib/auth/tokenManager';
 import { fetchWithAuth } from '@/src/lib/api/fetchWithAuth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // ============================================
 // 1. Register (POST /users/register)

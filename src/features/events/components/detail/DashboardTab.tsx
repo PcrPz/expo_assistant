@@ -20,10 +20,10 @@ const BLUE   = '#3674B5';
 const BLUE2  = '#498AC3';
 const BL     = '#EBF3FC';
 // โทนซีด เข้ากับธีมฟ้า
-const ZONE_COLORS = ['#3674B5','#5B9BD6','#82B4E0','#A8CDEB','#6BAED4','#3A8CC4','#2E6FA3'];
-const GENDER_COLORS: Record<string, string> = { female: '#A78BCA', male: '#3674B5', other: '#94A3B8' };
-const GENDER_TH:     Record<string, string> = { female: 'หญิง', male: 'ชาย', other: 'อื่นๆ' };
-const RATING_COLORS = ['#CBD5E1','#93B4D4','#5B9BD6','#3674B5','#2C5F99'];
+const ZONE_COLORS = ['#93C5FD','#86EFAC','#FDE68A','#C4B5FD','#F9A8D4','#6EE7B7','#FCA5A5'];
+const GENDER_COLORS: Record<string, string> = { female: '#F9A8D4', male: '#93C5FD', other: '#CBD5E1' };
+const GENDER_TH:     Record<string, string> = { female: 'หญิง', male: 'ชาย', other: 'ไม่ระบุ' };
+const RATING_COLORS = ['#FCA5A5','#FCD34D','#86EFAC','#6EE7B7','#93C5FD'];
 
 // ─── Props ────────────────────────────────────────────────────
 interface DashboardTabProps {
@@ -81,8 +81,16 @@ function Section({ title, sub, children, empty }: { title: string; sub?: string;
         </div>
       </div>
       {empty ? (
-        <div className="flex items-center justify-center py-10">
-          <p className="text-sm text-gray-400">ยังไม่มีข้อมูล</p>
+        <div className="flex flex-col items-center justify-center gap-2.5 py-10">
+          <div className="w-11 h-11 rounded-xl bg-gray-50 flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" strokeWidth="1.5" strokeLinecap="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+            </svg>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-gray-500">ยังไม่มีข้อมูล</p>
+            <p className="text-xs text-gray-400 mt-0.5">ข้อมูลจะแสดงเมื่อมีผู้เข้าชม</p>
+          </div>
         </div>
       ) : (
         <div className="p-5">{children}</div>
@@ -94,22 +102,19 @@ function Section({ title, sub, children, empty }: { title: string; sub?: string;
 // Top Booth Row
 function BoothRankRow({ rank, boothNo, value, max, label }: { rank: number; boothNo: string; value: number; max: number; label: string }) {
   const pct = max > 0 ? (value / max) * 100 : 0;
-  const opacity = rank === 1 ? 1 : rank === 2 ? 0.75 : rank === 3 ? 0.55 : 0.35;
+  const badgeBg    = rank === 1 ? '#FEF3C7' : '#F3F4F6';
+  const badgeColor = rank === 1 ? '#92400E' : '#4B5563';
   return (
     <div className="flex items-center gap-3 py-1">
-      {/* Badge วงกลม */}
-      <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0"
-        style={{ backgroundColor: `rgba(54,116,181,${opacity * 0.12})`, color: `rgba(54,116,181,${opacity})` }}>
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0"
+        style={{ backgroundColor: badgeBg, color: badgeColor }}>
         {rank}
       </div>
-      {/* ชื่อบูธ */}
       <span className="w-14 text-sm font-bold text-gray-900 flex-shrink-0">{boothNo}</span>
-      {/* Bar */}
       <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
         <div className="h-full rounded-full transition-all"
-          style={{ width: `${pct}%`, backgroundColor: BLUE2, opacity: 0.6 + opacity * 0.4 }}/>
+          style={{ width: `${pct}%`, backgroundColor: '#93C5FD' }}/>
       </div>
-      {/* ตัวเลข */}
       <div className="flex-shrink-0 text-right w-24">
         <span className="text-sm font-bold text-gray-900 tabular-nums">{value.toLocaleString()}</span>
         <span className="text-xs text-gray-400 ml-1">{label}</span>
@@ -227,21 +232,29 @@ export function DashboardTab({ eventId, eventTitle = 'Dashboard' }: DashboardTab
   }, [data]);
 
   // gender → PieChart
-  const genderChart = useMemo<GenderChartPoint[]>(() =>
-    (data?.visitGender ?? []).map(g => ({
-      name:  GENDER_TH[g.gender] ?? g.gender,
-      value: g.visitorCount,
-      color: GENDER_COLORS[g.gender] ?? '#9CA3AF',
-    }))
-  , [data]);
+  const genderChart = useMemo<GenderChartPoint[]>(() => {
+    const map: Record<string, number> = {};
+    (data?.visitGender ?? []).forEach(g => {
+      map[g.gender] = (map[g.gender] ?? 0) + g.visitorCount;
+    });
+    return Object.entries(map).map(([gender, value]) => ({
+      name:  GENDER_TH[gender] ?? gender,
+      value,
+      color: GENDER_COLORS[gender] ?? '#9CA3AF',
+    }));
+  }, [data]);
 
   // age → BarChart
-  const ageChart = useMemo<AgeChartPoint[]>(() =>
-    (data?.visitAge ?? []).map(a => ({
-      ageGroup: a.ageGroup,
-      visitors: a.visitorCount,
-    }))
-  , [data]);
+  const ageChart = useMemo<AgeChartPoint[]>(() => {
+    const map: Record<string, number> = {};
+    (data?.visitAge ?? []).forEach(a => {
+      map[a.ageGroup] = (map[a.ageGroup] ?? 0) + a.visitorCount;
+    });
+    const order = ['<18', '18-25', '26-40', '41-60', '>60'];
+    return order
+      .filter(g => map[g] !== undefined)
+      .map(g => ({ ageGroup: g, visitors: map[g] }));
+  }, [data]);
 
   // formRating → stacked BarChart (rating_1..5 จาก real API)
   const formRatingChart = useMemo(() =>
@@ -407,23 +420,13 @@ export function DashboardTab({ eventId, eventTitle = 'Dashboard' }: DashboardTab
           <div className="p-5">
             {visitHourChart.length > 0 ? (
               <ResponsiveContainer width="100%" height={220}>
-                <AreaChart data={visitHourChart} margin={{ top: 5, right: 16, left: 8, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="gradVisit" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor={BLUE} stopOpacity={0.18}/>
-                      <stop offset="95%" stopColor={BLUE} stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false}/>
-                  <XAxis dataKey="hour" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false}
-                    tickLine={false} padding={{ left: 20, right: 20 }}/>
-                  <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} width={36}/>
-                  <Tooltip content={<ChartTooltip/>}/>
-                  <Area type="monotone" dataKey="visitors" name="ผู้เข้าชม" stroke={BLUE} strokeWidth={2.5}
-                    fill="url(#gradVisit)"
-                    dot={{ r: 4, fill: BLUE, strokeWidth: 0 }}
-                    activeDot={{ r: 6, fill: BLUE, stroke: 'white', strokeWidth: 2 }}/>
-                </AreaChart>
+              <BarChart data={visitHourChart} margin={{ top: 5, right: 16, left: 8, bottom: 0 }} barCategoryGap="30%">
+                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false}/>
+                <XAxis dataKey="hour" tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false}/>
+                <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} axisLine={false} tickLine={false} width={36}/>
+                <Tooltip content={<ChartTooltip />}/>
+                <Bar dataKey="visitors" name="ผู้เข้าชม" fill="#93C5FD" radius={[4, 4, 0, 0]} maxBarSize={32}/>
+              </BarChart>
               </ResponsiveContainer>
             ) : (
               <div className="flex items-center justify-center py-10">
@@ -488,7 +491,7 @@ export function DashboardTab({ eventId, eventTitle = 'Dashboard' }: DashboardTab
                 <XAxis type="number" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false}/>
                 <YAxis type="category" dataKey="ageGroup" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} width={40}/>
                 <Tooltip content={<ChartTooltip/>}/>
-                <Bar dataKey="visitors" name="ผู้เข้าชม" fill={BLUE2} radius={[0,6,6,0]}/>
+                <Bar dataKey="visitors" name="ผู้เข้าชม" fill="#93C5FD" radius={[0,6,6,0]}/>
               </BarChart>
             </ResponsiveContainer>
           )}

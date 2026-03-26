@@ -2,13 +2,14 @@
 'use client';
 import { ConfirmModal } from '@/src/components/ui/ConfirmModal';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEventStore } from '@/src/features/events/store/eventStore';
 import { useLoadEvents } from '@/src/features/events/hooks/useLoadEvent';
 import { JoinExpoModal } from '@/src/features/events/components/JoinExpoModal';
 import { useAuthStore } from '@/src/features/auth/store/authStore';
+import { getMyBoothGlobal } from '@/src/features/booths/api/boothGlobalApi';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -98,10 +99,24 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
   useLoadEvents();
   const { organizedEvents } = useEventStore();
 
-  // TODO: เปลี่ยนเมื่อ API พร้อม
-  const hasBoothGlobal = false;
-  const boothName      = 'ABC Tech Booth';
+  // ─── Booth Manager state (ผูก API) ───────────────────────
+  const [hasBoothGlobal, setHasBoothGlobal] = useState(false);
+  const [boothName,      setBoothName]      = useState('');
+  const [boothGroupId,   setBoothGroupId]   = useState('');
   const eventsJoined: { id: string; name: string }[] = [];
+
+  useEffect(() => {
+    if (userRole !== 'booth_manager') return;
+    getMyBoothGlobal().then(({ booth }) => {
+      if (booth) {
+        setHasBoothGlobal(true);
+        setBoothName(booth.title);
+        setBoothGroupId(booth.id);
+      } else {
+        setHasBoothGlobal(false);
+      }
+    }).catch(() => {});
+  }, [userRole]);
 
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const go = (path: string) => { router.push(path); onClose(); };
@@ -127,13 +142,6 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
             <>
               <NavItem icon={<IcHome />} label="หน้าแรก"
                 href="/home" active={pathname === '/home'} onClick={onClose} />
-
-              <Divider />
-
-              <NavItem icon={<IcSearch />} label="ค้นหาบูธ"
-                href="/events/explore-booths"
-                active={pathname === '/events/explore-booths'}
-                onClick={onClose} />
 
               <Divider />
 
@@ -176,8 +184,10 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
                   open={boothOpen} onToggle={() => setBoothOpen(!boothOpen)}
                 >
                   <div className="space-y-0.5 pb-1">
-                    <SubLink label={boothName} href="/booths/my-booth"
-                      active={pathname === '/booths/my-booth'} onClick={onClose} />
+                    <SubLink label={boothName} href={`/booths/booth-group/${boothGroupId}`}
+                      active={pathname.startsWith(`/booths/booth-group/${boothGroupId}`)} onClick={onClose} />
+                    <SubLink label="จัดการสมาชิก" href="/booths/staff"
+                      active={pathname === '/booths/staff'} onClick={onClose} />
                     {eventsJoined.map((ev) => (
                       <SubLink key={ev.id} label={ev.name}
                         href={`/events/${ev.id}`}
