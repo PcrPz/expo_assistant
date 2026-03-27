@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getBoothById } from '@/src/features/booths/api/boothApi';
 import { getMyBoothGlobal } from '@/src/features/booths/api/boothGlobalApi';
 import { getMinioFileUrl } from '@/src/features/minio/api/minioApi';
@@ -98,7 +98,9 @@ export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailCli
 
   const [booth, setBooth] = useState<Booth | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabType>('detail');
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get('boothTab') as TabType) ?? 'detail';
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isAssignedStaff, setIsAssignedStaff] = useState(false);
@@ -329,7 +331,13 @@ export function BoothDetailClient({ eventId, boothId, userRole }: BoothDetailCli
             {allTabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  router.replace(
+                    `/events/${eventId}/booths/${boothId}?boothTab=${tab.id}`,
+                    { scroll: false }
+                  );
+                }}
                 className={[
                   'flex items-center gap-2 px-6 py-[13px] text-[14px] font-medium whitespace-nowrap flex-shrink-0 border-b-[2.5px] transition-colors',
                   activeTab === tab.id

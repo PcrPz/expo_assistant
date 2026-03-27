@@ -162,7 +162,10 @@ const loadEvent = async () => {
         role={event.role}
         activeTab={activeTab}
         availableTabs={availableTabs}
-        onTabChange={setActiveTab}
+        onTabChange={(tab) => {
+          setActiveTab(tab);
+          router.replace(`/events/${eventId}?tab=${tab}`, { scroll: false });
+        }}
         backUrl={fromExplore ? '/booths/explore-events' : undefined}
       />
 

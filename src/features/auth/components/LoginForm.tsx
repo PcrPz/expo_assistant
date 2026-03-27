@@ -137,7 +137,7 @@ export function LoginForm() {
                 value={emailOrUsername}
                 onChange={(e) => setEmailOrUsername(e.target.value)}
                 className="w-full px-4 py-3.5 pl-12 rounded-xl border-0 bg-gray-50 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all"
-                placeholder="อีเมล / ชื่อผู้ใช้"
+                placeholder="อีเมล"
                 required
                 disabled={loading}
               />

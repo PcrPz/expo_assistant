@@ -1,12 +1,20 @@
 'use client';
 
 import Image from 'next/image';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Navbar } from '../../components/layout/Navbar';
 
 export default function HomePage() {
   const router = useRouter();
+  
+    useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      router.replace('/home');
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
