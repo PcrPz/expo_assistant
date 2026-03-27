@@ -158,7 +158,7 @@ export function MyBoothDashboard() {
             className="w-64 h-64 object-contain mx-auto mb-2"
           />
           <h1 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">
-            เริ่มต้นสร้างบูธของคุณ
+            เริ่มต้นสร้างกลุ่มผู้ร่วมบูธของคุณ
           </h1>
           <p className="text-gray-500 text-sm mb-8 leading-relaxed">
             จัดการสินค้า ทีมงาน และเข้าร่วมงาน Expo ได้จากที่เดียว
@@ -172,7 +172,7 @@ export function MyBoothDashboard() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
                 <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
-              สร้างบูธใหม่
+              สร้างกลุ่มผู้ร่วมบูธใหม่
             </button>
             <button
               onClick={() => setShowJoin(true)}

@@ -24,7 +24,7 @@ const BL    = '#EBF3FC';
 const CATEGORIES = getCategoriesForFilter();
 
 const BOOTH_TYPE_LABELS: Record<string, string> = {
-  booth: 'บูธ', 
+  booth: 'บูธ',
   stage: 'เวที'
 };
 
@@ -83,9 +83,14 @@ function JoinRequestModal({ expo, boothGroupId, onClose, onSuccess }: JoinModalP
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col" style={{ maxHeight: '90vh' }}>
 
-        {/* ── Header ─────────────────────────────────────── */}
+      {/* ✅ ลบ overflow-hidden ออก / ใช้ flex-col + max-h-[90vh] */}
+      <div
+        className="bg-white rounded-2xl w-full max-w-md shadow-2xl flex flex-col"
+        style={{ maxHeight: '90vh' }}
+      >
+
+        {/* ── Header — fixed ─────────────────────────────── */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 flex-shrink-0">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: BL }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round">
@@ -108,172 +113,137 @@ function JoinRequestModal({ expo, boothGroupId, onClose, onSuccess }: JoinModalP
             </svg>
           </button>
         </div>
-      {/* ── แผนผังงาน ──────────────────────────────── */}
-      {mapUrl && (
-        <div className="px-5 pt-4 flex-shrink-0">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[14px] font-bold text-gray-700">แผนผังงาน</p>
-            <button
-              onClick={() => setShowMapFullscreen(true)}
-              className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition"
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2">
-                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
-              </svg>
-            </button>
-          </div>
-          <MapPreview mapUrl={mapUrl} />
-        </div>
-      )}
-    {/* Fullscreen modal */}
-    {showMapFullscreen && (
-      <div
-        className="fixed inset-0 bg-black/80 z-[60] flex flex-col items-center justify-center p-4"
-        onClick={() => setShowMapFullscreen(false)}
-      >
-        <div className="w-full max-w-2xl" onClick={e => e.stopPropagation()}>
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-white text-sm font-bold">แผนผังงาน — {expo.title}</p>
-            <button
-              onClick={() => setShowMapFullscreen(false)}
-              className="w-8 h-8 rounded-lg bg-white/15 hover:bg-white/25 flex items-center justify-center transition"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </button>
-          </div>
-          <div className="rounded-xl overflow-hidden bg-black" style={{ height: '70vh' }}>
-            <TransformWrapper>
-              {({ zoomIn, zoomOut, resetTransform }) => (
-                <div className="relative w-full h-full">
-                  <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
-                    <img
-                      src={getMinioFileUrl(mapUrl) ?? undefined}
-                      alt="แผนผังงาน"
-                      className="w-full h-full object-contain"
-                    />
-                  </TransformComponent>
-                  <div className="absolute bottom-3 right-3 flex flex-col gap-1.5">
-                    <button onClick={() => zoomIn()} className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center text-white font-bold text-base hover:bg-white/25">+</button>
-                    <button onClick={() => zoomOut()} className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center text-white font-bold text-base hover:bg-white/25">−</button>
-                    <button onClick={() => resetTransform()} className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center text-white hover:bg-white/25">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </TransformWrapper>
-          </div>
-        </div>
-      </div>
-    )}
 
+        {/* ── Scrollable body ─────────────────────────────── */}
+        {/* ✅ map + booth table + textarea scroll ด้วยกันในนี้ */}
+        <div className="flex-1 overflow-y-auto">
 
-      {/* ── Section label ──────────────────────────────── */}
-      <div className="flex items-center justify-between px-5 pt-4 pb-2 flex-shrink-0">
-          <p className="text-[13px] font-bold text-gray-700">เลือกบูธ</p>
-          {!loadingBooths && availableBooths.length > 0 && (
-            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-              ว่าง {availableBooths.length} บูธ
-            </span>
-          )}
-        </div>
-
-        {/* ── Scrollable booth table ──────────────────────── */}
-        <div className="overflow-y-auto flex-shrink-0" style={{ maxHeight: '240px' }}>
-          {loadingBooths ? (
-            <div className="flex items-center justify-center py-10">
-              <div className="w-6 h-6 border-2 border-gray-200 border-t-[#3674B5] rounded-full animate-spin" />
-            </div>
-          ) : availableBooths.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 px-5 text-center">
-              <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-3">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" strokeWidth="1.5">
-                  <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/>
-                </svg>
+          {/* ── แผนผังงาน ──────────────────────────────── */}
+          {mapUrl && (
+            <div className="px-5 pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[14px] font-bold text-gray-700">แผนผังงาน</p>
+                <button
+                  onClick={() => setShowMapFullscreen(true)}
+                  className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#374151" strokeWidth="2">
+                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                  </svg>
+                </button>
               </div>
-              <p className="text-sm text-gray-400">ไม่มีบูธว่างในขณะนี้</p>
+              <MapPreview mapUrl={mapUrl} />
             </div>
-          ) : (
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="sticky top-0 z-10">
-                  <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wide px-5 py-2.5 bg-gray-50 border-b border-gray-100">บูธ</th>
-                  <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wide px-3 py-2.5 bg-gray-50 border-b border-gray-100">ประเภท / ที่ตั้ง</th>
-                  <th className="text-right text-[11px] font-bold text-gray-400 uppercase tracking-wide px-5 py-2.5 bg-gray-50 border-b border-gray-100">ราคา</th>
-                </tr>
-              </thead>
-              <tbody>
-                {availableBooths.map((booth, idx) => (
-                  <tr
-                    key={booth.boothId}
-                    onClick={() => setSelectedBooth(booth)}
-                    className={`cursor-pointer transition-colors border-b border-gray-100 last:border-0 ${
-                      selectedBooth?.boothId === booth.boothId
-                        ? 'bg-[#EEF4FB]'
-                        : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-2.5">
-                        <div
-                          className={`w-[17px] h-[17px] rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-                            selectedBooth?.boothId === booth.boothId
-                              ? 'border-[#3674B5] bg-[#3674B5]'
-                              : 'border-gray-300'
-                          }`}
-                        >
-                          {selectedBooth?.boothId === booth.boothId && (
-                            <div className="w-[5px] h-[5px] rounded-full bg-white" />
-                          )}
-                        </div>
-                        <span className="text-[13px] font-bold text-gray-900">{booth.boothNo}</span>
-                      </div>
-                    </td>
-                    <td className="px-3 py-3">
-                      <p className="text-[12px] text-gray-500">
-                        {BOOTH_TYPE_LABELS[booth.type] || booth.type}
-                        {booth.hall ? ` · ฮอลล์ ${booth.hall}` : ''}
-                        {booth.zoneName ? ` · โซน ${booth.zoneName}` : ''}
-                      </p>
-                    </td>
-                    <td className="px-5 py-3 text-right">
-                      <span className="text-[13px] font-bold" style={{ color: BLUE }}>
-                        {booth.price > 0 ? `${booth.price.toLocaleString()} ฿` : 'ฟรี'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           )}
-        </div>
 
-        {/* ── Textarea + error ───────────────────────────── */}
-        <div className="px-5 pt-3 pb-4 flex-shrink-0 border-t border-gray-100">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[13px] font-bold text-gray-700">ข้อความถึงผู้จัดงาน</p>
-            <span className="text-[11px] text-gray-400">(ไม่บังคับ)</span>
+          {/* ── Section label ───────────────────────────── */}
+          <div className="flex items-center justify-between px-5 pt-4 pb-2">
+            <p className="text-[13px] font-bold text-gray-700">เลือกบูธ</p>
+            {!loadingBooths && availableBooths.length > 0 && (
+              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                ว่าง {availableBooths.length} บูธ
+              </span>
+            )}
           </div>
-          <textarea
-            value={detail}
-            onChange={e => setDetail(e.target.value)}
-            placeholder="แนะนำสินค้า/บริการ หรือเหตุผลที่ต้องการเข้าร่วมงาน..."
-            rows={3}
-            className="w-full px-3.5 py-2.5 border-2 border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#3674B5]/15 focus:border-[#3674B5] transition bg-gray-50 focus:bg-white"
-          />
-          {error && (
-            <div className="flex items-center gap-2 mt-2 px-3 py-2 bg-red-50 border border-red-100 rounded-xl">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5" strokeLinecap="round" className="flex-shrink-0">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-              <p className="text-[12px] text-red-600">{error}</p>
-            </div>
-          )}
-        </div>
 
-        {/* ── Footer ─────────────────────────────────────── */}
+          {/* ── Booth table ─────────────────────────────── */}
+          {/* ✅ ลบ maxHeight: 240px + flex-shrink-0 ออก — table แสดงเต็มใน scroll area */}
+          <div>
+            {loadingBooths ? (
+              <div className="flex items-center justify-center py-10">
+                <div className="w-6 h-6 border-2 border-gray-200 border-t-[#3674B5] rounded-full animate-spin" />
+              </div>
+            ) : availableBooths.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 px-5 text-center">
+                <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-3">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" strokeWidth="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/>
+                  </svg>
+                </div>
+                <p className="text-sm text-gray-400">ไม่มีบูธว่างในขณะนี้</p>
+              </div>
+            ) : (
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="sticky top-0 z-10">
+                    <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wide px-5 py-2.5 bg-gray-50 border-b border-gray-100">บูธ</th>
+                    <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wide px-3 py-2.5 bg-gray-50 border-b border-gray-100">ประเภท / ที่ตั้ง</th>
+                    <th className="text-right text-[11px] font-bold text-gray-400 uppercase tracking-wide px-5 py-2.5 bg-gray-50 border-b border-gray-100">ราคา</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {availableBooths.map((booth) => (
+                    <tr
+                      key={booth.boothId}
+                      onClick={() => setSelectedBooth(booth)}
+                      className={`cursor-pointer transition-colors border-b border-gray-100 last:border-0 ${
+                        selectedBooth?.boothId === booth.boothId
+                          ? 'bg-[#EEF4FB]'
+                          : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      <td className="px-5 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className={`w-[17px] h-[17px] rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+                              selectedBooth?.boothId === booth.boothId
+                                ? 'border-[#3674B5] bg-[#3674B5]'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {selectedBooth?.boothId === booth.boothId && (
+                              <div className="w-[5px] h-[5px] rounded-full bg-white" />
+                            )}
+                          </div>
+                          <span className="text-[13px] font-bold text-gray-900">{booth.boothNo}</span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3">
+                        <p className="text-[12px] text-gray-500">
+                          {BOOTH_TYPE_LABELS[booth.type] || booth.type}
+                          {booth.hall ? ` · ฮอลล์ ${booth.hall}` : ''}
+                          {booth.zoneName ? ` · โซน ${booth.zoneName}` : ''}
+                        </p>
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        <span className="text-[13px] font-bold" style={{ color: BLUE }}>
+                          {booth.price > 0 ? `${booth.price.toLocaleString()} ฿` : 'ฟรี'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* ── Textarea + error ─────────────────────────── */}
+          <div className="px-5 pt-3 pb-4 border-t border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[13px] font-bold text-gray-700">ข้อความถึงผู้จัดงาน</p>
+              <span className="text-[11px] text-gray-400">(ไม่บังคับ)</span>
+            </div>
+            <textarea
+              value={detail}
+              onChange={e => setDetail(e.target.value)}
+              placeholder="แนะนำสินค้า/บริการ หรือเหตุผลที่ต้องการเข้าร่วมงาน..."
+              rows={3}
+              className="w-full px-3.5 py-2.5 border-2 border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#3674B5]/15 focus:border-[#3674B5] transition bg-gray-50 focus:bg-white"
+            />
+            {error && (
+              <div className="flex items-center gap-2 mt-2 px-3 py-2 bg-red-50 border border-red-100 rounded-xl">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5" strokeLinecap="round" className="flex-shrink-0">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <p className="text-[12px] text-red-600">{error}</p>
+              </div>
+            )}
+          </div>
+
+        </div>{/* end scrollable body */}
+
+        {/* ── Footer — fixed ──────────────────────────────── */}
+        {/* ✅ อยู่นอก scroll area + flex-shrink-0 — ปุ่มไม่หายไม่ว่า zoom เท่าไหร่ */}
         <div className="flex gap-2.5 px-5 py-4 bg-gray-50 border-t border-gray-100 flex-shrink-0">
           <button
             onClick={onClose}
@@ -305,7 +275,53 @@ function JoinRequestModal({ expo, boothGroupId, onClose, onSuccess }: JoinModalP
             )}
           </button>
         </div>
+
       </div>
+
+      {/* ── Fullscreen map modal ─────────────────────────── */}
+      {showMapFullscreen && (
+        <div
+          className="fixed inset-0 bg-black/80 z-[60] flex flex-col items-center justify-center p-4"
+          onClick={() => setShowMapFullscreen(false)}
+        >
+          <div className="w-full max-w-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-white text-sm font-bold">แผนผังงาน — {expo.title}</p>
+              <button
+                onClick={() => setShowMapFullscreen(false)}
+                className="w-8 h-8 rounded-lg bg-white/15 hover:bg-white/25 flex items-center justify-center transition"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div className="rounded-xl overflow-hidden bg-black" style={{ height: '70vh' }}>
+              <TransformWrapper>
+                {({ zoomIn, zoomOut, resetTransform }) => (
+                  <div className="relative w-full h-full">
+                    <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
+                      <img
+                        src={getMinioFileUrl(mapUrl) ?? undefined}
+                        alt="แผนผังงาน"
+                        className="w-full h-full object-contain"
+                      />
+                    </TransformComponent>
+                    <div className="absolute bottom-3 right-3 flex flex-col gap-1.5">
+                      <button onClick={() => zoomIn()} className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center text-white font-bold text-base hover:bg-white/25">+</button>
+                      <button onClick={() => zoomOut()} className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center text-white font-bold text-base hover:bg-white/25">−</button>
+                      <button onClick={() => resetTransform()} className="w-8 h-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center text-white hover:bg-white/25">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </TransformWrapper>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
@@ -349,6 +365,11 @@ function SuccessModal({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
+
+// ══════════════════════════════════════════════════════════════
+// MapPreview
+// ══════════════════════════════════════════════════════════════
+
 function MapPreview({ mapUrl }: { mapUrl: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [initScale, setInitScale] = useState<number | null>(null);
@@ -365,7 +386,6 @@ function MapPreview({ mapUrl }: { mapUrl: string }) {
   return (
     <div ref={containerRef} className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50" style={{ height: '170px' }}>
       {initScale === null ? (
-        // โหลดรูปเพื่อวัดขนาดก่อน ยังไม่แสดง TransformWrapper
         <img
           src={getMinioFileUrl(mapUrl) ?? undefined}
           alt=""
@@ -394,8 +414,9 @@ function MapPreview({ mapUrl }: { mapUrl: string }) {
     </div>
   );
 }
+
 // ══════════════════════════════════════════════════════════════
-// ExpoCard — Style C (thumbnail + date overlay)
+// ExpoCard
 // ══════════════════════════════════════════════════════════════
 
 function ExpoCard({ expo, onApply }: { expo: ExpoSearchResult; onApply: (expo: ExpoSearchResult) => void }) {
@@ -405,8 +426,6 @@ function ExpoCard({ expo, onApply }: { expo: ExpoSearchResult; onApply: (expo: E
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer">
-
-      {/* Thumbnail */}
       <div
         className="relative h-[140px] overflow-hidden"
         style={{ background: `linear-gradient(135deg, ${BLUE}, ${BLUE2})` }}
@@ -419,10 +438,7 @@ function ExpoCard({ expo, onApply }: { expo: ExpoSearchResult; onApply: (expo: E
             onError={e => { e.currentTarget.style.display = 'none'; }}
           />
         )}
-        {/* gradient overlay */}
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 50%)' }} />
-
-        {/* category badge — top left */}
         <div className="absolute top-2.5 left-2.5">
           <span className="inline-block px-2.5 py-1 bg-white/92 backdrop-blur-sm text-[#3674B5] text-[11px] font-bold rounded-lg shadow-sm">
             {catLabel}
@@ -430,7 +446,6 @@ function ExpoCard({ expo, onApply }: { expo: ExpoSearchResult; onApply: (expo: E
         </div>
       </div>
 
-      {/* Body */}
       <div className="p-4">
         <h3 className="font-black text-gray-900 text-[14px] leading-snug mb-2 line-clamp-2 group-hover:text-[#3674B5] transition-colors">
           {expo.title}
@@ -493,7 +508,6 @@ export function ExploreEventsPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [boothGroupId, setBoothGroupId] = useState('');
 
-  // กัน stale closure
   const searchRef   = useRef(search);
   const categoryRef = useRef(category);
   searchRef.current   = search;
@@ -520,7 +534,6 @@ export function ExploreEventsPage() {
     }
   }, [boothGroupId]);
 
-  // โหลดครั้งแรกเมื่อได้ boothGroupId
   useEffect(() => {
     if (boothGroupId) loadExpos(1, '', '');
   }, [boothGroupId]);
@@ -539,7 +552,7 @@ export function ExploreEventsPage() {
     <div className="min-h-[calc(100vh-3.5rem)]" style={{ backgroundColor: '#F8FAFC' }}>
       <div className="max-w-screen-xl mx-auto px-8 py-6 space-y-5">
 
-        {/* ── Back ────────────────────────────────────────── */}
+        {/* ── Back ── */}
         <button
           onClick={() => router.push('/booths/my-booth')}
           className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border-2 text-sm font-bold transition hover:bg-[#EEF4FB]"
@@ -553,7 +566,7 @@ export function ExploreEventsPage() {
           ย้อนกลับ
         </button>
 
-        {/* ── Header ──────────────────────────────────────── */}
+        {/* ── Header ── */}
         <div className="flex items-center gap-4">
           <div
             className="w-[46px] h-[46px] rounded-xl flex items-center justify-center flex-shrink-0"
@@ -569,7 +582,7 @@ export function ExploreEventsPage() {
           </div>
         </div>
 
-        {/* ── Search + Filter card ─────────────────────────── */}
+        {/* ── Search + Filter ── */}
         <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4">
           <form onSubmit={handleSearch} className="flex gap-2.5">
             <div className="flex-1 relative">
@@ -596,7 +609,6 @@ export function ExploreEventsPage() {
             </button>
           </form>
 
-          {/* Category pills */}
           <div className="flex flex-wrap gap-2">
             {CATEGORIES.map(cat => (
               <button
@@ -614,7 +626,7 @@ export function ExploreEventsPage() {
           </div>
         </div>
 
-        {/* ── Results ─────────────────────────────────────── */}
+        {/* ── Results ── */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3">
             <div className="w-8 h-8 border-[3px] border-gray-200 border-t-[#3674B5] rounded-full animate-spin" />
@@ -659,7 +671,6 @@ export function ExploreEventsPage() {
               ))}
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-1.5 pt-2">
                 <button
@@ -700,7 +711,7 @@ export function ExploreEventsPage() {
         )}
       </div>
 
-      {/* ── Modals ──────────────────────────────────────────── */}
+      {/* ── Modals ── */}
       {applyTarget && (
         <JoinRequestModal
           expo={applyTarget}
