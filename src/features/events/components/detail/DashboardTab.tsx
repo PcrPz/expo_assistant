@@ -532,7 +532,7 @@ export function DashboardTab({ eventId, eventTitle = 'Dashboard' }: DashboardTab
                 <Legend wrapperStyle={{ fontSize: 11 }}/>
                 {/* Dynamic: สร้าง Line ตามจำนวน Zone จริง */}
                 {zoneNames.map((name, i) => (
-                  <Line key={name} type="monotone" dataKey={name}
+                  <Line key={name} type="linear" dataKey={name}
                     stroke={ZONE_COLORS[i % ZONE_COLORS.length]} strokeWidth={2}
                     dot={{ r: 3, strokeWidth: 0 }}
                     activeDot={{ r: 5, stroke: 'white', strokeWidth: 2 }}/>
