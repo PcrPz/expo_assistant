@@ -18,8 +18,8 @@ const USE_MOCK = true;
 
 const MOCK: DashboardData = {
   ticketCount: [
-    { status: 'paid', ticketCount: 830 },
-    { status: 'used', ticketCount: 1245 },
+    { status: 'paid', ticketCount: 1975 },
+    { status: 'used', ticketCount: 1800 },
   ],
 
   zoneRank: [
@@ -47,10 +47,10 @@ const MOCK: DashboardData = {
 
   visitHour: [
     { hour: '2026-02-17 09:00:00', visitorCount: 120 },
-    { hour: '2026-02-17 10:00:00', visitorCount: 245 },
-    { hour: '2026-02-17 11:00:00', visitorCount: 380 },
-    { hour: '2026-02-17 12:00:00', visitorCount: 310 },
-    { hour: '2026-02-17 13:00:00', visitorCount: 420 },
+    { hour: '2026-02-17 10:00:00', visitorCount: 200 },
+    { hour: '2026-02-17 11:00:00', visitorCount: 330 },
+    { hour: '2026-02-17 12:00:00', visitorCount: 280 },
+    { hour: '2026-02-17 13:00:00', visitorCount: 370 },
     { hour: '2026-02-17 14:00:00', visitorCount: 290 },
     { hour: '2026-02-17 15:00:00', visitorCount: 210 },
   ],
