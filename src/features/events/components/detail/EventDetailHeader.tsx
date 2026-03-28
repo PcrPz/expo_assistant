@@ -230,14 +230,14 @@ export function EventDetailHeader({
                     เผยแพร่แล้ว
                   </span>
                 )}
-                {event.status === 'closed' && (
+                {event.status === 'close' && (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
                     style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA' }}>
                     <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#DC2626' }} />
                     งานจบลงเเล้ว
                   </span>
                 )}
-                {event.status === 'completed' && (
+                {event.status === 'complete' && (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
                     style={{ background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0' }}>
                     <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#16A34A' }} />

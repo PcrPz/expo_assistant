@@ -28,7 +28,7 @@ export function PaymentModal({ form, boothGroupId, onClose, onSuccess }: {
   const [checkoutData, setCheckoutData] = useState<CheckoutData | null>(
     hasExistingPayment ? {
       paymentId: form.paymentId!,
-      price: '—',
+      price: '0',
       boothNo: form.boothNo,
       expoTitle: form.expoTitle,
     } : null
@@ -41,21 +41,33 @@ export function PaymentModal({ form, boothGroupId, onClose, onSuccess }: {
   const [cardName, setCardName] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvv, setCardCvv] = useState('');
-
+// 1. เพิ่ม Log เพื่อดูว่า Props ที่ได้รับมา "ครบไหม"
+  console.log('📦 Modal Props:', { 
+    requestId: form?.requestId, 
+    boothGroupId: boothGroupId 
+  });
   // Auto-checkout on mount — skip if paymentId already exists
   useEffect(() => {
-    if (hasExistingPayment) return;
-    (async () => {
+    // 2. เช็คว่ามีค่าครบก่อนเรียก API ไหม
+    if (!boothGroupId || !form?.requestId) {
+      console.error('❌ ข้อมูลไม่ครบ: boothGroupId หรือ requestId หายไป');
+      return;
+    }
+(async () => {
       try {
+        console.log('🚀 กำลังเริ่มดึงข้อมูล checkout...');
+        setStep('loading');
         const data = await checkoutPayment(boothGroupId, form.requestId);
+        console.log('✅ ดึงข้อมูลสำเร็จ:', data);
         setCheckoutData(data);
         setStep('select_method');
       } catch (e: any) {
-        setError(e.message || 'ไม่สามารถดึงข้อมูลการชำระเงินได้');
+        console.error('❌ checkoutPayment พัง:', e);
+        setError(e.message);
         setStep('error');
       }
     })();
-  }, []);
+  }, [boothGroupId, form?.requestId]);
 
   const handleConfirmPayment = async () => {
     if (!checkoutData) return;

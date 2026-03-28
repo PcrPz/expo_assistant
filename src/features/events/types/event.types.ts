@@ -170,7 +170,7 @@ export function getAvailableTabs(
 ): Array<'detail' | 'staff' | 'booth' | 'form' | 'dashboard' | 'applications' | 'tickets' | 'announcements' | 'checkout'> {
   // Checkout แสดงเฉพาะ owner/admin/system_admin + status เป็น closed หรือ completed
   const showCheckout = ['owner', 'admin', 'system_admin'].includes(role || '') &&
-                       ['closed', 'completed'].includes(status || '');
+                       ['close', 'complete'].includes(status || '');
  
   if (isEventOrganizer(role)) {
     const base = ['detail', 'staff', 'booth', 'form', 'dashboard', 'applications', 'tickets', 'announcements'] as const;
