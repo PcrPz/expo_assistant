@@ -226,23 +226,11 @@ export function PaymentModal({ form, boothGroupId, onClose, onSuccess }: {
                 {/* QR mock */}
                 <div className="w-48 h-48 rounded-2xl border-4 flex items-center justify-center mb-3"
                   style={{ borderColor: BLUE, backgroundColor: BL }}>
-                  <svg width="140" height="140" viewBox="0 0 100 100" fill="none">
-                    {/* QR pattern mock */}
-                    <rect x="5" y="5" width="35" height="35" rx="3" fill={BLUE} opacity="0.15"/>
-                    <rect x="9" y="9" width="27" height="27" rx="2" fill={BLUE} opacity="0.3"/>
-                    <rect x="13" y="13" width="19" height="19" rx="1" fill={BLUE}/>
-                    <rect x="60" y="5" width="35" height="35" rx="3" fill={BLUE} opacity="0.15"/>
-                    <rect x="64" y="9" width="27" height="27" rx="2" fill={BLUE} opacity="0.3"/>
-                    <rect x="68" y="13" width="19" height="19" rx="1" fill={BLUE}/>
-                    <rect x="5" y="60" width="35" height="35" rx="3" fill={BLUE} opacity="0.15"/>
-                    <rect x="9" y="64" width="27" height="27" rx="2" fill={BLUE} opacity="0.3"/>
-                    <rect x="13" y="68" width="19" height="19" rx="1" fill={BLUE}/>
-                    {[45,50,55,60,65,70,75,80,85,90].map((x, i) =>
-                      [45,50,55,60,65,70,75,80,85,90].filter((_, j) => (i + j) % 3 !== 0).map(y =>
-                        <rect key={`${x}-${y}`} x={x} y={y} width="4" height="4" rx="0.5" fill={BLUE} opacity="0.6"/>
-                      )
-                    )}
-                  </svg>
+              <img 
+                        src="/images/QrCode.jpg" 
+                        alt="Payment QR Code" 
+                        className="w-full h-full object-contain rounded-xl"
+                      />
                 </div>
                 <div className="text-center">
                   <p className="text-xs text-gray-400 mb-1">จำนวนเงิน</p>
