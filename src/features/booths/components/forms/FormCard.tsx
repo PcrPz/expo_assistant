@@ -1,7 +1,7 @@
 // src/features/booths/components/forms/FormCard.tsx
 'use client';
 
-import { FileText, Eye, Edit2, BarChart3, Trash2, Send, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { FileText, Eye, Edit2, BarChart3, Trash2, Send, CheckCircle2, Clock, AlertCircle, QrCode } from 'lucide-react';
 import type { FormStatus } from '../../types/form.types';
 
 interface FormCardProps {
@@ -15,11 +15,12 @@ interface FormCardProps {
   onViewResults: () => void;
   onDelete: () => void;
   onToggleStatus: () => void;
+  onQR?: () => void;
 }
 
 export function FormCard({
   status, totalQuestions, totalResponses, updatedAt,
-  canManage, onView, onEdit, onViewResults, onDelete, onToggleStatus,
+  canManage, onView, onEdit, onViewResults, onDelete, onToggleStatus, onQR,
 }: FormCardProps) {
   const isPublished = status === 'publish';
 
@@ -109,6 +110,12 @@ export function FormCard({
           <button onClick={onEdit} disabled={isPublished}
             className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 bg-[#F8FAFC] border-[1.5px] border-[#E2E8F0] text-gray-600 text-[12px] font-semibold rounded-[9px] hover:border-[#3674B5] hover:text-[#3674B5] hover:bg-[#EBF3FC] transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[#E2E8F0] disabled:hover:text-gray-600 disabled:hover:bg-[#F8FAFC]">
             <Edit2 className="h-3.5 w-3.5" />แก้ไข
+          </button>
+        )}
+        {isPublished && onQR && (
+          <button onClick={onQR}
+            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 bg-[#F8FAFC] border-[1.5px] border-[#E2E8F0] text-gray-600 text-[12px] font-semibold rounded-[9px] hover:border-[#3674B5] hover:text-[#3674B5] hover:bg-[#EBF3FC] transition">
+            <QrCode className="h-3.5 w-3.5" />QR Code
           </button>
         )}
         <button onClick={onViewResults}

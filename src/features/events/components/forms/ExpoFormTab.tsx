@@ -337,7 +337,6 @@ export function ExpoFormTab({ expoId, role }: ExpoFormTabProps) {
                 </div>
                 <div className="text-center">
                   <p className="text-xs text-gray-400">สแกน QR Code นี้เพื่อตอบแบบสอบถาม</p>
-                  <p className="text-[11px] font-mono text-gray-300 mt-1 break-all">{`EXPOFORM|${expoId}`}</p>
                 </div>
               </div>
               {/* Footer */}
