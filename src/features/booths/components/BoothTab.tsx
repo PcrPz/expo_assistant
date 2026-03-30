@@ -511,7 +511,7 @@ function BoothCard({ booth, isMyBooth, viewMode, onClick }: {
               </defs>
               <rect width="100%" height="100%" fill={`url(#grid-${booth.booth_id})`}/>
             </svg>
-            <div className="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center shadow-sm" style={{ backgroundColor: isMyBooth ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.75)' }}>
+            <div className="relative w-10 h-10 rounded-xl flex items-center justify-center shadow-sm" style={{ backgroundColor: isMyBooth ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.75)' }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isMyBooth ? 'white' : cfg.color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 {booth.type === 'stage'
                   ? <><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></>

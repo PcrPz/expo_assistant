@@ -122,12 +122,12 @@ export function EventDetailHeader({
   };
 
   const LOGO = 88;
-  const COVER = 88;
-  const LOGO_PULL = LOGO / 2;
+  const COVER = 100;
+  const LOGO_PULL = LOGO * 0.4;
 
   return (
     <>
-    <div className="sticky top-14 z-10 shadow-sm">
+    <div className="sticky top-14 z-20 shadow-sm">
 
       {/* Cover Banner */}
       <div
