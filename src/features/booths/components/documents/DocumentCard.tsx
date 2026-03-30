@@ -146,8 +146,10 @@ export function DocumentCard({ document, boothId, canManage, onEdit, onRefresh, 
 
           {/* Actions — แถวล่าง: QR + edit + delete */}
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowQR(true)}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-[7px] bg-[#F8FAFC] border-[1.5px] border-[#E2E8F0] text-[#3674B5] rounded-[9px] text-[11px] font-semibold hover:bg-[#EBF3FC] hover:border-[#3674B5] transition">
+            <button
+              onClick={() => setShowQR(true)}
+              disabled={!isPublished}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-[7px] bg-[#F8FAFC] border-[1.5px] border-[#E2E8F0] text-[#3674B5] rounded-[9px] text-[11px] font-semibold hover:bg-[#EBF3FC] hover:border-[#3674B5] transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#F8FAFC] disabled:hover:border-[#E2E8F0]">
               <QrCode className="h-3.5 w-3.5" />QR Code
             </button>
             {canManage && (
