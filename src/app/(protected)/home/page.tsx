@@ -30,10 +30,13 @@ function getRoleColor(role?: string | null) {
   };
 }
 
+// ✅ เปลี่ยนเป็นภาษาอังกฤษ
 function getRoleLabel(role?: string | null): string {
   const labels: Record<string, string> = {
-    'owner': 'เจ้าของ', 'system_admin': 'ผู้ดูแลระบบ',
-    'admin': 'ผู้จัดการ', 'staff': 'เจ้าหน้าที่',
+    'owner':        'เจ้าของ',
+    'system_admin': 'ผู้ดูแลระบบ',
+    'admin':        'ผู้จัดการ',
+    'staff':        'เจ้าหน้าที่',
   };
   return labels[(role || '').toLowerCase()] || 'ผู้เข้าร่วม';
 }
@@ -110,7 +113,6 @@ export default function HomePage() {
       <>
         <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-6">
           <div className="max-w-lg w-full text-center">
-            {/* รูป */}
             <div className="mb-8 flex justify-center">
               <Image
                 src="/images/Landing_Image.png"
@@ -121,15 +123,12 @@ export default function HomePage() {
                 priority
               />
             </div>
-
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
               ยังไม่มีงานที่คุณเข้าร่วม
             </h1>
             <p className="text-gray-500 mb-8">
               สร้างงาน Expo ของคุณเอง หรือใส่โค้ดเพื่อเข้าร่วมงานที่มีอยู่
             </p>
-
-            {/* ปุ่ม */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={() => router.push('/events/create')}
@@ -218,9 +217,12 @@ export default function HomePage() {
                       <div className="text-5xl">🎪</div>
                     </div>
                   )}
-                  {/* Role Badge */}
+                  {/* ✅ Role Badge — เพิ่มกรอบขาว */}
                   <div className="absolute top-3 right-3">
-                    <span className={`inline-flex items-center px-2.5 py-1 ${roleColors.badge} rounded-full text-xs font-semibold shadow`}>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-1 ${roleColors.badge} rounded-full text-xs font-semibold`}
+                      style={{ boxShadow: '0 0 0 2px white, 0 0 0 3px rgba(0,0,0,0.08)' }}
+                    >
                       {getRoleLabel(event.role)}
                     </span>
                   </div>
@@ -228,7 +230,7 @@ export default function HomePage() {
 
                 {/* Body */}
                 <div className="p-4">
-                  <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="flex items-start justify-between gap-2 mb-1">
                     <h3 className={`text-base font-bold text-gray-900 line-clamp-2 ${roleColors.hover} transition flex-1`}>
                       {event.name}
                     </h3>
@@ -254,15 +256,14 @@ export default function HomePage() {
                   )}
 
                   <div className="space-y-1.5 text-sm text-gray-600">
-                  <div className="flex gap-2">
-                    <span className="font-medium min-w-[48px]">วันที่</span>
-                    <span>: {
-                      event.startDate && event.endDate && event.startDate !== event.endDate
-                        ? `${new Date(event.startDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })} - ${new Date(event.endDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}`
-                        : new Date(event.startDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })
-                    }</span>
-                  </div>
-
+                    <div className="flex gap-2">
+                      <span className="font-medium min-w-[48px]">วันที่</span>
+                      <span>: {
+                        event.startDate && event.endDate && event.startDate !== event.endDate
+                          ? `${new Date(event.startDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })} - ${new Date(event.endDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                          : new Date(event.startDate).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })
+                      }</span>
+                    </div>
                     <div className="flex gap-2">
                       <span className="font-medium min-w-[48px]">สถานที่</span>
                       <span className="line-clamp-1">: {event.location}</span>
