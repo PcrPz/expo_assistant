@@ -13,9 +13,9 @@ export interface BoothGenderInteraction {
 }
 
 // ─── Age Range ────────────────────────────────────────────────
-// Backend: { "AgeRange": "18-25", "TotalUsers": 310 }
+// Backend: { "AgeRange": "13-19", "TotalUsers": 310 }
 export interface BoothAgeInteraction {
-  ageRange: '<18' | '18-25' | '26-40' | '41-60' | '>60';
+  ageRange: '13-19' | '20-39' | '40-59' | '>59' | string;
   totalUsers: number;
 }
 

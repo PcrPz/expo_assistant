@@ -658,7 +658,7 @@ export function BoothDashboardTab({ expoId, boothId, boothTitle = 'Dashboard' }:
         );
 
         const genders   = ['all', ...Array.from(new Set(allAnswers.map(r => r.gender)))];
-        const ageGroups = ['all', ...['<18','18-25','26-40','41-60','>60']
+        const ageGroups = ['all', ...['13-19','20-39','40-59','>59']
           .filter(a => allAnswers.some(r => r.ageGroup === a))];
 
         const FilterBtn = ({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) => (

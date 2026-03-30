@@ -36,13 +36,12 @@ const MOCK_RAW = {
   ],
 
   // GET /total-booth-age
-  // [{ "AgeRange": "<18", "TotalUsers": 65 }, ...]
+  // [{ "AgeRange": "13-19", "TotalUsers": 65 }, ...]
   age: [
-    { AgeRange: '<18',   TotalUsers: 65  },
-    { AgeRange: '18-25', TotalUsers: 310 },
-    { AgeRange: '26-40', TotalUsers: 245 },
-    { AgeRange: '41-60', TotalUsers: 105 },
-    { AgeRange: '>60',   TotalUsers: 29  },
+    { AgeRange: '13-19', TotalUsers: 65  },
+    { AgeRange: '20-39', TotalUsers: 310 },
+    { AgeRange: '40-59', TotalUsers: 245 },
+    { AgeRange: '>59',   TotalUsers: 29  },
   ],
 
   // GET /total-booth-hour

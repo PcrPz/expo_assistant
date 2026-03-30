@@ -34,7 +34,7 @@ export interface VisitGender {
 
 export interface VisitAge {
   visitDate: string;
-  ageGroup: '<18' | '18-25' | '26-40' | '41-60' | '>60';
+  ageGroup: '13-19' | '20-39' | '40-59' | '>59' | string;
   visitorCount: number;
 }
 
