@@ -241,7 +241,7 @@ export function EventDetailHeader({
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
                     style={{ background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0' }}>
                     <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#16A34A' }} />
-                    เคลียเงินเสร็จสิ้น
+                    เคลียร์เงินเสร็จสิ้น
                   </span>
                 )}
               </div>

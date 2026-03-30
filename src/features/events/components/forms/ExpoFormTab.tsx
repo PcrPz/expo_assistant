@@ -4,7 +4,8 @@ import { toast } from '@/src/lib/toast';
 import { ConfirmModal } from '@/src/components/ui/ConfirmModal';
 
 import { useState, useEffect } from 'react';
-import { FileText, Plus, RefreshCw, Send, CheckCircle2, Clock, Eye, Edit2, BarChart3, Trash2, AlertCircle } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
+import { FileText, Plus, RefreshCw, Send, CheckCircle2, Clock, Eye, Edit2, BarChart3, Trash2, AlertCircle, QrCode } from 'lucide-react';
 import { getExpoForm, updateExpoFormStatus, deleteExpoForm } from '../../api/expoFormApi';
 import type { GetExpoFormResponse } from '../../types/expoForm.types';
 import type { EventRole } from '../../types/event.types';
@@ -32,6 +33,7 @@ export function ExpoFormTab({ expoId, role }: ExpoFormTabProps) {
   const [showResults, setShowResults]     = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
   const manage = canManage(role);
   const isPublished = form?.status === 'publish';
@@ -191,6 +193,12 @@ export function ExpoFormTab({ expoId, role }: ExpoFormTabProps) {
                 <Edit2 className="h-3.5 w-3.5" />แก้ไข
               </button>
             )}
+            {isPublished && (
+              <button onClick={() => setShowQR(true)}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 bg-[#F8FAFC] border-[1.5px] border-[#E2E8F0] text-gray-600 text-[12px] font-semibold rounded-[9px] hover:border-[#3674B5] hover:text-[#3674B5] hover:bg-[#EBF3FC] transition">
+                <QrCode className="h-3.5 w-3.5" />QR Code
+              </button>
+            )}
             <button onClick={() => setShowResults(true)}
               className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 bg-[#3674B5] text-white text-[12px] font-semibold rounded-[9px] hover:bg-[#2d5a8f] transition">
               <BarChart3 className="h-3.5 w-3.5" />ผลสรุป
@@ -287,6 +295,56 @@ export function ExpoFormTab({ expoId, role }: ExpoFormTabProps) {
                 <button onClick={handleDelete}
                   className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition flex items-center justify-center gap-2">
                   <Trash2 className="h-4 w-4" />ยืนยันการลบ
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+      {/* QR Modal */}
+      {showQR && (
+        <>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={() => setShowQR(false)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xs overflow-hidden" onClick={e => e.stopPropagation()}>
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-xl bg-[#EBF3FC] flex items-center justify-center">
+                    <QrCode className="h-4 w-4 text-[#3674B5]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">QR Code แบบสอบถาม</p>
+                    <p className="text-xs text-gray-400">ให้ผู้เข้าร่วมสแกนเพื่อตอบ</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowQR(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+              {/* QR */}
+              <div className="flex flex-col items-center px-6 py-6 gap-4">
+                <div className="p-4 bg-white border-2 border-[#E2E8F0] rounded-2xl">
+                  <QRCodeSVG
+                    value={`EXPOFORM|${expoId}`}
+                    size={200}
+                    level="M"
+                    includeMargin={false}
+                  />
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-400">สแกน QR Code นี้เพื่อตอบแบบสอบถาม</p>
+                  <p className="text-[11px] font-mono text-gray-300 mt-1 break-all">{`EXPOFORM|${expoId}`}</p>
+                </div>
+              </div>
+              {/* Footer */}
+              <div className="px-5 pb-5">
+                <button onClick={() => setShowQR(false)}
+                  className="w-full py-2.5 rounded-xl border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition">
+                  ปิด
                 </button>
               </div>
             </div>
