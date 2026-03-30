@@ -2,11 +2,14 @@
 
 import { useEffect } from 'react';
 import { useEventStore } from '../store/eventStore';
-import { getOrganizedEvents, getParticipatedEvents } from '../api/eventApi';
+import { getAllMyEvents } from '../api/eventApi';
 
 /**
  * Hook สำหรับโหลด Events ทั้งหมด
  * ใช้ใน HomePage, DashboardSidebar
+ *
+ * เรียก API ครั้งเดียว (/expo/get-my-expo-list) แล้ว
+ * แยก organized / participated ด้วย role filter ในฝั่ง client
  */
 export function useLoadEvents() {
   const {
@@ -29,11 +32,8 @@ export function useLoadEvents() {
       setLoading(true);
       setError(null);
 
-      // โหลดทั้ง 2 แบบพร้อมกัน
-      const [organized, participated] = await Promise.all([
-        getOrganizedEvents(),
-        getParticipatedEvents(),
-      ]);
+      // เรียก API เดียว แล้ว split ผลลัพธ์ตาม role
+      const { organized, participated } = await getAllMyEvents();
 
       setOrganizedEvents(organized);
       setParticipatedEvents(participated);

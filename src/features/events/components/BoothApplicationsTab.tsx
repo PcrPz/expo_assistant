@@ -4,7 +4,7 @@ import { toast } from '@/src/lib/toast';
 
 import { useState, useEffect } from 'react';
 import { getMinioFileUrl } from '@/src/features/minio/api/minioApi';
-import { getJoinFormsByExpo, respondToJoinRequest, getBoothGroupDetail } from '@/src/features/booths/api/boothGlobalApi';
+import { getJoinFormsByExpo, respondToJoinRequest, getBoothGroupDetail, cancelJoinBooth } from '@/src/features/booths/api/boothGlobalApi';
 import type { JoinFormByExpo, JoinFormStatus, BoothGlobal } from '@/src/features/booths/types/boothGlobal.types';
 
 interface BoothApplicationsTabProps {
@@ -77,6 +77,43 @@ function ConfirmModal({ form, action, onConfirm, onCancel, loading }: {
               ? <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle className="opacity-25" cx="12" cy="12" r="10"/><path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
               : isAccept ? 'อนุมัติ' : 'ปฏิเสธ'
             }
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Cancel Modal (organizer ยกเลิก) ────────────────────────────
+
+function CancelModal({ form, onConfirm, onCancel, loading }: {
+  form: JoinFormByExpo; onConfirm: () => void; onCancel: () => void; loading: boolean;
+}) {
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+      <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+        <div className="w-12 h-12 rounded-full mx-auto mb-4 flex items-center justify-center bg-orange-100">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </div>
+        <h3 className="text-lg font-bold text-gray-900 text-center mb-1">ยกเลิกคำ{form.type === 'request_to_join' ? 'ขอ' : 'เชิญ'}นี้?</h3>
+        <p className="text-sm text-gray-500 text-center mb-1">{form.boothGroupTitle} — บูธ {form.boothNo}</p>
+        <p className="text-xs text-orange-500 text-center mb-6">
+          {form.type === 'request_to_join'
+            ? 'บูธกลุ่มนี้ยังไม่ได้ชำระเงิน หากยกเลิกจะต้องเชิญหรืออนุมัติใหม่'
+            : 'คำเชิญที่ส่งออกไปจะถูกยกเลิก บูธกลุ่มจะไม่สามารถตอบรับได้อีก'}
+        </p>
+        <div className="flex gap-3">
+          <button onClick={onCancel} disabled={loading}
+            className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition text-sm disabled:opacity-50">
+            ไม่ใช่
+          </button>
+          <button onClick={onConfirm} disabled={loading}
+            className="flex-1 px-4 py-2.5 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition text-sm disabled:opacity-50 flex items-center justify-center gap-2">
+            {loading
+              ? <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle className="opacity-25" cx="12" cy="12" r="10"/><path className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+              : 'ยืนยันยกเลิก'}
           </button>
         </div>
       </div>
@@ -295,7 +332,7 @@ function sortForms(forms: JoinFormByExpo[]) {
   });
 }
 
-function RequestsTable({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespond: (f: JoinFormByExpo, a: 'accept' | 'reject') => void }) {
+function RequestsTable({ forms, onRespond, onCancel }: { forms: JoinFormByExpo[]; onRespond: (f: JoinFormByExpo, a: 'accept' | 'reject') => void; onCancel: (f: JoinFormByExpo) => void }) {
   const [selectedForm, setSelectedForm] = useState<JoinFormByExpo | null>(null);
   const sorted = sortForms(forms);
 
@@ -364,6 +401,13 @@ function RequestsTable({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespon
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     กำลังชำระเงิน
                   </span>
+                ) : form.status === 'accepted' && !form.paymentId ? (
+                  <button onClick={() => onCancel(form)}
+                    className="h-8 px-3 rounded-lg border border-orange-200 text-orange-500 hover:bg-orange-50 transition flex items-center gap-1.5 text-xs font-semibold"
+                    title="ยกเลิกคำขอ">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    ยกเลิก
+                  </button>
                 ) : (
                   <span className="text-xs text-gray-300">—</span>
                 )}
@@ -393,56 +437,84 @@ function RequestsTable({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespon
 
 // ─── Invites Table ───────────────────────────────────────────────
 
-function InvitesTable({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespond: (f: JoinFormByExpo, a: 'accept' | 'reject') => void }) {
+function InvitesTable({ forms, onRespond, onCancel }: { forms: JoinFormByExpo[]; onRespond: (f: JoinFormByExpo, a: 'accept' | 'reject') => void; onCancel: (f: JoinFormByExpo) => void }) {
   const [selectedForm, setSelectedForm] = useState<JoinFormByExpo | null>(null);
   const sorted = sortForms(forms);
 
   return (
     <>
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-        <div className="grid grid-cols-[1fr_80px_140px_52px] border-b border-gray-100 bg-gray-50">
+        <div className="grid grid-cols-[1fr_80px_140px_160px_52px] border-b border-gray-100 bg-gray-50">
           <div className="px-6 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">ชื่อบูธ</div>
           <div className="px-3 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">บูธ</div>
           <div className="px-3 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">สถานะ</div>
+          <div className="px-3 py-3 text-xs font-bold text-gray-400 uppercase tracking-wider">ดำเนินการ</div>
           <div className="border-l border-gray-100"/>
         </div>
 
-        {sorted.map((form, i) => (
-          <div key={form.requestId}
-            className={`grid grid-cols-[1fr_80px_140px_52px] items-center transition-colors ${
-              i !== sorted.length - 1 ? 'border-b border-gray-100' : ''
-            } hover:bg-gray-50/60`}>
+        {sorted.map((form, i) => {
+          const isPending   = form.status === 'pending';
+          const isAcceptedNoPay = form.status === 'accepted' && !form.paymentId;
+          const isAcceptedPay   = form.status === 'accepted' && !!form.paymentId;
+          const canCancelInvite = isPending || isAcceptedNoPay;
 
-            <div className="px-6 py-3.5 flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-sm font-black text-white bg-[#498AC3]">
-                {form.boothGroupTitle?.charAt(0)?.toUpperCase() || '?'}
+          return (
+            <div key={form.requestId}
+              className={`grid grid-cols-[1fr_80px_140px_160px_52px] items-center transition-colors ${
+                i !== sorted.length - 1 ? 'border-b border-gray-100' : ''
+              } ${isPending ? 'bg-amber-50/30 hover:bg-amber-50/50' : 'hover:bg-gray-50/60'}`}>
+
+              <div className="px-6 py-3.5 flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-sm font-black text-white bg-[#498AC3] relative">
+                  {form.boothGroupTitle?.charAt(0)?.toUpperCase() || '?'}
+                  {isPending && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-white"/>}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">{form.boothGroupTitle}</p>
+                  {form.detail && <p className="text-xs text-gray-400 truncate italic">"{form.detail}"</p>}
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-gray-900 truncate">{form.boothGroupTitle}</p>
-                {form.detail && <p className="text-xs text-gray-400 truncate italic">"{form.detail}"</p>}
+
+              <div className="px-3 py-3.5">
+                <span className="text-sm font-bold text-[#498AC3]">{form.boothNo}</span>
+              </div>
+
+              <div className="px-3 py-3.5">
+                <StatusBadge status={form.status as JoinFormStatus} />
+              </div>
+
+              {/* ดำเนินการ */}
+              <div className="px-3 py-3.5 flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                {isAcceptedPay ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    กำลังชำระเงิน
+                  </span>
+                ) : canCancelInvite ? (
+                  <button onClick={() => onCancel(form)}
+                    className="h-8 px-3 rounded-lg border border-orange-200 text-orange-500 hover:bg-orange-50 transition flex items-center gap-1.5 text-xs font-semibold"
+                    title="ยกเลิกคำเชิญ">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    ยกเลิกเชิญ
+                  </button>
+                ) : (
+                  <span className="text-xs text-gray-300">—</span>
+                )}
+              </div>
+
+              {/* ดูรายละเอียด column */}
+              <div className="px-2 py-3.5 flex items-center justify-center border-l border-gray-100">
+                <button onClick={() => setSelectedForm(form)}
+                  className="w-8 h-8 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition flex items-center justify-center"
+                  title="ดูรายละเอียด">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </button>
               </div>
             </div>
-
-            <div className="px-3 py-3.5">
-              <span className="text-sm font-bold text-[#498AC3]">{form.boothNo}</span>
-            </div>
-
-            <div className="px-3 py-3.5">
-              <StatusBadge status={form.status as JoinFormStatus} />
-            </div>
-
-            {/* ดูรายละเอียด column */}
-            <div className="px-2 py-3.5 flex items-center justify-center border-l border-gray-100">
-              <button onClick={() => setSelectedForm(form)}
-                className="w-8 h-8 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition flex items-center justify-center"
-                title="ดูรายละเอียด">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="9 18 15 12 9 6"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {selectedForm && (
@@ -565,7 +637,7 @@ function InviteCard({ form, onRespond }: { form: JoinFormByExpo; onRespond: (f: 
 
 // ─── Requests Tab ───────────────────────────────────────────────
 
-function RequestsTab({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespond: (f: JoinFormByExpo, a: 'accept' | 'reject') => void }) {
+function RequestsTab({ forms, onRespond, onCancel }: { forms: JoinFormByExpo[]; onRespond: (f: JoinFormByExpo, a: 'accept' | 'reject') => void; onCancel: (f: JoinFormByExpo) => void }) {
   const [statusFilter, setStatusFilter] = useState<'all' | JoinFormStatus>('all');
   const pending = forms.filter(f => f.status === 'pending');
   const filtered = statusFilter === 'all' ? forms : forms.filter(f => f.status === statusFilter);
@@ -611,7 +683,7 @@ function RequestsTab({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespond:
 
       {filtered.length === 0
         ? <EmptyState message={forms.length === 0 ? 'ยังไม่มีคำขอเข้าร่วม' : 'ไม่มีรายการในหมวดนี้'} />
-        : <RequestsTable forms={filtered} onRespond={onRespond} />
+        : <RequestsTable forms={filtered} onRespond={onRespond} onCancel={onCancel} />
       }
     </div>
   );
@@ -619,7 +691,7 @@ function RequestsTab({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespond:
 
 // ─── Invites Tab ────────────────────────────────────────────────
 
-function InvitesTab({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespond: (f: JoinFormByExpo, a: 'accept' | 'reject') => void }) {
+function InvitesTab({ forms, onRespond, onCancel }: { forms: JoinFormByExpo[]; onRespond: (f: JoinFormByExpo, a: 'accept' | 'reject') => void; onCancel: (f: JoinFormByExpo) => void }) {
   const [statusFilter, setStatusFilter] = useState<'all' | JoinFormStatus>('all');
   const filtered = statusFilter === 'all' ? forms : forms.filter(f => f.status === statusFilter);
 
@@ -656,7 +728,7 @@ function InvitesTab({ forms, onRespond }: { forms: JoinFormByExpo[]; onRespond: 
 
       {filtered.length === 0
         ? <EmptyState message={forms.length === 0 ? 'ยังไม่มีคำเชิญที่ส่งออกไป' : 'ไม่มีรายการในหมวดนี้'} />
-        : <InvitesTable forms={filtered} onRespond={onRespond} />
+        : <InvitesTable forms={filtered} onRespond={onRespond} onCancel={onCancel} />
       }
     </div>
   );
@@ -687,6 +759,8 @@ export function BoothApplicationsTab({ eventId }: BoothApplicationsTabProps) {
   const [activeTab, setActiveTab] = useState<MainTab>('requests');
   const [confirmState, setConfirmState] = useState<{ form: JoinFormByExpo; action: 'accept' | 'reject' } | null>(null);
   const [responding, setResponding] = useState(false);
+  const [cancelTarget, setCancelTarget] = useState<JoinFormByExpo | null>(null);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => { loadForms(); }, [eventId]);
 
@@ -707,6 +781,19 @@ export function BoothApplicationsTab({ eventId }: BoothApplicationsTabProps) {
     } catch (err: any) {
       toast.error(err.message || 'เกิดข้อผิดพลาด');
     } finally { setResponding(false); }
+  };
+
+  const handleCancel = async () => {
+    if (!cancelTarget) return;
+    setCancelling(true);
+    try {
+      await cancelJoinBooth(cancelTarget.requestId);
+      toast.success('ยกเลิกสำเร็จ');
+      setCancelTarget(null);
+      await loadForms();
+    } catch (err: any) {
+      toast.error(err.message || 'เกิดข้อผิดพลาดในการยกเลิก');
+    } finally { setCancelling(false); }
   };
 
   const requests = forms.filter(f => f.type === 'request_to_join');
@@ -780,13 +867,18 @@ export function BoothApplicationsTab({ eventId }: BoothApplicationsTabProps) {
 
       {/* content */}
       {activeTab === 'requests'
-        ? <RequestsTab forms={requests} onRespond={(f, a) => setConfirmState({ form: f, action: a })} />
-        : <InvitesTab  forms={invites}  onRespond={(f, a) => setConfirmState({ form: f, action: a })} />
+        ? <RequestsTab forms={requests} onRespond={(f, a) => setConfirmState({ form: f, action: a })} onCancel={setCancelTarget} />
+        : <InvitesTab  forms={invites}  onRespond={(f, a) => setConfirmState({ form: f, action: a })} onCancel={setCancelTarget} />
       }
 
       {confirmState && (
         <ConfirmModal form={confirmState.form} action={confirmState.action}
           onConfirm={handleRespond} onCancel={() => setConfirmState(null)} loading={responding} />
+      )}
+
+      {cancelTarget && (
+        <CancelModal form={cancelTarget}
+          onConfirm={handleCancel} onCancel={() => setCancelTarget(null)} loading={cancelling} />
       )}
     </div>
   );

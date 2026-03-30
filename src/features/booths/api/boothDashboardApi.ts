@@ -16,7 +16,7 @@ import type {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
 // ─── Toggle: false เมื่อ backend พร้อม ────────────────────────
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 // ══════════════════════════════════════════════════════════════
 // MOCK DATA — ตรง structure จริงของ backend (PascalCase)

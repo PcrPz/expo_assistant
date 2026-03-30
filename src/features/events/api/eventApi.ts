@@ -173,15 +173,61 @@ export async function getParticipatedEvents(): Promise<Event[]> {
 }
 
 // ============================================
+// Get All My Events (เรียก API ครั้งเดียว แล้ว split ตาม role)
+// ============================================
+
+export async function getAllMyEvents(): Promise<{
+  organized: Event[];
+  participated: Event[];
+}> {
+  try {
+    const response = await fetchWithAuth(`${API_URL}/expo/get-my-expo-list`);
+
+    if (!response.ok) {
+      console.error('Failed to fetch my expo list:', response.status);
+      return { organized: [], participated: [] };
+    }
+
+    const data = await response.json();
+    console.log('📦 Raw API response (getAllMyEvents):', data);
+
+    let rawEvents: any[] = [];
+    if (data.manage_expo && Array.isArray(data.manage_expo)) {
+      rawEvents = data.manage_expo;
+    } else if (Array.isArray(data)) {
+      rawEvents = data;
+    }
+
+    const ORGANIZER_ROLES = ['system_admin', 'owner', 'admin', 'staff'];
+
+    const organized: Event[] = [];
+    const participated: Event[] = [];
+
+    for (const event of rawEvents) {
+      if (!isValidEvent(event)) continue;
+      const role = (event.Role || event.role || '').toLowerCase();
+      const normalized = transformEventData(event);
+      if (ORGANIZER_ROLES.includes(role)) {
+        organized.push(normalized);
+      } else if (role === 'booth_staff') {
+        participated.push(normalized);
+      }
+    }
+
+    console.log(`✅ getAllMyEvents: organized=${organized.length}, participated=${participated.length}`);
+    return { organized, participated };
+  } catch (error) {
+    console.error('Failed to fetch all my events:', error);
+    return { organized: [], participated: [] };
+  }
+}
+
+// ============================================
 // Get My Events
 // ============================================
 
 export async function getMyEvents(): Promise<Event[]> {
-  const [organized, participated] = await Promise.all([
-    getOrganizedEvents(),
-    getParticipatedEvents(),
-  ]);
-  
+  const { organized, participated } = await getAllMyEvents();
   return [...organized, ...participated];
 }
 

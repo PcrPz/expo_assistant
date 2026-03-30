@@ -40,14 +40,14 @@ function getRoleLabel(role?: string | null): string {
 
 function getStatusBadge(status?: string) {
   const s = (status || 'pending').toLowerCase();
-  const map: Record<string, { label: string; className: string }> = {
-    'pending':   { label: 'รอดำเนินการ',     className: 'bg-yellow-50 text-yellow-700 border border-yellow-200' },
-    'approved':  { label: 'อนุมัติแล้ว',      className: 'bg-green-50 text-green-700 border border-green-200' },
-    'rejected':  { label: 'ไม่อนุมัติ',       className: 'bg-red-50 text-red-700 border border-red-200' },
-    'active':    { label: 'กำลังดำเนินการ',   className: 'bg-[#E8F4FD] text-[#3674B5] border border-[#498AC3]' },
-    'completed': { label: 'เสร็จสิ้น',        className: 'bg-gray-50 text-gray-700 border border-gray-300' },
+  const map: Record<string, { label: string; bg: string; color: string; border: string; dot: string }> = {
+    'pending':   { label: 'รอชำระเงิน',          bg: '#FFF8E1', color: '#B45309', border: '#FFBD0D', dot: '#FFBD0D' },
+    'unpublish': { label: 'พร้อมเผยแพร่',         bg: '#EEF4FB', color: '#3674B5', border: '#B8D0EA', dot: '#3674B5' },
+    'publish':   { label: 'เผยแพร่แล้ว',          bg: '#E8F4FD', color: '#2563a8', border: '#93C5E8', dot: '#498AC3' },
+    'close':     { label: 'งานจบลงแล้ว',          bg: '#FEF2F2', color: '#DC2626', border: '#FECACA', dot: '#DC2626' },
+    'complete':  { label: 'เคลียร์เงินเสร็จสิ้น', bg: '#F0FDF4', color: '#16A34A', border: '#BBF7D0', dot: '#16A34A' },
   };
-  return map[s] || map['pending'];
+  return map[s] ?? map['pending'];
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -232,7 +232,11 @@ export default function HomePage() {
                     <h3 className={`text-base font-bold text-gray-900 line-clamp-2 ${roleColors.hover} transition flex-1`}>
                       {event.name}
                     </h3>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${statusBadge.className}`}>
+                    <span
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap"
+                      style={{ background: statusBadge.bg, color: statusBadge.color, border: `1px solid ${statusBadge.border}` }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: statusBadge.dot }} />
                       {statusBadge.label}
                     </span>
                   </div>
