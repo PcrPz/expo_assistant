@@ -466,35 +466,42 @@ interface MapModalProps {
 function MapModal({ title, imageUrl, onClose }: MapModalProps) {
   return (
     <div
-      className="fixed inset-0 z-50 bg-gradient-to-br from-black/70 via-black/80 to-black/90 backdrop-blur-lg flex items-center justify-center p-4 animate-fadeIn"
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={onClose}
     >
-      <div className="relative max-w-7xl w-full h-full flex flex-col">
+      <div
+        className="relative w-full max-w-5xl flex flex-col"
+        style={{ maxHeight: 'calc(100vh - 32px)' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition shadow-lg"
+          className="absolute top-3 right-3 z-10 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition shadow-lg"
           aria-label="ปิด"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
 
-        <div className="flex-1 flex items-center justify-center">
+        {/* Image — จำกัดด้วย max-height เพื่อไม่ให้ล้นหน้าจอ */}
+        <div className="flex-1 min-h-0 flex items-center justify-center bg-black/20 rounded-t-2xl overflow-hidden">
           <img
             src={imageUrl}
             alt={title}
-            className="max-w-full max-h-full object-contain drop-shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            className="max-w-full max-h-full object-contain"
+            style={{ maxHeight: 'calc(100vh - 120px)' }}
             onError={(e) => {
               e.currentTarget.src = 'https://via.placeholder.com/800x600/5B9BD5/FFFFFF?text=Image+Not+Found';
             }}
           />
         </div>
 
-        <div className="bg-white/95 backdrop-blur-md rounded-t-xl p-4 text-center shadow-lg">
-          <p className="text-gray-700 font-medium">{title}</p>
+        {/* Footer */}
+        <div className="bg-white/95 rounded-b-2xl px-5 py-3 text-center">
+          <p className="text-sm text-gray-600 font-medium">{title}</p>
         </div>
       </div>
     </div>

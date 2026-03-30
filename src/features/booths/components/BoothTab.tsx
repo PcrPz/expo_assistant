@@ -18,6 +18,7 @@ const BL    = '#EBF3FC';
 interface BoothTabProps {
   expoId: string;
   role: EventRole;
+  expoMap?: string | null;
   onBoothChange?: () => void;
 }
 
@@ -43,7 +44,7 @@ const STATUS_CONFIG: Record<string, { label: string; dot: string; bg: string; te
 // Main Component
 // ══════════════════════════════════════════════════════════════
 
-export function BoothTab({ expoId, role, onBoothChange }: BoothTabProps) {
+export function BoothTab({ expoId, role, expoMap, onBoothChange }: BoothTabProps) {
   const router = useRouter();
   const [booths,         setBooths]         = useState<Booth[]>([]);
   const [myBoothGroupId, setMyBoothGroupId] = useState<string | null>(null);
@@ -91,10 +92,28 @@ export function BoothTab({ expoId, role, onBoothChange }: BoothTabProps) {
     return matchesSearch && matchesType;
   });
 
+  // ── Natural sort: ตัวอักษรก่อน ตามด้วยตัวเลข เช่น A1,A2,B1 ก่อน 1,2,10
+  const naturalSort = (a: string, b: string): number => {
+    const tokenize = (s: string) =>
+      (s || '').split(/(\d+)/).map(t => (isNaN(Number(t)) ? t.toLowerCase() : Number(t)));
+    const hasLeadingAlpha = (s: string) => /^[a-zA-Z]/.test(s || '');
+    if (hasLeadingAlpha(a) && !hasLeadingAlpha(b)) return -1;
+    if (!hasLeadingAlpha(a) && hasLeadingAlpha(b)) return 1;
+    const ta = tokenize(a), tb = tokenize(b);
+    for (let i = 0; i < Math.max(ta.length, tb.length); i++) {
+      if (ta[i] === undefined) return -1;
+      if (tb[i] === undefined) return 1;
+      if (ta[i] < tb[i]) return -1;
+      if (ta[i] > tb[i]) return 1;
+    }
+    return 0;
+  };
+
   // booth_staff — ไม่แสดงบูธของฉันใน grid เพราะมี hero card แล้ว
-  const sortedBooths = isBoothStaff
+  const sortedBooths = (isBoothStaff
     ? filteredBooths.filter(b => !isMyBooth(b))
-    : filteredBooths;
+    : filteredBooths
+  ).slice().sort((a, b) => naturalSort(a.booth_no, b.booth_no));
 
   const stats = {
     total:     booths.length,
@@ -149,7 +168,7 @@ export function BoothTab({ expoId, role, onBoothChange }: BoothTabProps) {
                 ) : (
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.6" strokeLinecap="round">
                     {myBoothsList[0].type === 'stage'
-                      ? <><polygon points="12 2 2 7..."/><polyline points="2 17..."/><polyline points="2 12..."/></>
+                      ? <><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></>
                       : <><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></>
                     }
                   </svg>
@@ -401,7 +420,7 @@ export function BoothTab({ expoId, role, onBoothChange }: BoothTabProps) {
       )}
 
       {showCreateModal && (
-        <CreateBoothModal expoId={expoId} onClose={() => setShowCreateModal(false)} onSuccess={() => { loadBooths(); onBoothChange?.(); }} />
+        <CreateBoothModal expoId={expoId} expoMap={expoMap} onClose={() => setShowCreateModal(false)} onSuccess={() => { loadBooths(); onBoothChange?.(); }} />
       )}
     </div>
   );
@@ -479,11 +498,11 @@ function BoothCard({ booth, isMyBooth, viewMode, onClick }: {
         isMyBooth ? 'border-[#3674B5] shadow-md' : 'border-gray-100 hover:border-[#3674B5]/40'
       }`}
     >
-      <div className="relative w-full aspect-[4/3] overflow-hidden">
+      <div className="relative w-full overflow-hidden" style={{ height: '120px' }}>
         {thumbnailUrl ? (
-          <img src={thumbnailUrl} alt={displayName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>
+          <img src={thumbnailUrl} alt={displayName} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>
         ) : (
-          <div className="w-full h-full flex items-center justify-center relative" style={{ backgroundColor: isMyBooth ? '#3674B5' : cfg.bg }}>
+          <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: isMyBooth ? '#3674B5' : cfg.bg }}>
             <svg className="absolute inset-0 w-full h-full opacity-[0.07]" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id={`grid-${booth.booth_id}`} width="20" height="20" patternUnits="userSpaceOnUse">

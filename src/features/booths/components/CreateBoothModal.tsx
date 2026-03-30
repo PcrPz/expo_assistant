@@ -2,12 +2,15 @@
 'use client';
 import { toast } from '@/src/lib/toast';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getZonesByExpoId } from '@/src/features/zones/api/zoneApi';
+import { getMinioFileUrl } from '@/src/features/minio/api/minioApi';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import type { Zone } from '@/src/features/zones/types/zone.types';
 
 interface CreateBoothModalProps {
   expoId: string;
+  expoMap?: string | null;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -80,10 +83,11 @@ const STATUS_OPTIONS = [
   },
 ];
 
-export function CreateBoothModal({ expoId, onClose, onSuccess }: CreateBoothModalProps) {
+export function CreateBoothModal({ expoId, expoMap, onClose, onSuccess }: CreateBoothModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [zones, setZones] = useState<Zone[]>([]);
   const [loadingZones, setLoadingZones] = useState(true);
+  const mapUrl = expoMap ? getMinioFileUrl(expoMap) : null;
 
   const [formData, setFormData] = useState({
     booth_no: '',
@@ -184,6 +188,17 @@ export function CreateBoothModal({ expoId, onClose, onSuccess }: CreateBoothModa
 
           {/* Form — scrollable */}
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+
+            {/* ── แผนผังงาน ── */}
+            {mapUrl && (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-1.5">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  แผนผังงาน
+                </label>
+                <MapPreview mapUrl={mapUrl} />
+              </div>
+            )}
 
             {/* ── เลขที่บูธ ── */}
             <div>
@@ -428,5 +443,41 @@ export function CreateBoothModal({ expoId, onClose, onSuccess }: CreateBoothModa
         </div>
       </div>
     </>
+  );
+}
+// ── MapPreview (reused from ExploreEventsPage) ─────────────────
+function MapPreview({ mapUrl }: { mapUrl: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [initScale, setInitScale] = useState<number | null>(null);
+
+  const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    const container = containerRef.current;
+    if (!container) return;
+    const scaleX = container.clientWidth / img.naturalWidth;
+    const scaleY = 170 / img.naturalHeight;
+    setInitScale(Math.min(scaleX, scaleY) * 1.5);
+  };
+
+  return (
+    <div ref={containerRef} className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50" style={{ height: '170px' }}>
+      {initScale === null ? (
+        <img src={mapUrl} alt="" onLoad={handleLoad} style={{ visibility: 'hidden', position: 'absolute' }} />
+      ) : (
+        <TransformWrapper key={initScale} initialScale={initScale} minScale={0.1} maxScale={4} centerOnInit>
+          {({ zoomIn, zoomOut }) => (
+            <div className="relative w-full h-full">
+              <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
+                <img src={mapUrl} alt="แผนผังงาน" style={{ display: 'block' }} />
+              </TransformComponent>
+              <div className="absolute bottom-2 right-2 flex flex-col gap-1">
+                <button type="button" onClick={() => zoomIn()} className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-700 font-bold shadow-sm hover:bg-gray-50 text-base">+</button>
+                <button type="button" onClick={() => zoomOut()} className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-700 font-bold shadow-sm hover:bg-gray-50 text-base">−</button>
+              </div>
+            </div>
+          )}
+        </TransformWrapper>
+      )}
+    </div>
   );
 }

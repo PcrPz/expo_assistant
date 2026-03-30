@@ -212,6 +212,7 @@ const loadEvent = async () => {
             <BoothTab 
               expoId={event.expoID}
               role={event.role}
+              expoMap={event.map}
               onBoothChange={refreshBooths}
             />
           )}
