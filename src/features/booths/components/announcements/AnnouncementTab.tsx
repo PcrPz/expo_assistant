@@ -105,8 +105,7 @@ export function AnnouncementsTab({
     if (!publishTarget) return;
     setIsPublishing(true);
     try {
-      const detail = await getBoothAnnouncementDetail(expoID, publishTarget.NotiID);
-      await publishBoothAnnouncement(expoID, boothID, detail);
+      await publishBoothAnnouncement(expoID, boothID, { NotiID: publishTarget.NotiID } as any);
       toast.success('เผยแพร่ประกาศสำเร็จ');
       setShowPublishConfirm(false);
       setPublishTarget(null);

@@ -178,30 +178,17 @@ export async function deleteBoothAnnouncement(
 }
 
 /**
- * Publish announcement (update status to 'publish')
- * ✅ เพิ่ม boothID parameter
+ * Publish announcement
+ * GET /booth-noti/:expoID/:boothID/publish/:notiID
  */
 export async function publishBoothAnnouncement(
   expoID: string,
-  boothID: string, // ✅ เพิ่ม parameter
+  boothID: string,
   announcement: BoothAnnouncementDetail
 ): Promise<{ message: string }> {
-  const formData = new FormData();
-  
-  formData.append('noti_id', announcement.NotiID);
-  formData.append('title', announcement.Title);
-  if (announcement.Detail) {
-    formData.append('detail', announcement.Detail);
-  }
-  formData.append('status', 'publish');
-
-  // ✅ เพิ่ม boothID ใน path
   const response = await fetchWithAuth(
-    `${API_BASE}/booth-noti/${expoID}/${boothID}/update`,
-    {
-      method: 'PUT',
-      body: formData,
-    }
+    `${API_BASE}/booth-noti/${expoID}/${boothID}/publish/${announcement.NotiID}`,
+    { method: 'GET' }
   );
 
   if (!response.ok) {
